@@ -1,3 +1,17 @@
+// Top of js/visualTapper.js
+let UNIT_TIME_MS = 150; 
+let DOT_THRESHOLD_MS = UNIT_TIME_MS * 1.5;
+let LETTER_SPACE_SILENCE_MS = UNIT_TIME_MS * 3;
+
+// Function to update unit time and related variables
+function updateVisualTapperUnitTime(newUnitTime) {
+  UNIT_TIME_MS = parseInt(newUnitTime);
+  DOT_THRESHOLD_MS = UNIT_TIME_MS * 1.5;
+  LETTER_SPACE_SILENCE_MS = UNIT_TIME_MS * 3;
+  localStorage.setItem('visualTapperUnitTime', UNIT_TIME_MS.toString());
+  console.log("Visual Tapper UNIT_TIME_MS updated to:", UNIT_TIME_MS, "Derived DOT_THRESHOLD_MS:", DOT_THRESHOLD_MS, "LETTER_SPACE_SILENCE_MS:", LETTER_SPACE_SILENCE_MS);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- Visual Tapper JavaScript ---
     const tapper = document.getElementById('tapper');
@@ -22,10 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Define Placeholders & Tapper Variables
-    const UNIT_TIME_MS = 150; // Standard unit time for Morse code element
-    const DOT_THRESHOLD_MS = UNIT_TIME_MS * 1.5; // Max duration for a dot
-    // const SHORT_SPACE_MS = UNIT_TIME_MS * 3; // Silence duration between letters (original constant name)
-    const LETTER_SPACE_SILENCE_MS = UNIT_TIME_MS * 3; // More descriptive for its use here.
+    // const UNIT_TIME_MS = 150; // Standard unit time for Morse code element - MOVED TO GLOBAL
+    // const DOT_THRESHOLD_MS = UNIT_TIME_MS * 1.5; // Max duration for a dot - MOVED TO GLOBAL
+    // const SHORT_SPACE_MS = UNIT_TIME_MS * 3; // Silence duration between letters (original constant name) - MOVED TO GLOBAL
+    // const LETTER_SPACE_SILENCE_MS = UNIT_TIME_MS * 3; // More descriptive for its use here. - MOVED TO GLOBAL
     // const WORD_SPACE_SILENCE_MS = UNIT_TIME_MS * 7; // Silence duration between words (not directly used by this tapper's decodeMorse for sending word spaces)
     const TAP_SOUND_FREQ = 770; // Frequency for tap sound
 
@@ -208,5 +222,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial check for Tone.js (optional, for debugging or early warning)
     if (typeof Tone === 'undefined') {
         console.warn("VisualTapper: Tone.js library not detected. Tap sounds will be unavailable.");
+    }
+
+    const savedUnitTime = localStorage.getItem('visualTapperUnitTime');
+    if (savedUnitTime) {
+        console.log("Found saved unit time in localStorage:", savedUnitTime);
+        updateVisualTapperUnitTime(parseInt(savedUnitTime)); 
+    } else {
+        console.log("No saved unit time in localStorage, ensuring default configuration is applied via updateVisualTapperUnitTime.");
+        // This call ensures that DOT_THRESHOLD_MS and LETTER_SPACE_SILENCE_MS are initialized
+        // through the same function, using the default UNIT_TIME_MS.
+        // It also handles saving the default to localStorage if it wasn't there.
+        updateVisualTapperUnitTime(UNIT_TIME_MS); // UNIT_TIME_MS here is the initial default (e.g., 150)
     }
 });
