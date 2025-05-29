@@ -125,7 +125,14 @@
     <div id="tab-content-wrapper">
         <div id="learn-practice-tab" class="tab-content">
             <div class="app-container">
-        <div class="controls mb-6 text-center">
+
+                <!-- Tapper Area for Learn & Practice Tab -->
+                <div id="learnPracticeTapperArea" class="text-center my-4">
+                    <!-- The shared visual tapper will be inserted here by JavaScript -->
+                     <h3 class="text-xl font-semibold mb-2">Practice Tapping Morse</h3>
+                </div>
+
+                <div class="controls mb-6 text-center">
             <button id="play-morse-btn" class="mr-2">Play Morse Code</button>
             <button id="stop-morse-btn" class="mr-2">Stop Sound</button>
             <button id="copy-text-btn" class="mr-2">Copy Text</button>
@@ -478,25 +485,23 @@ function attachTapperToArea(targetAreaId) {
 }
 
 function detachSharedTapper() {
-    if (sharedVisualTapperWrapper && hiddenTapperStorage) {
-        // Check if the tapper is currently a child of some other element (not the hidden storage)
-        // and if that parent is not null.
-        if (sharedVisualTapperWrapper.parentNode && sharedVisualTapperWrapper.parentNode !== hiddenTapperStorage) {
-            hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
-            sharedVisualTapperWrapper.style.display = 'none';
-            console.log("Tapper detached and moved to hidden storage.");
-        } else if (!sharedVisualTapperWrapper.parentNode) {
-            // If it has no parent (e.g. was removed from DOM entirely somehow), still try to store and hide.
-            hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
-            sharedVisualTapperWrapper.style.display = 'none';
-            console.log("Tapper (no parent) moved to hidden storage and hidden.");
-        } else {
-            // Already in hidden storage, just ensure it's hidden
-             sharedVisualTapperWrapper.style.display = 'none';
-             console.log("Tapper already in hidden storage, ensured hidden.");
-        }
+    // Call resetVisualTapperState if it's available
+    if (typeof resetVisualTapperState === 'function') {
+        resetVisualTapperState();
     } else {
-         console.error(`Failed to detach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper}) or hiddenTapperStorage (${hiddenTapperStorage}) not found.`);
+        console.warn("detachSharedTapper: resetVisualTapperState function not found. Tapper state may not be fully reset.");
+    }
+
+    if (sharedVisualTapperWrapper && hiddenTapperStorage) {
+        // Ensure the tapper is moved to hidden storage if it's not already there.
+        if (sharedVisualTapperWrapper.parentNode !== hiddenTapperStorage) {
+            hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
+        }
+        // Always hide it when detaching.
+        sharedVisualTapperWrapper.style.display = 'none';
+        console.log("Tapper detached and hidden. State reset attempted.");
+    } else {
+         console.error(`Failed to detach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper}) or hiddenTapperStorage (${hiddenTapperStorage}) not found. State reset was attempted if function was available.`);
     }
 }
 
@@ -527,14 +532,13 @@ function showTab(tabIdToShow) {
         selectedNavButton.classList.add('bg-blue-600', 'text-white');
     }
 
-    // Attach tapper to the new tab if it's the book cipher tab
+    // Attach tapper to the new tab if it's the book cipher tab or learn & practice tab
     if (tabIdToShow === 'book-cipher-tab') {
         attachTapperToArea('bookCipherTapperArea');
+    } else if (tabIdToShow === 'learn-practice-tab') {
+        attachTapperToArea('learnPracticeTapperArea');
     }
-    // Example for future use:
-    // else if (tabIdToShow === 'learn-practice-tab' && someConditionForTapperInLearnPractice) {
-    //     attachTapperToArea('learnPracticeTapperPlaceholder'); 
-    // }
+    // No 'else' here, so if it's another tab, tapper remains detached (which is correct)
 }
 
 navTabButtons.forEach(button => {

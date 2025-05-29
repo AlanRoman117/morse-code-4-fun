@@ -1,7 +1,14 @@
 // Top of js/visualTapper.js
+// These variables are script-global, accessible within the DOMContentLoaded and by resetVisualTapperState
 let UNIT_TIME_MS = 150; 
 let DOT_THRESHOLD_MS = UNIT_TIME_MS * 1.5;
 let LETTER_SPACE_SILENCE_MS = UNIT_TIME_MS * 3;
+
+// State variables for the visual tapper, scoped to be accessible by resetVisualTapperState
+let currentMorse = "";
+let tapStartTime = 0;
+let silenceTimer = null;
+let currentText = ""; // Holds the sequence of decoded characters by the tapper.
 
 // Function to update unit time and related variables
 function updateVisualTapperUnitTime(newUnitTime) {
@@ -44,12 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const TAP_SOUND_FREQ = 770; // Frequency for tap sound
 
     let isPlayingBack = false; // Placeholder, assume false. Controlled by other parts of app if needed.
-    let currentText = ""; // Tapper's own internal decoded text, separate from Book Cipher's main text.
+    // currentText is now at a higher scope
     
-    let tapStartTime = 0;
-    // let tapEndTime = 0; // tapEndTime is local to mouseup/touchend, not needed as state variable.
-    let currentMorse = "";
-    let silenceTimer = null; // Timer for detecting end of letter/word
+    // tapStartTime, currentMorse, silenceTimer are now at a higher scope
     let tapperTone = null; // For tap sound (Tone.js synth instance)
     // let soundInitialized = false; // Not directly used in the provided tapper logic snippet, Tone.js handles its own initialization on first user gesture.
 
@@ -236,3 +240,29 @@ document.addEventListener('DOMContentLoaded', () => {
         updateVisualTapperUnitTime(UNIT_TIME_MS); // UNIT_TIME_MS here is the initial default (e.g., 150)
     }
 });
+
+// Globally accessible reset function for the visual tapper state
+function resetVisualTapperState() {
+    currentMorse = "";
+    tapStartTime = 0;
+    if (silenceTimer) {
+        clearTimeout(silenceTimer);
+        silenceTimer = null;
+    }
+    currentText = ""; // Reset the accumulated decoded text
+
+    // Re-fetch the tapperMorseOutput element each time to ensure it's the correct one,
+    // especially since the tapper DOM itself is moved around.
+    const tapperMorseOutputElement = document.getElementById('tapperMorseOutput');
+    if (tapperMorseOutputElement) {
+        tapperMorseOutputElement.textContent = "";
+    }
+
+    // Also ensure the tapper visual itself is not stuck in 'active' state
+    const tapperElement = document.getElementById('tapper');
+    if (tapperElement) {
+        tapperElement.classList.remove('active');
+    }
+    
+    console.log("VisualTapper state reset.");
+}
