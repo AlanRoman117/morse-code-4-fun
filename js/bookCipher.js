@@ -10,10 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCharacterIndex = 0;
     let revealedCharacters = [];
 
-    // New state variables for Morse tapper
-    let characterTimer = null;
-    const morseCharTypingTimeout = 1000; // 1 second
-
     // 2. Get DOM Elements
     const bookSelectionDropdown = document.getElementById('book-selection');
     const startBookButton = document.getElementById('start-book-btn');
@@ -102,9 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // function advanceTarget() { ... }
 
 
-    function handleMorseProcessing() {
-        if (!currentDecodedCharDisplay || !unlockedTextDisplay || !targetTextDisplay || !bookCipherMorseIO) {
-            console.error("One or more required display/input elements are not found for Morse processing.");
+    // Modified handleMorseProcessing to accept morseString
+    function handleMorseProcessing(morseString) { 
+        if (!currentDecodedCharDisplay || !unlockedTextDisplay || !targetTextDisplay) { // Removed bookCipherMorseIO from check
+            console.error("One or more required display elements are not found for Morse processing.");
             return;
         }
         if (typeof morseToText === 'undefined') {
@@ -113,14 +110,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const morseInput = bookCipherMorseIO.value.trim();
-        // If there's no input to process (e.g. timer fired after clearing), do nothing.
-        if (morseInput === '') {
-            currentDecodedCharDisplay.textContent = '-';
+        // Use the provided morseString argument
+        if (!morseString || morseString.trim() === '') {
+            // If the tapper sends an empty string (e.g. from space button without prior Morse),
+            // it might be a signal for a space, or just an empty input.
+            // For now, we won't process it as a character. If space handling is needed from empty morse,
+            // it would need specific logic here or a different event detail from the tapper.
+            // The current tapper logic sends morseStringForEvent, which could be empty.
+            // If it's an explicit space from the tapper, it might mean "end of word" or "add space".
+            // The current auto-space reveal in this function already handles spaces in target text.
+            // So, an empty morseString here likely means "no character to decode".
+            console.log("handleMorseProcessing called with empty morseString.");
+            currentDecodedCharDisplay.textContent = '-'; // Reset if nothing to decode
             return;
         }
 
-        let decodedString = morseToText(morseInput);
+        let decodedString = morseToText(morseString.trim()); // Use the argument
 
         if (decodedString && decodedString.length > 0) {
             let lastChar = decodedString.charAt(decodedString.length - 1).toUpperCase();
@@ -144,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     currentDecodedCharDisplay.textContent = '-';
                 }
-                bookCipherMorseIO.value = ''; // Clear input
+                // DO NOT clear bookCipherMorseIO.value here
                 return;
             }
 
@@ -191,62 +196,43 @@ document.addEventListener('DOMContentLoaded', () => {
                  currentDecodedCharDisplay.textContent = '-'; // Reset after invalid Morse
              }, 300);
         }
-        bookCipherMorseIO.value = ''; // Clear input after processing attempt (correct, incorrect, or invalid)
+        // DO NOT clear bookCipherMorseIO.value here
     }
 
+    // Event listener for the visual tapper's output
+    document.addEventListener('visualTapperCharacterComplete', (event) => {
+        if (event.detail && typeof event.detail.morseString === 'string') {
+            const morseFromTapper = event.detail.morseString;
+            console.log('BookCipher: Received visualTapperCharacterComplete with Morse:', morseFromTapper);
+            if (morseFromTapper) { // Process only if not empty
+                handleMorseProcessing(morseFromTapper);
+            } else {
+                // If tapper sends empty string (e.g. space button with no prior Morse)
+                // current logic in handleMorseProcessing will show '-'
+                // Specific handling for "word space" signal could be added if needed.
+                // For now, an empty morse string effectively resets currentDecodedCharDisplay to '-'
+                // via handleMorseProcessing's initial check.
+                handleMorseProcessing(morseFromTapper); // Call to potentially reset display
+            }
+        } else {
+            console.warn('BookCipher: Received visualTapperCharacterComplete event without morseString in detail.');
+        }
+    });
 
+
+    // Original bookCipherMorseIO related logic (now mostly unused for input)
+    // We keep the reference if other parts of the UI might interact with it,
+    // but the core input is from the visual tapper.
     if (bookCipherMorseIO) {
-        // Keydown listener for tapper
-        bookCipherMorseIO.addEventListener('keydown', (event) => {
-            if (bookCipherMorseIO.disabled) return;
-
-            if (event.key === '.' || event.key === '-') {
-                event.preventDefault(); // Prevent default character insertion
-                clearTimeout(characterTimer); // Reset timer on new input
-
-                bookCipherMorseIO.value += event.key; // Append . or -
-
-                // Update currentDecodedCharDisplay tentatively with the raw Morse input
-                // This gives immediate feedback of what's being typed.
-                // Alternatively, could try to decode on each keypress for live char display.
-                // For now, just show the morse.
-                // currentDecodedCharDisplay.textContent = bookCipherMorseIO.value; 
-                // ^ This might be confusing if it shows ".-" then decodes to "A"
-
-                characterTimer = setTimeout(handleMorseProcessing, morseCharTypingTimeout);
-            } else if (event.key === 'Backspace') {
-                 event.preventDefault();
-                 bookCipherMorseIO.value = bookCipherMorseIO.value.slice(0, -1);
-                 clearTimeout(characterTimer);
-                 if (bookCipherMorseIO.value.length > 0) { // If still some Morse, restart timer
-                    characterTimer = setTimeout(handleMorseProcessing, morseCharTypingTimeout);
-                 } else {
-                    currentDecodedCharDisplay.textContent = '-'; // Cleared all Morse
-                 }
-            }
-            // Allow other keys like arrows, delete, etc. for basic editing, but they don't reset the timer
-            // unless they modify the content in a way that 'input' event would catch (but we removed it).
-            // For simplicity, only '.', '-', and Backspace are specially handled for timer logic.
-        });
-
-        // Blur listener to process pending input
-        bookCipherMorseIO.addEventListener('blur', () => {
-            if (bookCipherMorseIO.disabled) return;
-            
-            clearTimeout(characterTimer); // Stop any pending timer
-            if (bookCipherMorseIO.value.trim() !== '') {
-                handleMorseProcessing(); // Process immediately if there's content
-            }
-        });
-
-        // Enable bookCipherMorseIO and reset tapper state when a book is started
+        // Enable bookCipherMorseIO visually (though it's not primary input) 
+        // and reset displays when a book is started.
         if (startBookButton) {
             startBookButton.addEventListener('click', () => {
                 if (bookSelectionDropdown.value && bookSelectionDropdown.value !== "Choose a book") {
-                    bookCipherMorseIO.disabled = false;
-                    bookCipherMorseIO.value = '';
+                    if(bookCipherMorseIO) bookCipherMorseIO.disabled = false; // Keep it enabled if it exists
+                    // No need to clear its value as it's not the input source for processing
                     currentDecodedCharDisplay.textContent = '-';
-                    clearTimeout(characterTimer); // Clear any existing timer
+                    // No characterTimer to clear
                 }
             });
         }

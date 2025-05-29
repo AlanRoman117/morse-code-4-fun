@@ -81,6 +81,36 @@
             width: 100%; /* Ensure it spans the full width available */
             /* e.g., padding-top: 1rem; */
         }
+
+        /* Tapper CSS */
+        .tapper {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #4a5568; /* Tailwind gray-600 */
+            border: 4px solid #2d3748; /* Tailwind gray-700 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e2e8f0; /* Tailwind gray-300 */
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s ease-out;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            flex-shrink: 0; /* Added from original context if tapper was in flex */
+        }
+        .tapper:active, .tapper.active {
+            background-color: #f6e05e; /* Tailwind yellow-300 */
+            color: #1a202c; /* Tailwind gray-900 */
+            transform: scale(0.95);
+            box-shadow: 0 0 20px #f6e05e, 0 0 30px #f6e05e;
+        }
+        #spaceButton {
+            /* Using Tailwind in HTML for most styling */
+            /* Example: width: 70px; height: 70px; border-radius: 50%; */
+        }
     </style>
 </head>
 <body>
@@ -160,6 +190,11 @@
         </div>
         <div id="book-cipher-tab" class="tab-content hidden">
             <div class="app-container mx-auto p-6 bg-gray-800 shadow-xl rounded-lg">
+                
+                <div id="bookCipherTapperArea" class="text-center my-4">
+                    <!-- The shared visual tapper will be inserted here by JavaScript -->
+                </div>
+
                 <!-- Book Selection Dropdown -->
                 <div class="mb-4">
                     <label for="book-selection" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label>
@@ -212,6 +247,22 @@
         <div id="settings-tab" class="tab-content hidden">
             <!-- Placeholder for Settings content -->
             <p class="text-center text-xl p-8">Settings Content Coming Soon!</p>
+        </div>
+    </div>
+
+    <div id="hiddenTapperStorage" style="display: none;"></div>
+    <div id="sharedVisualTapperWrapper" style="display: none;">
+        <div class="tapper-section-container text-center my-4">
+            <div class="tapper-area inline-block mr-2">
+                <div class="tapper-container">
+                    <div id="tapper" class="tapper shadow-lg mx-auto">Tap!</div>
+                </div>
+            </div>
+            <button id="spaceButton" title="End Letter" class="align-middle text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-full h-14 w-14 flex items-center justify-center">End<br>Ltr</button>
+            <div class="output-area mt-2">
+                <h3 class="text-lg font-semibold mb-1">Your Morse:</h3>
+                <p id="tapperMorseOutput" class="text-xl font-mono min-h-[25px] break-all bg-gray-700 p-2 rounded"></p>
+            </div>
         </div>
     </div>
     
@@ -402,18 +453,56 @@
 // --- Tab Navigation ---
 const navTabButtons = document.querySelectorAll('nav button[data-tab]');
 const tabContentDivs = document.querySelectorAll('.tab-content');
+const sharedVisualTapperWrapper = document.getElementById('sharedVisualTapperWrapper');
+const hiddenTapperStorage = document.getElementById('hiddenTapperStorage');
+
+function attachTapperToArea(targetAreaId) {
+    const targetElement = document.getElementById(targetAreaId);
+    if (sharedVisualTapperWrapper && targetElement) {
+        targetElement.appendChild(sharedVisualTapperWrapper);
+        sharedVisualTapperWrapper.style.display = 'block'; // Or 'flex' if its internal layout needs it
+        console.log(`Tapper attached to ${targetAreaId}`);
+    } else {
+        console.error(`Failed to attach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper}) or targetElement (${targetElement} for ID ${targetAreaId}) not found.`);
+    }
+}
+
+function detachSharedTapper() {
+    if (sharedVisualTapperWrapper && hiddenTapperStorage) {
+        // Check if the tapper is currently a child of some other element (not the hidden storage)
+        // and if that parent is not null.
+        if (sharedVisualTapperWrapper.parentNode && sharedVisualTapperWrapper.parentNode !== hiddenTapperStorage) {
+            hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
+            sharedVisualTapperWrapper.style.display = 'none';
+            console.log("Tapper detached and moved to hidden storage.");
+        } else if (!sharedVisualTapperWrapper.parentNode) {
+            // If it has no parent (e.g. was removed from DOM entirely somehow), still try to store and hide.
+            hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
+            sharedVisualTapperWrapper.style.display = 'none';
+            console.log("Tapper (no parent) moved to hidden storage and hidden.");
+        } else {
+            // Already in hidden storage, just ensure it's hidden
+             sharedVisualTapperWrapper.style.display = 'none';
+             console.log("Tapper already in hidden storage, ensured hidden.");
+        }
+    } else {
+         console.error(`Failed to detach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper}) or hiddenTapperStorage (${hiddenTapperStorage}) not found.`);
+    }
+}
+
 
 function showTab(tabIdToShow) {
+    // Detach tapper from any previous tab BEFORE hiding all tabs
+    detachSharedTapper();
+
     tabContentDivs.forEach(div => {
         div.classList.add('hidden');
     });
 
     navTabButtons.forEach(button => {
         button.classList.remove('active-tab-button');
-        // Add back default inactive styles (Tailwind)
-        // These are the typical classes for non-active buttons.
         button.classList.add('bg-gray-700', 'text-gray-300');
-        button.classList.remove('bg-blue-600', 'text-white'); // Remove classes associated with active state if present
+        button.classList.remove('bg-blue-600', 'text-white');
     });
 
     const selectedTabContent = document.getElementById(tabIdToShow);
@@ -424,10 +513,18 @@ function showTab(tabIdToShow) {
     const selectedNavButton = document.querySelector(`nav button[data-tab='${tabIdToShow}']`);
     if (selectedNavButton) {
         selectedNavButton.classList.add('active-tab-button');
-        // Remove default inactive styles and ensure base active styles for properties not covered by !important
         selectedNavButton.classList.remove('bg-gray-700', 'text-gray-300');
-        selectedNavButton.classList.add('bg-blue-600', 'text-white'); // Base active style (Tailwind)
+        selectedNavButton.classList.add('bg-blue-600', 'text-white');
     }
+
+    // Attach tapper to the new tab if it's the book cipher tab
+    if (tabIdToShow === 'book-cipher-tab') {
+        attachTapperToArea('bookCipherTapperArea');
+    }
+    // Example for future use:
+    // else if (tabIdToShow === 'learn-practice-tab' && someConditionForTapperInLearnPractice) {
+    //     attachTapperToArea('learnPracticeTapperPlaceholder'); 
+    // }
 }
 
 navTabButtons.forEach(button => {
@@ -441,7 +538,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set the initial active tab correctly.
     // The learn-practice-nav-btn might already have active-tab-button from HTML.
     // This call ensures consistent state management via JS.
-    showTab('learn-practice-tab');
+    showTab('learn-practice-tab'); // Initial tab
+    // Explicit detach on DOMContentLoaded after initial showTab is good practice,
+    // though current showTab logic handles it.
+    // If learn-practice-tab is not supposed to have tapper, this ensures it's gone.
+    // If learn-practice-tab *was* supposed to have it, showTab would call attach.
+    // Given showTab now detaches first, this specific call here might be redundant
+    // unless the very first tab shown *shouldn't* have the tapper.
+    // Let's assume 'learn-practice-tab' does not use the tapper initially.
+    // The `showTab` function already calls `detachSharedTapper`, so this is not strictly needed here.
+    // detachSharedTapper(); 
 });
 // --- End Tab Navigation ---
 
@@ -607,7 +713,9 @@ document.addEventListener('DOMContentLoaded', () => {
             freqValue.textContent = freqSlider.value;
         });
 
+        // VISUAL TAPPER JS HAS BEEN MOVED FROM HERE
     </script>
+    <script src="js/visualTapper.js" defer></script>
     <script src="js/bookCipher.js" defer></script>
 </body>
 </html>
