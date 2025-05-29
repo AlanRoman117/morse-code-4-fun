@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morse Code Learner</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a; /* Dark background */
+            color: #f0f0f0; /* Light text */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            background-color: #2c2c2c; /* Slightly lighter dark shade for the container */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 800px; /* Max width for larger screens */
+        }
+        .main-title {
+            color: #4a90e2; /* A bright blue for the title */
+        }
+        .input-output-box {
+            background-color: #3a3a3a; /* Darker input areas */
+            color: #f0f0f0;
+            border: 1px solid #555; /* Subtle border */
+            border-radius: 4px;
+            min-height: 100px;
+            padding: 10px;
+            white-space: pre-wrap; /* Ensures spaces and newlines are preserved */
+            word-wrap: break-word; /* Prevents overflow */
+        }
+        .controls button, .settings button {
+            background-color: #4a90e2; /* Blue buttons */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .controls button:hover, .settings button:hover {
+            background-color: #357abd; /* Darker blue on hover */
+        }
+        .section-title {
+            color: #4a90e2; /* Blue for section titles */
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .reference-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .reference-table th, .reference-table td {
+            border: 1px solid #555;
+            padding: 8px;
+            text-align: center;
+        }
+        .reference-table th {
+            background-color: #3a3a3a; /* Header background for table */
+        }
+        .hidden {
+            display: none;
+        }
+        .active-tab-button {
+            background-color: #4A90E2 !important; /* A distinct blue, adjust as needed */
+            color: white !important;
+            font-weight: 600; /* Tailwind semibold */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .tab-content {
+            width: 100%; /* Ensure it spans the full width available */
+            /* e.g., padding-top: 1rem; */
+        }
+    </style>
+</head>
+<body>
+    <nav class="flex justify-center mb-4 space-x-2">
+        <button id="learn-practice-nav-btn" data-tab="learn-practice-tab" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active-tab-button">Learn & Practice</button>
+        <button id="book-cipher-nav-btn" data-tab="book-cipher-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Book Cipher</button>
+        <button id="morse-pals-nav-btn" data-tab="morse-pals-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Morse Pals</button>
+        <button id="global-beacon-nav-btn" data-tab="global-beacon-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Global Beacon</button>
+        <button id="settings-nav-btn" data-tab="settings-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Settings</button>
+    </nav>
+    <h1 class="text-4xl font-bold mb-8 text-center main-title">Morse Code Learner</h1>
+    <div id="tab-content-wrapper">
+        <div id="learn-practice-tab" class="tab-content">
+            <div class="app-container">
+        <div class="controls mb-6 text-center">
+            <button id="play-morse-btn" class="mr-2">Play Morse Code</button>
+            <button id="stop-morse-btn" class="mr-2">Stop Sound</button>
+            <button id="copy-text-btn" class="mr-2">Copy Text</button>
+            <button id="copy-morse-btn">Copy Morse</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label for="text-input" class="block text-sm font-medium mb-1">Enter Text:</label>
+                <textarea id="text-input" class="input-output-box w-full" placeholder="Type text here..."></textarea>
+            </div>
+            <div>
+                <label for="morse-output" class="block text-sm font-medium mb-1">Morse Code Output:</label>
+                <textarea id="morse-output" class="input-output-box w-full" placeholder="Or type Morse here (e.g. .... . .-.. .-.. ---)" readonly></textarea>
+            </div>
+        </div>
+
+        <div class="settings mb-6">
+            <h2 class="section-title text-2xl font-semibold mb-3 text-center">Settings</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div>
+                    <label for="wpm-slider" class="block text-sm font-medium">Words Per Minute (WPM): <span id="wpm-value">20</span></label>
+                    <input type="range" id="wpm-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div>
+                    <label for="farnsworth-slider" class="block text-sm font-medium">Farnsworth WPM: <span id="farnsworth-value">20</span></label>
+                    <input type="range" id="farnsworth-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div>
+                    <label for="freq-slider" class="block text-sm font-medium">Tone Frequency (Hz): <span id="freq-value">600</span></Hz></label>
+                    <input type="range" id="freq-slider" min="300" max="1000" value="600" step="50" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+            </div>
+             <div class="mt-4 flex justify-center">
+                <button id="toggle-theme-btn">Toggle Dark/Light Mode</button>
+            </div>
+        </div>
+
+        <div class="morse-reference">
+            <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Code Reference</h2>
+            <div class="overflow-x-auto">
+                <table class="reference-table mx-auto">
+                    <thead>
+                        <tr>
+                            <th>Character</th>
+                            <th>Morse</th>
+                            <th>Character</th>
+                            <th>Morse</th>
+                            <th>Character</th>
+                            <th>Morse</th>
+                            <th>Character</th>
+                            <th>Morse</th>
+                        </tr>
+                    </thead>
+                    <tbody id="morse-reference-body">
+                        <!-- Dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+        </div>
+        <div id="book-cipher-tab" class="tab-content hidden">
+            <!-- Placeholder for Book Cipher content -->
+            <p class="text-center text-xl p-8">Book Cipher Content Coming Soon!</p>
+        </div>
+        <div id="morse-pals-tab" class="tab-content hidden">
+            <!-- Placeholder for Morse Pals content -->
+            <p class="text-center text-xl p-8">Morse Pals Content Coming Soon!</p>
+        </div>
+        <div id="global-beacon-tab" class="tab-content hidden">
+            <!-- Placeholder for Global Beacon content -->
+            <p class="text-center text-xl p-8">Global Beacon Content Coming Soon!</p>
+        </div>
+        <div id="settings-tab" class="tab-content hidden">
+            <!-- Placeholder for Settings content -->
+            <p class="text-center text-xl p-8">Settings Content Coming Soon!</p>
+        </div>
+    </div>
+    
+    <script>
+        // Morse code dictionary
+        const morseCode = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
+            'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.',
+            'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..',
+            '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+            '8': '---..', '9': '----.', '0': '-----',
+            '.': '.-.-.-', ',': '--..--', '?': '..--..', "'": '.----.', '!': '-.-.--', '/': '-..-.',
+            '(': '-.--.', ')': '-.--.-', '&': '.-...', ':': '---...', ';': '-.-.-.', '=': '-...-',
+            '+': '.-.-.', '-': '-....-', '_': '..--.-', '"': '.-..-.', '$': '...-..-', '@': '.--.-.-',
+            ' ': '/' // Represent space between words with a slash or longer pause
+        };
+
+        const reversedMorseCode = {};
+        for (const key in morseCode) {
+            reversedMorseCode[morseCode[key]] = key;
+        }
+
+        // AudioContext for playing Morse code sound
+        let audioContext;
+        let oscillator;
+        let gainNode;
+        let isPlaying = false;
+        let stopMorseCode = false; // Flag to stop ongoing Morse playback
+
+        // DOM Elements
+        const textInput = document.getElementById('text-input');
+        const morseOutput = document.getElementById('morse-output');
+        const playMorseBtn = document.getElementById('play-morse-btn');
+        const stopMorseBtn = document.getElementById('stop-morse-btn');
+        const copyTextBtn = document.getElementById('copy-text-btn');
+        const copyMorseBtn = document.getElementById('copy-morse-btn');
+        const wpmSlider = document.getElementById('wpm-slider');
+        const wpmValue = document.getElementById('wpm-value');
+        const farnsworthSlider = document.getElementById('farnsworth-slider');
+        const farnsworthValue = document.getElementById('farnsworth-value');
+        const freqSlider = document.getElementById('freq-slider');
+        const freqValue = document.getElementById('freq-value');
+        const morseReferenceBody = document.getElementById('morse-reference-body');
+        const toggleThemeBtn = document.getElementById('toggle-theme-btn');
+
+
+        // Initialize AudioContext
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                gainNode = audioContext.createGain();
+                gainNode.connect(audioContext.destination);
+            }
+        }
+
+        // Settings
+        let wpm = parseInt(wpmSlider.value);
+        let farnsworthWpm = parseInt(farnsworthSlider.value); // Farnsworth WPM
+        let frequency = parseInt(freqSlider.value);
+
+        // Timing (PARIS standard)
+        // Dot is 1 unit
+        // Dash is 3 units
+        // Intra-character space is 1 unit
+        // Inter-character space is 3 units
+        // Word space is 7 units
+
+        // WPM calculation: A standard word "PARIS" has 50 units.
+        // If WPM is X, then X words take 60 seconds.
+        // X * 50 units = 60 seconds
+        // 1 unit = 60 / (X * 50) = 1.2 / X seconds
+        let dotDuration = 1.2 / wpm; // seconds
+
+        function updateDurations() {
+            dotDuration = 1.2 / wpm;
+            if (farnsworthWpm < wpm && farnsworthWpm > 0) {
+                // Adjust inter-character and word spaces for Farnsworth timing
+                // Character speed remains at 'wpm', but spacing is as if overall WPM is 'farnsworthWpm'
+                // This means the 'unit' for spacing is based on farnsworthWpm
+                // However, dot/dash/intra-character space are based on 'wpm'
+                // This is a common interpretation. Some systems might vary.
+            }
+             // Ensure Farnsworth is not faster than character speed
+            if (farnsworthSlider.value > wpmSlider.value) {
+                farnsworthSlider.value = wpmSlider.value;
+                farnsworthValue.textContent = wpmSlider.value;
+                farnsworthWpm = wpm;
+            }
+        }
+        updateDurations(); // Initial calculation
+
+        // --- Event Listeners ---
+        textInput.addEventListener('input', () => {
+            const text = textInput.value.toUpperCase();
+            morseOutput.value = textToMorse(text);
+        });
+
+        morseOutput.addEventListener('input', () => {
+            // Basic attempt to allow Morse input - needs refinement for robustness
+            const morse = morseOutput.value.trim();
+            textInput.value = morseToText(morse);
+        });
+
+        playMorseBtn.addEventListener('click', async () => {
+            if (isPlaying) return;
+            initAudio(); // Ensure AudioContext is ready (especially on user gesture)
+            const morse = morseOutput.value;
+            if (morse) {
+                await playMorseSequence(morse);
+            }
+        });
+
+        stopMorseBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                stopMorseCode = true; // Set flag to stop the sequence
+                if (oscillator) {
+                    oscillator.stop();
+                    oscillator.disconnect(); // Clean up
+                    oscillator = null;
+                }
+                if (gainNode) { // Ensure gainNode is controlled
+                    gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                }
+                isPlaying = false;
+                playMorseBtn.disabled = false;
+                console.log("Morse playback stopped by user.");
+            }
+        });
+
+
+        copyTextBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(textInput.value)
+                .then(() => alert('Text copied to clipboard!'))
+                .catch(err => console.error('Error copying text: ', err));
+        });
+
+        copyMorseBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(morseOutput.value)
+                .then(() => alert('Morse code copied to clipboard!'))
+                .catch(err => console.error('Error copying Morse code: ', err));
+        });
+
+        wpmSlider.addEventListener('input', (e) => {
+            wpm = parseInt(e.target.value);
+            wpmValue.textContent = wpm;
+            if (farnsworthWpm > wpm) { // Ensure Farnsworth isn't faster
+                farnsworthWpm = wpm;
+                farnsworthSlider.value = wpm;
+                farnsworthValue.textContent = wpm;
+            }
+            updateDurations();
+        });
+
+        farnsworthSlider.addEventListener('input', (e) => {
+            farnsworthWpm = parseInt(e.target.value);
+            farnsworthValue.textContent = farnsworthWpm;
+            if (farnsworthWpm > wpm) { // User tries to set Farnsworth higher than WPM
+                wpm = farnsworthWpm; // Adjust WPM to match Farnsworth
+                wpmSlider.value = farnsworthWpm;
+                wpmValue.textContent = farnsworthWpm;
+            }
+            updateDurations();
+        });
+
+
+        freqSlider.addEventListener('input', (e) => {
+            frequency = parseInt(e.target.value);
+            freqValue.textContent = frequency;
+        });
+
+        toggleThemeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            document.querySelector('.app-container').classList.toggle('light-theme-container');
+
+            // Persist theme preference
+            if (document.body.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+
+        // --- Core Functions ---
+
+// --- Tab Navigation ---
+const navTabButtons = document.querySelectorAll('nav button[data-tab]');
+const tabContentDivs = document.querySelectorAll('.tab-content');
+
+function showTab(tabIdToShow) {
+    tabContentDivs.forEach(div => {
+        div.classList.add('hidden');
+    });
+
+    navTabButtons.forEach(button => {
+        button.classList.remove('active-tab-button');
+        // Add back default inactive styles (Tailwind)
+        // These are the typical classes for non-active buttons.
+        button.classList.add('bg-gray-700', 'text-gray-300');
+        button.classList.remove('bg-blue-600', 'text-white'); // Remove classes associated with active state if present
+    });
+
+    const selectedTabContent = document.getElementById(tabIdToShow);
+    if (selectedTabContent) {
+        selectedTabContent.classList.remove('hidden');
+    }
+
+    const selectedNavButton = document.querySelector(`nav button[data-tab='${tabIdToShow}']`);
+    if (selectedNavButton) {
+        selectedNavButton.classList.add('active-tab-button');
+        // Remove default inactive styles and ensure base active styles for properties not covered by !important
+        selectedNavButton.classList.remove('bg-gray-700', 'text-gray-300');
+        selectedNavButton.classList.add('bg-blue-600', 'text-white'); // Base active style (Tailwind)
+    }
+}
+
+navTabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const tabId = button.getAttribute('data-tab');
+        showTab(tabId);
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Set the initial active tab correctly.
+    // The learn-practice-nav-btn might already have active-tab-button from HTML.
+    // This call ensures consistent state management via JS.
+    showTab('learn-practice-tab');
+});
+// --- End Tab Navigation ---
+
+        function textToMorse(text) {
+            return text.split('').map(char => {
+                if (morseCode[char]) {
+                    return morseCode[char];
+                } else if (char === ' ') {
+                    return '/'; // Word separator
+                }
+                return ''; // Or some indicator for unknown characters
+            }).join(' '); // Space between Morse codes of letters
+        }
+
+        function morseToText(morse) {
+            return morse.split(' ').map(code => {
+                if (code === '/') return ' '; // Word separator
+                return reversedMorseCode[code] || ''; // Or indicator for unknown code
+            }).join('');
+        }
+
+       async function playTone(duration, isLastSignal = false) {
+            if (stopMorseCode || !audioContext) return; // Check stop flag and audio context
+
+            return new Promise(resolve => {
+                if (!audioContext || audioContext.state === 'suspended') {
+                    console.warn("AudioContext not active. Cannot play tone.");
+                    resolve();
+                    return;
+                }
+
+                oscillator = audioContext.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+                // Ramp up volume smoothly
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.01); // Quick ramp up
+
+                oscillator.connect(gainNode);
+                oscillator.start(audioContext.currentTime);
+
+                // Schedule stop and ramp down
+                oscillator.stop(audioContext.currentTime + duration);
+                // Ramp down volume smoothly before stopping
+                gainNode.gain.setValueAtTime(1, audioContext.currentTime + duration - 0.01);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+
+
+                oscillator.onended = () => {
+                    if (oscillator && oscillator.connected) { // Check if it's the current oscillator
+                         oscillator.disconnect();
+                    }
+                    resolve();
+                };
+            });
+        }
+
+
+        async function playMorseSequence(morse) {
+            if (isPlaying) return;
+            isPlaying = true;
+            stopMorseCode = false; // Reset stop flag
+            playMorseBtn.disabled = true;
+
+            const signals = morse.split('');
+            for (let i = 0; i < signals.length; i++) {
+                if (stopMorseCode) {
+                    console.log("Stopping Morse sequence playback.");
+                    break; // Exit loop if stop flag is true
+                }
+
+                const signal = signals[i];
+                let signalDuration = 0;
+                let silenceDuration = dotDuration; // Default intra-character space
+
+                if (signal === '.') {
+                    signalDuration = dotDuration;
+                } else if (signal === '-') {
+                    signalDuration = 3 * dotDuration;
+                } else if (signal === ' ') { // Space between letters in the same word
+                    // This is an inter-character space
+                    // The actual sound played is nothing, but the delay is different
+                    // Farnsworth timing: use character speed (wpm) for elements,
+                    // but overall speed (farnsworthWpm) for spacing between characters and words.
+                    let spaceUnit = 1.2 / (farnsworthWpm > 0 ? farnsworthWpm : wpm);
+                    silenceDuration = 3 * spaceUnit; // Inter-character space is 3 units (of potentially slower Farnsworth time)
+                                                   // Subtract the automatic 1-unit intra-character space that follows every signal
+                    silenceDuration -= dotDuration; // Adjust because a 1-unit space is already added after each signal.
+                } else if (signal === '/') { // Space between words
+                    let spaceUnit = 1.2 / (farnsworthWpm > 0 ? farnsworthWpm : wpm);
+                    silenceDuration = 7 * spaceUnit; // Word space is 7 units
+                    silenceDuration -= dotDuration; // Adjust
+                }
+
+                if (signalDuration > 0) {
+                    await playTone(signalDuration, i === signals.length -1);
+                }
+
+                // After the tone (or if it was a space character), wait for silence duration
+                if (silenceDuration > 0 && !stopMorseCode) {
+                    await new Promise(resolve => setTimeout(resolve, silenceDuration * 1000));
+                }
+            }
+            isPlaying = false;
+            playMorseBtn.disabled = false;
+            if (stopMorseCode) {
+                console.log("Morse sequence officially ended due to stop request.");
+            }
+        }
+
+
+        // --- UI Initialization ---
+        function populateMorseReference() {
+            const characters = Object.keys(morseCode);
+            let rowContent = '';
+            for (let i = 0; i < characters.length; i++) {
+                if (i % 4 === 0) { // Start new row
+                    if (i > 0) rowContent += '</tr>';
+                    rowContent += '<tr>';
+                }
+                const char = characters[i];
+                // Handle space explicitly for display if needed, though it's usually implied by '/'
+                const displayChar = char === ' ' ? 'Space' : char;
+                rowContent += `<td>${displayChar}</td><td>${morseCode[char]}</td>`;
+
+                if (i === characters.length - 1) { // Ensure last row is closed
+                    // If the last row doesn't have 4 items, add empty cells
+                    while ((i + 1) % 4 !== 0) {
+                        rowContent += '<td></td><td></td>';
+                        i++;
+                    }
+                    rowContent += '</tr>';
+                }
+            }
+            morseReferenceBody.innerHTML = rowContent;
+        }
+
+
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                document.querySelector('.app-container').classList.add('light-theme-container');
+            } else {
+                // Dark theme is default, so no need to remove classes if they aren't there
+                // but if they are (e.g. from a previous session), ensure they are removed.
+                document.body.classList.remove('light-theme');
+                document.querySelector('.app-container').classList.remove('light-theme-container');
+            }
+        }
+
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            populateMorseReference();
+            applySavedTheme(); // Apply theme on load
+            updateDurations(); // Initialize durations based on default slider values
+
+            // Set initial values for sliders display
+            wpmValue.textContent = wpmSlider.value;
+            farnsworthValue.textContent = farnsworthSlider.value;
+            freqValue.textContent = freqSlider.value;
+        });
+
+    </script>
+</body>
+</html>
