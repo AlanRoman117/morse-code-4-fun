@@ -100,13 +100,9 @@ function updateTableHighlight(morseString) {
 
         if (charCell) {
             charCell.classList.add('table-highlight');
-        } else {
-            // console.warn(`Highlight: Character cell not found with ID: ${charCellId}`);
         }
         if (morseCell) {
             morseCell.classList.add('table-highlight');
-        } else {
-            // console.warn(`Highlight: Morse cell not found with ID: ${morseCellId}`);
         }
     }
 }

@@ -37,20 +37,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for the input field
     unitTimeInput.addEventListener('input', () => {
-        const newValue = parseInt(unitTimeInput.value);
-        if (isNaN(newValue)) {
-            console.warn("Invalid input for unit time:", unitTimeInput.value);
+        const rawValue = unitTimeInput.value;
+        const newValue = parseInt(rawValue);
+        const min = parseInt(unitTimeInput.min);
+        const max = parseInt(unitTimeInput.max);
+        const feedbackEl = document.getElementById('unit-time-save-feedback');
+
+        if (rawValue === '') { // Handle empty input - could be intermediate state or cleared
+            if (feedbackEl) {
+                feedbackEl.textContent = 'Please enter a value.';
+                feedbackEl.className = 'text-sm ml-2 feedback-message text-red-500';
+                setTimeout(() => { feedbackEl.textContent = ''; }, 3000);
+            }
+            // Do not revert yet, user might be typing
             return;
         }
 
-        // Call the global function from visualTapper.js to update the actual timing
-        if (typeof updateVisualTapperUnitTime === 'function') {
-            updateVisualTapperUnitTime(newValue);
-        } else {
-            console.error("updateVisualTapperUnitTime function is not defined globally. Cannot update tapper speed. Ensure visualTapper.js is loaded first and defines this function globally.");
+        if (isNaN(newValue) || newValue < min || newValue > max) {
+            if (feedbackEl) {
+                feedbackEl.textContent = `Invalid: Must be ${min}-${max}ms.`;
+                feedbackEl.className = 'text-sm ml-2 feedback-message text-red-500';
+                setTimeout(() => { feedbackEl.textContent = ''; }, 3000);
+            }
+            // Revert to the last known good value if UNIT_TIME_MS is available and reliable
+            if (typeof UNIT_TIME_MS !== 'undefined') {
+                unitTimeInput.value = UNIT_TIME_MS;
+            }
+            return; // Don't proceed with saving or updating if invalid
         }
 
-        // Update the UI in the settings tab
+        // If valid, proceed with updateVisualTapperUnitTime and "Saved!" feedback
+        if (typeof updateVisualTapperUnitTime === 'function') {
+            updateVisualTapperUnitTime(newValue); // This function should also update global UNIT_TIME_MS
+            if (feedbackEl) {
+                feedbackEl.textContent = 'Saved!';
+                feedbackEl.className = 'text-sm ml-2 feedback-message text-green-500';
+                setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
+            }
+        } else {
+            console.error("updateVisualTapperUnitTime function is not defined globally. Cannot update tapper speed.");
+            if (feedbackEl) {
+                feedbackEl.textContent = 'Error saving settings!';
+                feedbackEl.className = 'text-sm ml-2 feedback-message text-red-500';
+                setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
+            }
+        }
+
+        // Update the UI display for current effective value (already handled by updateSettingsUI if UNIT_TIME_MS changes)
+        // but if updateVisualTapperUnitTime directly updates UNIT_TIME_MS, then call updateSettingsUI with that.
+        // For now, assuming updateVisualTapperUnitTime handles the underlying UNIT_TIME_MS update.
+        // The current updateSettingsUI(newValue) below might be redundant if UNIT_TIME_MS is the source of truth.
+        // Let's ensure updateSettingsUI is called with the *actual* applied value (which is newValue here as it's validated).
         updateSettingsUI(newValue);
     });
 });
