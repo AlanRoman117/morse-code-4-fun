@@ -2,7 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookCipherBooks = {
         'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1.txt' },
         'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro.txt' },
-        'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote.txt' }
+        'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote.txt' },
+        'empty_book': { title: 'Empty Book Test', filePath: 'assets/book_cipher_texts/empty.txt' },
+        'short_book': { title: 'Short Book Test', filePath: 'assets/book_cipher_texts/very_short.txt' },
+        'long_book': { title: 'Long Book Test', filePath: 'assets/book_cipher_texts/long_passage.txt' }
     };
 
     let currentTargetText = '';
@@ -16,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const unlockedTextDisplay = document.getElementById('unlocked-text-display');
     const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
     const bookCipherMorseIO = document.getElementById('book-cipher-morse-io');
+    const bookCipherMessageEl = document.getElementById('book-cipher-message'); // Added
 
     function displayTargetText() {
         if (!targetTextDisplay) return;
@@ -90,25 +94,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (startBookButton) {
         startBookButton.addEventListener('click', () => {
+            if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; // Clear previous messages
+            startBookButton.disabled = true; // Disable button
+
             if (!bookSelectionDropdown || !targetTextDisplay || !unlockedTextDisplay || !currentDecodedCharDisplay) {
                 console.error("A required DOM element is missing for the book cipher.");
-                alert("Error: A required UI element is missing. Please refresh the page.");
+                if (bookCipherMessageEl) {
+                    bookCipherMessageEl.textContent = "Error: A required UI element is missing. Please refresh the page.";
+                    setTimeout(() => { if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; }, 3000);
+                } else {
+                    alert("Error: A required UI element is missing. Please refresh the page.");
+                }
+                startBookButton.disabled = false; // Re-enable button
                 return;
             }
 
             const selectedBookKey = bookSelectionDropdown.value;
 
             if (!selectedBookKey || selectedBookKey === "Choose a book") {
-                alert("Please select a book to start.");
+                if (bookCipherMessageEl) {
+                    bookCipherMessageEl.textContent = "Please select a book to start.";
+                    setTimeout(() => { if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; }, 3000);
+                } else {
+                    alert("Please select a book to start.");
+                }
+                startBookButton.disabled = false; // Re-enable button
                 return;
             }
 
             const bookData = bookCipherBooks[selectedBookKey];
 
             if (!bookData || !bookData.filePath) {
-                alert("Selected book definition is missing or has no file path. Please choose another.");
+                if (bookCipherMessageEl) {
+                    bookCipherMessageEl.textContent = "Selected book definition is missing or has no file path. Please choose another.";
+                    setTimeout(() => { if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; }, 3000);
+                } else {
+                    alert("Selected book definition is missing or has no file path. Please choose another.");
+                }
                 console.error("Selected book key:", selectedBookKey, "Book data:", bookData);
-                targetTextDisplay.textContent = "Error: Book details incomplete.";
+                targetTextDisplay.textContent = "Error: Book details incomplete."; // This could also use the messageEl
+                startBookButton.disabled = false; // Re-enable button
                 return;
             }
 
@@ -123,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(text => {
                     currentTargetText = text.trim().toUpperCase();
                     currentBookId = selectedBookKey; // Set currentBookId once book key is known and fetch initiated
+                    startBookButton.disabled = false; // Re-enable button
 
                     if (currentTargetText.length === 0) {
                         // Handle empty book scenario
@@ -172,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentDecodedCharDisplay.textContent = '-';
                     if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
                     currentBookId = selectedBookKey; // Ensure currentBookId is set even on fetch error for context
+                    startBookButton.disabled = false; // Re-enable button
                 });
             // -- FETCH LOGIC END --
         });
@@ -179,7 +206,15 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Start button not found for book cipher.");
     }
 
-    function handleMorseProcessing(morseString) { 
+    function handleMorseProcessing(morseString) {
+        // Check if a book is loaded and the Morse IO is enabled (proxy for game active)
+        if (!currentTargetText || (bookCipherMorseIO && bookCipherMorseIO.disabled)) {
+            // console.log("Book Cipher: Morse processing ignored, no active game or input disabled.");
+            // Optionally clear currentDecodedCharDisplay if it shouldn't show anything
+            // if(currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
+            return;
+        }
+
         if (!currentDecodedCharDisplay || !unlockedTextDisplay || !targetTextDisplay) {
             console.error("One or more required display elements are not found for Morse processing.");
             return;

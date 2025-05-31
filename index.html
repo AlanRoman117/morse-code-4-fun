@@ -38,18 +38,6 @@
             white-space: pre-wrap; /* Ensures spaces and newlines are preserved */
             word-wrap: break-word; /* Prevents overflow */
         }
-        .controls button, .settings button {
-            background-color: #4a90e2; /* Blue buttons */
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .controls button:hover, .settings button:hover {
-            background-color: #357abd; /* Darker blue on hover */
-        }
         .section-title {
             color: #4a90e2; /* Blue for section titles */
             margin-top: 20px;
@@ -72,8 +60,6 @@
             display: none;
         }
         .active-tab-button {
-            background-color: #4A90E2 !important; /* A distinct blue, adjust as needed */
-            color: white !important;
             font-weight: 600; /* Tailwind semibold */
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
@@ -116,15 +102,119 @@
             color: #1a202c; /* Tailwind gray-900 or a dark color for contrast */
             font-weight: bold;
         }
+
+        /* Light Theme Styles */
+        body.light-theme {
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            color: #1f2937; /* Tailwind gray-800 */
+        }
+        .app-container.light-theme-container {
+            background-color: #ffffff; /* white */
+            color: #1f2937; /* Tailwind gray-800 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+        }
+        .light-theme .input-output-box, /* Applied if body has .light-theme */
+        .light-theme-container .input-output-box { /* Applied if .app-container has .light-theme-container */
+            background-color: #e5e7eb; /* Tailwind gray-200 */
+            color: #1f2937; /* Tailwind gray-800 */
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+        }
+        /* Ensure labels are dark in light theme if they have specific color classes */
+        .light-theme .text-gray-300,
+        .light-theme-container .text-gray-300 {
+             color: #374151; /* Tailwind gray-700, or choose appropriate dark shade */
+        }
+        .light-theme .section-title,
+        .light-theme-container .section-title {
+            color: #2563eb; /* Tailwind blue-600 for light theme */
+        }
+
+        /* Theme-specific styles for Tailwind-styled elements */
+        .light-theme #unit-time-input,
+        .light-theme-container #unit-time-input {
+            background-color: #e5e7eb; /* gray-200 */
+            border-color: #d1d5db; /* gray-300 */
+            color: #1f2937; /* gray-800 */
+        }
+        .light-theme #unit-time-input::placeholder,
+        .light-theme-container #unit-time-input::placeholder {
+            color: #6b7280; /* gray-500 */
+        }
+
+        .light-theme #wpm-slider, .light-theme-container #wpm-slider,
+        .light-theme #farnsworth-slider, .light-theme-container #farnsworth-slider,
+        .light-theme #freq-slider, .light-theme-container #freq-slider {
+            background-color: #d1d5db; /* gray-300 for track */
+            /* This only styles the track for some browsers if appearance-none is set.
+               Full slider styling is complex and browser-specific.
+               Tailwind typically handles this with pseudo-elements like ::-webkit-slider-thumb etc.
+               which are harder to override cleanly outside of Tailwind's dark: variant.
+               For now, this will change the track color.
+            */
+        }
+
+        .light-theme #book-selection, .light-theme-container #book-selection,
+        .light-theme #target-text-display, .light-theme-container #target-text-display,
+        .light-theme #unlocked-text-display, .light-theme-container #unlocked-text-display,
+        .light-theme #current-decoded-char, .light-theme-container #current-decoded-char,
+        .light-theme #tapperDecodedOutput, .light-theme-container #tapperDecodedOutput,
+        .light-theme #tapperMorseOutput, .light-theme-container #tapperMorseOutput {
+            background-color: #e5e7eb; /* gray-200 */
+            color: #1f2937; /* gray-800 */
+        }
+        .light-theme #book-selection, .light-theme-container #book-selection,
+        .light-theme #target-text-display, .light-theme-container #target-text-display,
+        .light-theme #unlocked-text-display, .light-theme-container #unlocked-text-display {
+            border-color: #d1d5db; /* gray-300 */
+        }
+        /* Ensure text-white elements become dark text in light theme */
+        .light-theme #book-selection, .light-theme-container #book-selection { /* text-white */
+            color: #1f2937; /* gray-800 */
+        }
+
+        .light-theme .reference-table th,
+        .light-theme-container .reference-table th,
+        .light-theme .reference-table td,
+        .light-theme-container .reference-table td {
+            border: 1px solid #d1d5db; /* gray-300 */
+        }
+        .light-theme .reference-table th,
+        .light-theme-container .reference-table th {
+            background-color: #e5e7eb; /* gray-200 */
+            /* Text color should be inherited from .app-container.light-theme-container */
+        }
+
+        .light-theme .tapper, /* For tapper within .light-theme body */
+        .light-theme-container .tapper { /* For tapper within .light-theme-container */
+            background-color: #9ca3af; /* Tailwind gray-400 */
+            border-color: #6b7280; /* Tailwind gray-500 */
+            color: #111827; /* Tailwind gray-900, adjusted for good contrast on gray-400 */
+        }
+        /* Active state for tapper (.tapper:active or .tapper.active) uses yellow-300 and gray-900,
+           which should be fine in light mode as well. No override needed for active state. */
+
+        /* Feedback message styling for themes */
+        .light-theme .feedback-message.text-green-500,
+        .light-theme-container .feedback-message.text-green-500 {
+            color: #16a34a; /* Tailwind green-600 */
+        }
+        .light-theme .feedback-message.text-red-500,
+        .light-theme-container .feedback-message.text-red-500 {
+            color: #dc2626; /* Tailwind red-600 */
+        }
+        .light-theme .feedback-message.text-yellow-500, /* For book cipher messages */
+        .light-theme-container .feedback-message.text-yellow-500 {
+            color: #d97706; /* Tailwind amber-600 for better contrast on light bg */
+        }
     </style>
 </head>
 <body>
     <nav class="flex justify-center mb-4 space-x-2">
-        <button id="learn-practice-nav-btn" data-tab="learn-practice-tab" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active-tab-button">Learn & Practice</button>
-        <button id="book-cipher-nav-btn" data-tab="book-cipher-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Book Cipher</button>
-        <button id="morse-pals-nav-btn" data-tab="morse-pals-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Morse Pals</button>
-        <button id="global-beacon-nav-btn" data-tab="global-beacon-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Global Beacon</button>
-        <button id="settings-nav-btn" data-tab="settings-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Settings</button>
+        <button id="learn-practice-nav-btn" data-tab="learn-practice-tab" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active-tab-button">Learn & Practice</button>
+        <button id="book-cipher-nav-btn" data-tab="book-cipher-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Book Cipher</button>
+        <button id="morse-pals-nav-btn" data-tab="morse-pals-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Morse Pals</button>
+        <button id="global-beacon-nav-btn" data-tab="global-beacon-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Global Beacon</button>
+        <button id="settings-nav-btn" data-tab="settings-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Settings</button>
     </nav>
     <h1 class="text-4xl font-bold mb-8 text-center main-title">Morse Code Learner</h1>
     <div id="tab-content-wrapper">
@@ -134,7 +224,7 @@
                 <!-- Tapper Area for Learn & Practice Tab -->
                 <div id="learnPracticeTapperArea" class="text-center my-4">
                     <!-- The shared visual tapper will be inserted here by JavaScript -->
-                     <h3 class="text-xl font-semibold mb-2">Practice Tapping Morse</h3>
+                     <h2 class="section-title text-2xl font-semibold mb-3 text-center">Practice Tapping Morse</h2>
                 </div>
 
                 <!-- Interactive Practice Game Area -->
@@ -142,27 +232,27 @@
                     <p id="practiceText" class="text-3xl font-bold text-yellow-400 min-h-[40px] text-center"></p>
                     <p id="tapperDecodedOutput" class="text-2xl min-h-[30px] break-all text-center bg-gray-700 p-2 rounded mt-2"></p>
                     <p id="practiceMessage" class="text-lg text-center min-h-[24px] mt-2"></p>
-                    <button id="newChallengeButton" class="mt-2 w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">New Challenge</button>
-                    <button id="play-tapped-morse-btn" class="mt-2 w-full bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Play My Tapped Morse</button>
-                    <button id="clearTapperInputButton" class="mt-2 w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Clear My Tapping</button>
+                    <button id="newChallengeButton" class="mt-2 w-full bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">New Challenge</button>
+                    <button id="play-tapped-morse-btn" class="mt-2 w-full bg-purple-500 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Play My Tapped Morse</button>
+                    <button id="clearTapperInputButton" class="mt-2 w-full bg-red-500 hover:bg-red-700 active:bg-red-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Clear My Tapping</button>
                 </div>
                 <!-- End Interactive Practice Game Area -->
 
                 <div class="controls mb-6 text-center">
-            <button id="play-morse-btn" class="mr-2">Play Morse Code</button>
-            <button id="stop-morse-btn" class="mr-2">Stop Sound</button>
-            <button id="copy-text-btn" class="mr-2">Copy Text</button>
-            <button id="copy-morse-btn">Copy Morse</button>
+            <button id="play-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Play Morse Code</button>
+            <button id="stop-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Stop Sound</button>
+            <button id="copy-text-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Text</button><span id="copy-text-feedback" class="ml-2 text-sm"></span>
+            <button id="copy-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Morse</button><span id="copy-morse-feedback" class="ml-2 text-sm"></span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-                <label for="text-input" class="block text-sm font-medium mb-1">Enter Text:</label>
-                <textarea id="text-input" class="input-output-box w-full" placeholder="Type text here..."></textarea>
+                <label for="text-input" class="block text-sm font-medium mb-2">Enter Text:</label>
+                <textarea id="text-input" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Type text here..."></textarea>
             </div>
             <div>
-                <label for="morse-output" class="block text-sm font-medium mb-1">Morse Code Output:</label>
-                <textarea id="morse-output" class="input-output-box w-full" placeholder="Or type Morse here (e.g. .... . .-.. .-.. ---)" readonly></textarea>
+                <label for="morse-output" class="block text-sm font-medium mb-2">Morse Code Output:</label>
+                <textarea id="morse-output" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Or type Morse here (e.g. .... . .-.. .-.. ---)" readonly></textarea>
             </div>
         </div>
 
@@ -183,7 +273,7 @@
                 </div>
             </div>
              <div class="mt-4 flex justify-center">
-                <button id="toggle-theme-btn">Toggle Dark/Light Mode</button>
+                <button id="toggle-theme-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Toggle Dark/Light Mode</button>
             </div>
         </div>
 
@@ -213,7 +303,7 @@
         </div>
         <div id="book-cipher-tab" class="tab-content hidden">
             <div class="app-container mx-auto p-6 bg-gray-800 shadow-xl rounded-lg">
-                
+                <p id="book-cipher-message" class="text-center feedback-message text-yellow-500 mb-3 h-6"></p> <!-- Message area, h-6 for consistent height -->
                 <div id="bookCipherTapperArea" class="text-center my-4">
                     <!-- The shared visual tapper will be inserted here by JavaScript -->
                 </div>
@@ -226,6 +316,9 @@
                         <option value="passage_1">Sherlock Holmes Snippet</option>
                         <option value="mystery_intro">Stormy Night Mystery</option>
                         <option value="sci_fi_quote">Sci-Fi Classic Quote</option>
+                        <option value="empty_book">Empty Book Test</option>
+                        <option value="short_book">Short Book Test</option>
+                        <option value="long_book">Long Book Test</option>
                     </select>
                 </div>
 
@@ -249,13 +342,13 @@
                 
                 <!-- Morse Input/Output Area -->
                 <div class="mb-6">
-                    <label for="book-cipher-morse-io" class="block text-sm font-medium text-gray-300 mb-1">Morse Input/Output:</label>
-                    <textarea id="book-cipher-morse-io" class="input-output-box w-full" placeholder="Morse input/output for book cipher..."></textarea>
+                    <label for="book-cipher-morse-io" class="block text-sm font-medium text-gray-300 mb-2">Morse Input/Output:</label>
+                    <textarea id="book-cipher-morse-io" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Morse input/output for book cipher..."></textarea>
                 </div>
 
                 <!-- Start Button -->
                 <div class="text-center">
-                    <button id="start-book-btn" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">Start Selected Book</button>
+                    <button id="start-book-btn" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-lg shadow-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed">Start Selected Book</button>
                 </div>
             </div>
         </div>
@@ -272,8 +365,9 @@
                 <h2 class="section-title text-2xl font-semibold mb-3 text-center">Tapper Speed Settings</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-items-center p-4">
                     <div class="w-full">
-                        <label for="unit-time-input" class="block text-sm font-medium mb-1">Morse Unit Time (ms):</label>
+                        <label for="unit-time-input" class="block text-sm font-medium mb-2">Morse Unit Time (ms):</label>
                         <input type="number" id="unit-time-input" value="150" min="50" max="500" step="10" class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white">
+                        <span id="unit-time-save-feedback" class="text-sm ml-2 feedback-message"></span>
                     </div>
                     <div class="mt-4 md:mt-0 w-full text-center md:text-left">
                         <p class="text-sm font-medium text-gray-300">Current effective value: <span id="current-unit-time-display" class="font-bold text-white">150</span> ms</p>
@@ -291,7 +385,7 @@
                     <div id="tapper" class="tapper shadow-lg mx-auto">Tap!</div>
                 </div>
             </div>
-            <button id="spaceButton" title="End Letter" class="align-middle text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-full h-14 w-14 flex items-center justify-center">End<br>Ltr</button>
+            <button id="spaceButton" title="End Letter" class="align-middle text-sm bg-blue-500 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-3 rounded-full h-14 w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">End<br>Ltr</button>
             <div class="output-area mt-2">
                 <h3 class="text-lg font-semibold mb-1">Your Morse:</h3>
                 <p id="tapperMorseOutput" class="text-xl font-mono min-h-[25px] break-all bg-gray-700 p-2 rounded"></p>
@@ -399,6 +493,7 @@
             initAudio(); // Ensure AudioContext is ready (especially on user gesture)
             const morse = morseOutput.value;
             if (morse) {
+                // stopMorseBtn.disabled = false; // Enabled inside playMorseSequence
                 await playMorseSequence(morse);
             }
         });
@@ -406,6 +501,7 @@
         stopMorseBtn.addEventListener('click', () => {
             if (isPlaying) {
                 stopMorseCode = true; // Set flag to stop the sequence
+                stopMorseBtn.disabled = true; // Disable stop button as it's now clicked
                 if (oscillator) {
                     oscillator.stop();
                     oscillator.disconnect(); // Clean up
@@ -423,21 +519,43 @@
 
 
         copyTextBtn.addEventListener('click', () => {
+            const feedbackEl = document.getElementById('copy-text-feedback');
             navigator.clipboard.writeText(textInput.value)
-                .then(() => alert('Text copied to clipboard!'))
-                .catch(err => console.error('Error copying text: ', err));
+                .then(() => {
+                    feedbackEl.textContent = 'Copied!';
+                    feedbackEl.className = 'ml-2 text-sm feedback-message text-green-500';
+                    setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
+                })
+                .catch(err => {
+                    feedbackEl.textContent = 'Error!';
+                    feedbackEl.className = 'ml-2 text-sm feedback-message text-red-500';
+                    console.error('Error copying text: ', err);
+                    setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
+                });
         });
 
         copyMorseBtn.addEventListener('click', () => {
+            const feedbackEl = document.getElementById('copy-morse-feedback');
             navigator.clipboard.writeText(morseOutput.value)
-                .then(() => alert('Morse code copied to clipboard!'))
-                .catch(err => console.error('Error copying Morse code: ', err));
+                .then(() => {
+                    feedbackEl.textContent = 'Copied!';
+                    feedbackEl.className = 'ml-2 text-sm feedback-message text-green-500';
+                    setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
+                })
+                .catch(err => {
+                    feedbackEl.textContent = 'Error!';
+                    feedbackEl.className = 'ml-2 text-sm feedback-message text-red-500';
+                    console.error('Error copying Morse code: ', err);
+                    setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
+                });
         });
 
         wpmSlider.addEventListener('input', (e) => {
             wpm = parseInt(e.target.value);
             wpmValue.textContent = wpm;
-            if (farnsworthWpm > wpm) { // Ensure Farnsworth isn't faster
+            // If new WPM is lower than current Farnsworth, pull Farnsworth down.
+            // Farnsworth cannot be higher than character WPM.
+            if (wpm < farnsworthWpm) {
                 farnsworthWpm = wpm;
                 farnsworthSlider.value = wpm;
                 farnsworthValue.textContent = wpm;
@@ -447,12 +565,14 @@
 
         farnsworthSlider.addEventListener('input', (e) => {
             farnsworthWpm = parseInt(e.target.value);
-            farnsworthValue.textContent = farnsworthWpm;
-            if (farnsworthWpm > wpm) { // User tries to set Farnsworth higher than WPM
-                wpm = farnsworthWpm; // Adjust WPM to match Farnsworth
-                wpmSlider.value = farnsworthWpm;
-                wpmValue.textContent = farnsworthWpm;
+            // Farnsworth WPM cannot be higher than character WPM.
+            // If user tries to set Farnsworth higher, cap it at current WPM.
+            // Do NOT increase WPM based on Farnsworth changes.
+            if (farnsworthWpm > wpm) {
+                farnsworthWpm = wpm;
+                e.target.value = wpm; // Correct the slider position
             }
+            farnsworthValue.textContent = farnsworthWpm;
             updateDurations();
         });
 
@@ -637,7 +757,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isPlaying) return;
             isPlaying = true;
             stopMorseCode = false; // Reset stop flag
-            playMorseBtn.disabled = true; // Consider disabling the other play button too if custom playback is active
+            playMorseBtn.disabled = true;
+            if(stopMorseBtn) stopMorseBtn.disabled = false; // Enable stop button
 
             const currentPlaybackFrequency = typeof customFreq === 'number' ? customFreq : frequency;
 
@@ -705,7 +826,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             isPlaying = false;
-            playMorseBtn.disabled = false; // Re-enable the main play button
+            playMorseBtn.disabled = false;
+            if(stopMorseBtn) stopMorseBtn.disabled = true; // Disable stop button
             // Consider if the custom play button also needs its state managed (e.g., playTappedMorseBtn.disabled = false;)
             if (stopMorseCode) {
                 console.log("Morse sequence officially ended due to stop request.");
@@ -835,7 +957,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     // and will continue to use the global `frequency`.
                     // The subtask asks to call: await playMorseSequence(morseToPlay, customDotDuration, frequency);
                     // This implies playMorseSequence will be updated to use the passed frequency as well.
+                    // stopMorseBtn.disabled = false; // Enable stop button - handled by playMorseSequence
                     await playMorseSequence(morseToPlay, customDotDuration, frequency);
+                    // stopMorseBtn.disabled = true; // Disable stop button after completion - handled by playMorseSequence
                 });
             } else {
                 console.error("Could not find 'play-tapped-morse-btn' or 'tapperDecodedOutput' elements.");

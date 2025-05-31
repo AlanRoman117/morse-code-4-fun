@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const practiceMessage = document.getElementById('practiceMessage');
     const tapperDecodedOutput = document.getElementById('tapperDecodedOutput');
     const clearTapperInputButton = document.getElementById('clearTapperInputButton');
+    const playTappedMorseBtn = document.getElementById('play-tapped-morse-btn'); // Added
 
-    if (!practiceText || !newChallengeButton || !practiceMessage || !tapperDecodedOutput || !clearTapperInputButton) {
+    if (!practiceText || !newChallengeButton || !practiceMessage || !tapperDecodedOutput || !clearTapperInputButton || !playTappedMorseBtn) { // Added playTappedMorseBtn
         console.error("Learn & Practice Game Error: One or more essential UI elements not found. Game will not initialize.");
         return;
     }
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentTappedString = ''; // Reset internal tracking
         tapperDecodedOutput.textContent = ''; // Clear display
+        updatePlayTappedMorseButtonState(); // Update button state
         practiceMessage.textContent = '';   // Clear feedback
 
         // Reset the visual tapper's internal state (e.g., current Morse signals)
@@ -45,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentTappedString += tappedChar;
         tapperDecodedOutput.textContent = currentTappedString;
+        updatePlayTappedMorseButtonState(); // Update button state
 
         if (currentTappedString === currentChallengeWord) {
             practiceMessage.textContent = "Challenge Complete!";
@@ -55,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             practiceMessage.style.color = 'lightblue';
         } else {
             practiceMessage.textContent = "Mistake. Tap 'End Ltr' then try the correct letter.";
-            practiceMessage.style.color = 'pink';
+            practiceMessage.style.color = '#DC2626'; // Tailwind red-600 for better contrast
             // To handle the "mistake" more gracefully:
             // The user has tapped a full character, and it's wrong in the sequence.
             // We should clear the last attempted character from currentTappedString
@@ -79,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clearTapperInputButton) {
         clearTapperInputButton.addEventListener('click', () => {
             tapperDecodedOutput.textContent = '';
+            updatePlayTappedMorseButtonState(); // Update button state
             if (typeof resetVisualTapperState === 'function') {
                 resetVisualTapperState();
             } else {
@@ -104,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // visualTapper.js already handles showing "Unknown Morse" locally.
                 // Here, we might want to provide feedback in the game context.
                 practiceMessage.textContent = `Unknown Morse: ${morseString}. Try again.`;
-                practiceMessage.style.color = 'orange';
+                practiceMessage.style.color = '#F59E0B'; // Tailwind amber-500 (similar to orange)
             }
         } else {
             // This can happen if the spaceButton is pressed when currentMorse in tapper is empty.
@@ -115,4 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize the first challenge
     startNewChallenge();
+
+    function updatePlayTappedMorseButtonState() {
+        if (tapperDecodedOutput.textContent.trim() !== '') {
+            playTappedMorseBtn.disabled = false;
+        } else {
+            playTappedMorseBtn.disabled = true;
+        }
+    }
 });
