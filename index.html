@@ -394,12 +394,6 @@
             morseOutput.value = textToMorse(text);
         });
 
-        morseOutput.addEventListener('input', () => {
-            // Basic attempt to allow Morse input - needs refinement for robustness
-            const morse = morseOutput.value.trim();
-            textInput.value = morseToText(morse);
-        });
-
         playMorseBtn.addEventListener('click', async () => {
             if (isPlaying) return;
             initAudio(); // Ensure AudioContext is ready (especially on user gesture)
