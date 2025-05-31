@@ -138,6 +138,7 @@
                     <p id="tapperDecodedOutput" class="text-2xl min-h-[30px] break-all text-center bg-gray-700 p-2 rounded mt-2"></p>
                     <p id="practiceMessage" class="text-lg text-center min-h-[24px] mt-2"></p>
                     <button id="newChallengeButton" class="mt-2 w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">New Challenge</button>
+                    <button id="play-tapped-morse-btn" class="mt-2 w-full bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Play My Tapped Morse</button>
                 </div>
                 <!-- End Interactive Practice Game Area -->
 
@@ -592,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }).join('');
         }
 
-       async function playTone(duration, isLastSignal = false) {
+       async function playTone(duration, isLastSignal = false, toneFrequency) {
             if (stopMorseCode || !audioContext) return; // Check stop flag and audio context
 
             return new Promise(resolve => {
@@ -604,7 +605,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 oscillator = audioContext.createOscillator();
                 oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                // Use the provided toneFrequency, or default to global frequency if undefined
+                const currentFrequency = typeof toneFrequency === 'number' ? toneFrequency : frequency;
+                oscillator.frequency.setValueAtTime(currentFrequency, audioContext.currentTime);
 
                 // Ramp up volume smoothly
                 gainNode.gain.setValueAtTime(0, audioContext.currentTime);
@@ -630,53 +633,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        async function playMorseSequence(morse) {
+        async function playMorseSequence(morse, customDotDur, customFreq) {
             if (isPlaying) return;
             isPlaying = true;
             stopMorseCode = false; // Reset stop flag
-            playMorseBtn.disabled = true;
+            playMorseBtn.disabled = true; // Consider disabling the other play button too if custom playback is active
+
+            const currentPlaybackFrequency = typeof customFreq === 'number' ? customFreq : frequency;
+
+            let effectiveDotDuration;
+            let effectiveInterCharSpace;
+            let effectiveWordSpace;
+            let effectiveIntraCharSilence;
+
+            if (typeof customDotDur === 'number') {
+                effectiveDotDuration = customDotDur;
+                effectiveIntraCharSilence = effectiveDotDuration; // 1 unit silence after each signal
+                effectiveInterCharSpace = 3 * effectiveDotDuration; // 3 units for inter-character
+                effectiveWordSpace = 7 * effectiveDotDuration;    // 7 units for word space
+            } else {
+                // Use existing WPM/Farnsworth logic
+                effectiveDotDuration = dotDuration; // Global dotDuration based on WPM
+                effectiveIntraCharSilence = dotDuration; // Base silence is 1 WPM-based unit
+
+                let spaceUnit = 1.2 / (farnsworthWpm > 0 && farnsworthWpm < wpm ? farnsworthWpm : wpm);
+                effectiveInterCharSpace = 3 * spaceUnit;
+                effectiveWordSpace = 7 * spaceUnit;
+            }
 
             const signals = morse.split('');
             for (let i = 0; i < signals.length; i++) {
                 if (stopMorseCode) {
                     console.log("Stopping Morse sequence playback.");
-                    break; // Exit loop if stop flag is true
+                    break;
                 }
 
                 const signal = signals[i];
                 let signalDuration = 0;
-                let silenceDuration = dotDuration; // Default intra-character space
+                // Default silence after a signal is the intra-character silence unit
+                let silenceDurationAfterSignal = effectiveIntraCharSilence;
 
                 if (signal === '.') {
-                    signalDuration = dotDuration;
+                    signalDuration = effectiveDotDuration;
                 } else if (signal === '-') {
-                    signalDuration = 3 * dotDuration;
+                    signalDuration = 3 * effectiveDotDuration;
                 } else if (signal === ' ') { // Space between letters in the same word
-                    // This is an inter-character space
-                    // The actual sound played is nothing, but the delay is different
-                    // Farnsworth timing: use character speed (wpm) for elements,
-                    // but overall speed (farnsworthWpm) for spacing between characters and words.
-                    let spaceUnit = 1.2 / (farnsworthWpm > 0 ? farnsworthWpm : wpm);
-                    silenceDuration = 3 * spaceUnit; // Inter-character space is 3 units (of potentially slower Farnsworth time)
-                                                   // Subtract the automatic 1-unit intra-character space that follows every signal
-                    silenceDuration -= dotDuration; // Adjust because a 1-unit space is already added after each signal.
+                    // This signal itself is silence. The silence *after* this "signal" is what we calculate.
+                    // The total silence for an inter-character space is `effectiveInterCharSpace`.
+                    // Since `silenceDurationAfterSignal` (1 unit) is already added by default,
+                    // we adjust the duration of this "space signal" to make up the difference.
+                    signalDuration = 0; // No tone for space
+                    // Total silence needed is effectiveInterCharSpace.
+                    // The loop adds effectiveIntraCharSilence by default.
+                    // So, the "duration" of this space signal should be effectiveInterCharSpace - effectiveIntraCharSilence
+                    silenceDurationAfterSignal = effectiveInterCharSpace - effectiveIntraCharSilence;
+                     if (silenceDurationAfterSignal < 0) silenceDurationAfterSignal = 0; // Should not happen with correct logic
                 } else if (signal === '/') { // Space between words
-                    let spaceUnit = 1.2 / (farnsworthWpm > 0 ? farnsworthWpm : wpm);
-                    silenceDuration = 7 * spaceUnit; // Word space is 7 units
-                    silenceDuration -= dotDuration; // Adjust
+                    signalDuration = 0; // No tone for space
+                    // Total silence needed is effectiveWordSpace.
+                    silenceDurationAfterSignal = effectiveWordSpace - effectiveIntraCharSilence;
+                    if (silenceDurationAfterSignal < 0) silenceDurationAfterSignal = 0;
                 }
 
                 if (signalDuration > 0) {
-                    await playTone(signalDuration, i === signals.length -1);
+                    await playTone(signalDuration, i === signals.length - 1, currentPlaybackFrequency);
                 }
 
-                // After the tone (or if it was a space character), wait for silence duration
-                if (silenceDuration > 0 && !stopMorseCode) {
-                    await new Promise(resolve => setTimeout(resolve, silenceDuration * 1000));
+                // After the tone (or if it was a space character that has 0 signal duration), wait for its specific silence duration
+                if (silenceDurationAfterSignal > 0 && !stopMorseCode) {
+                    await new Promise(resolve => setTimeout(resolve, silenceDurationAfterSignal * 1000));
                 }
             }
             isPlaying = false;
-            playMorseBtn.disabled = false;
+            playMorseBtn.disabled = false; // Re-enable the main play button
+            // Consider if the custom play button also needs its state managed (e.g., playTappedMorseBtn.disabled = false;)
             if (stopMorseCode) {
                 console.log("Morse sequence officially ended due to stop request.");
             }
@@ -734,6 +764,58 @@ document.addEventListener('DOMContentLoaded', () => {
             wpmValue.textContent = wpmSlider.value;
             farnsworthValue.textContent = farnsworthSlider.value;
             freqValue.textContent = freqSlider.value;
+
+            // Event listener for "Play My Tapped Morse" button
+            const playTappedMorseBtn = document.getElementById('play-tapped-morse-btn');
+            const tapperDecodedOutputEl = document.getElementById('tapperDecodedOutput');
+
+            if (playTappedMorseBtn && tapperDecodedOutputEl) {
+                playTappedMorseBtn.addEventListener('click', async () => {
+                    if (isPlaying) {
+                        console.log("Audio is currently playing. Please wait.");
+                        return;
+                    }
+                    initAudio(); // Ensure AudioContext is ready
+
+                    const textToPlay = tapperDecodedOutputEl.textContent;
+                    if (!textToPlay || textToPlay.trim() === '') {
+                        console.log("No tapped text to play.");
+                        // Optionally, provide user feedback e.g., alert("No tapped text to play.");
+                        return;
+                    }
+
+                    const morseToPlay = textToMorse(textToPlay.toUpperCase());
+                    if (!morseToPlay || morseToPlay.trim() === '') {
+                        console.log("Could not convert tapped text to Morse.");
+                        // Optionally, provide user feedback
+                        return;
+                    }
+
+                    // Assuming UNIT_TIME_MS is globally available (e.g., window.UNIT_TIME_MS)
+                    // This value would typically come from visualTapper.js or settings.js
+                    let currentUnitTimeMs = 150; // Default if not found
+                    if (typeof UNIT_TIME_MS !== 'undefined') {
+                        currentUnitTimeMs = UNIT_TIME_MS;
+                    } else if (typeof window.UNIT_TIME_MS !== 'undefined') {
+                        currentUnitTimeMs = window.UNIT_TIME_MS;
+                    } else {
+                        console.warn("Global UNIT_TIME_MS not found, using default 150ms for playback. This might lead to inconsistent playback speed with tapper settings.");
+                    }
+
+                    const customDotDuration = currentUnitTimeMs / 1000.0; // Convert ms to seconds
+
+                    // The global `frequency` variable (updated by #freq-slider) will be used by playMorseSequence directly
+                    // Or, if playMorseSequence is modified to take frequency, pass it:
+                    // await playMorseSequence(morseToPlay, customDotDuration, frequency);
+                    // For now, assuming playMorseSequence will be modified to accept customDotDuration
+                    // and will continue to use the global `frequency`.
+                    // The subtask asks to call: await playMorseSequence(morseToPlay, customDotDuration, frequency);
+                    // This implies playMorseSequence will be updated to use the passed frequency as well.
+                    await playMorseSequence(morseToPlay, customDotDuration, frequency);
+                });
+            } else {
+                console.error("Could not find 'play-tapped-morse-btn' or 'tapperDecodedOutput' elements.");
+            }
         });
 
         // VISUAL TAPPER JS HAS BEEN MOVED FROM HERE
