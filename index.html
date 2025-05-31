@@ -132,6 +132,15 @@
                      <h3 class="text-xl font-semibold mb-2">Practice Tapping Morse</h3>
                 </div>
 
+                <!-- Interactive Practice Game Area -->
+                <div id="interactivePracticeGame" class="mt-4">
+                    <p id="practiceText" class="text-3xl font-bold text-yellow-400 min-h-[40px] text-center"></p>
+                    <p id="tapperDecodedOutput" class="text-2xl min-h-[30px] break-all text-center bg-gray-700 p-2 rounded mt-2"></p>
+                    <p id="practiceMessage" class="text-lg text-center min-h-[24px] mt-2"></p>
+                    <button id="newChallengeButton" class="mt-2 w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">New Challenge</button>
+                </div>
+                <!-- End Interactive Practice Game Area -->
+
                 <div class="controls mb-6 text-center">
             <button id="play-morse-btn" class="mr-2">Play Morse Code</button>
             <button id="stop-morse-btn" class="mr-2">Stop Sound</button>
@@ -729,6 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // VISUAL TAPPER JS HAS BEEN MOVED FROM HERE
     </script>
+    <script src="js/learnPracticeGame.js" defer></script>
     <script src="js/visualTapper.js" defer></script>
     <script src="js/settings.js" defer></script> 
     <script src="js/bookCipher.js" defer></script> 
