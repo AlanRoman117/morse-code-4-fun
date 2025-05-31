@@ -1,48 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Define Book Data
-    const bookSamples = {
-        'wildwood': 'THE QUICK BROWN FOX', // Using a slightly longer example
-        'morse_mysteries': 'MORSE MYSTERIES VOL ONE',
-        'code_star': 'JOURNEY TO THE CODE STAR'
+    const bookCipherBooks = {
+        'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1.txt' },
+        'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro.txt' },
+        'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote.txt' }
     };
 
     let currentTargetText = '';
     let currentCharacterIndex = 0;
     let revealedCharacters = [];
 
-    // 2. Get DOM Elements
     const bookSelectionDropdown = document.getElementById('book-selection');
     const startBookButton = document.getElementById('start-book-btn');
     const targetTextDisplay = document.getElementById('target-text-display');
     const unlockedTextDisplay = document.getElementById('unlocked-text-display');
     const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
-    const bookCipherMorseIO = document.getElementById('book-cipher-morse-io'); // Added Morse I/O element
+    const bookCipherMorseIO = document.getElementById('book-cipher-morse-io');
 
-    // 3. obscureText Function (Will be implemented in the next step)
-    function obscureText(text) {
-        // Implementation will follow
-        // For now, a placeholder to allow dependent functions to be structured
-        let obscured = "";
-        for (let i = 0; i < text.length; i++) {
-            const char = text[i];
-            if (char >= 'A' && char <= 'Z') {
-                obscured += '_';
-            } else {
-                obscured += char; // Preserve spaces and other characters
-            }
-        }
-        return obscured;
-    }
-
-    // 4. displayTargetText Function
     function displayTargetText() {
-        if (!targetTextDisplay) return; // Guard clause
-        // Iterates over revealedCharacters and joins them to form the display string.
-        // Spaces are handled by the initialization of revealedCharacters.
+        if (!targetTextDisplay) return;
         targetTextDisplay.textContent = revealedCharacters.join('');
     }
 
-    // 5. Event Listener for "Start Selected Book"
     if (startBookButton) {
         startBookButton.addEventListener('click', () => {
             if (!bookSelectionDropdown || !targetTextDisplay || !unlockedTextDisplay || !currentDecodedCharDisplay) {
@@ -58,49 +36,71 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const bookText = bookSamples[selectedBookKey];
+            const bookData = bookCipherBooks[selectedBookKey];
 
-            if (!bookText) {
-                alert("Selected book not found. Please choose another.");
+            if (!bookData || !bookData.filePath) {
+                alert("Selected book definition is missing or has no file path. Please choose another.");
+                console.error("Selected book key:", selectedBookKey, "Book data:", bookData);
+                targetTextDisplay.textContent = "Error: Book details incomplete.";
                 return;
             }
 
-            currentTargetText = bookText.toUpperCase();
-            currentCharacterIndex = 0;
-            
-            // Initialize revealedCharacters
-            revealedCharacters = [];
-            for (let i = 0; i < currentTargetText.length; i++) {
-                if (currentTargetText[i] === ' ') {
-                    revealedCharacters.push(' ');
-                } else {
-                    revealedCharacters.push('_');
-                }
-            }
-            
-            displayTargetText(); // Display the initially obscured text
+            // -- FETCH LOGIC START --
+            fetch(bookData.filePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    currentTargetText = text.trim().toUpperCase(); // Trim whitespace and convert to upper case
+                    if (currentTargetText.length === 0) {
+                        console.warn(`Fetched text for ${bookData.filePath} is empty.`);
+                        targetTextDisplay.textContent = "Book is empty.";
+                        revealedCharacters = [];
+                        unlockedTextDisplay.textContent = '';
+                        currentDecodedCharDisplay.textContent = '-';
+                        currentCharacterIndex = 0;
+                        if(bookCipherMorseIO) bookCipherMorseIO.disabled = true; // Disable input if book is empty
+                        return;
+                    }
 
-            unlockedTextDisplay.textContent = ''; // Clear any previous unlocked text
-            currentDecodedCharDisplay.textContent = '-'; // Reset current decoded char display
-            
-            console.log(`Starting book: ${selectedBookKey}`);
-            console.log(`Target text: ${currentTargetText}`);
-            console.log(`Obscured view: ${revealedCharacters.join('')}`);
+                    currentCharacterIndex = 0;
+                    revealedCharacters = [];
+                    for (let i = 0; i < currentTargetText.length; i++) {
+                        if (currentTargetText[i] === ' ') {
+                            revealedCharacters.push(' ');
+                        } else {
+                            revealedCharacters.push('_');
+                        }
+                    }
+                    displayTargetText(); // Display the initially obscured text
+
+                    unlockedTextDisplay.textContent = ''; // Clear any previous unlocked text
+                    currentDecodedCharDisplay.textContent = '-'; // Reset current decoded char display
+                    if(bookCipherMorseIO) bookCipherMorseIO.disabled = false; // Enable Morse input area
+
+                    console.log(`Successfully loaded book: ${selectedBookKey} from ${bookData.filePath}`);
+                    console.log(`Target text set to: ${currentTargetText}`);
+                })
+                .catch(error => {
+                    console.error('Error fetching book content:', error);
+                    targetTextDisplay.textContent = `Error: Could not load '${bookData.title}'. File not found or unreadable.`;
+                    currentTargetText = '';
+                    revealedCharacters = [];
+                    unlockedTextDisplay.textContent = '';
+                    currentDecodedCharDisplay.textContent = '-';
+                    if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
+                });
+            // -- FETCH LOGIC END --
         });
     } else {
         console.error("Start button not found for book cipher.");
     }
 
-    // --- Placeholder for future functions related to Morse input and character checking ---
-    // function handleMorseInput(morseSignal) { ... }
-    // function checkCharacter(char) { ... }
-    // function revealCharacter() { ... }
-    // function advanceTarget() { ... }
-
-
-    // Modified handleMorseProcessing to accept morseString
     function handleMorseProcessing(morseString) { 
-        if (!currentDecodedCharDisplay || !unlockedTextDisplay || !targetTextDisplay) { // Removed bookCipherMorseIO from check
+        if (!currentDecodedCharDisplay || !unlockedTextDisplay || !targetTextDisplay) {
             console.error("One or more required display elements are not found for Morse processing.");
             return;
         }
@@ -110,22 +110,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Use the provided morseString argument
-        if (!morseString || morseString.trim() === '') {
-            // If the tapper sends an empty string (e.g. from space button without prior Morse),
-            // it might be a signal for a space, or just an empty input.
-            // For now, we won't process it as a character. If space handling is needed from empty morse,
-            // it would need specific logic here or a different event detail from the tapper.
-            // The current tapper logic sends morseStringForEvent, which could be empty.
-            // If it's an explicit space from the tapper, it might mean "end of word" or "add space".
-            // The current auto-space reveal in this function already handles spaces in target text.
-            // So, an empty morseString here likely means "no character to decode".
-            console.log("handleMorseProcessing called with empty morseString.");
-            currentDecodedCharDisplay.textContent = '-'; // Reset if nothing to decode
+        if (currentTargetText === '') { // Don't process if no book is loaded or book is empty
+            console.log("Morse processing ignored: No target text loaded.");
+            currentDecodedCharDisplay.textContent = '-';
             return;
         }
 
-        let decodedString = morseToText(morseString.trim()); // Use the argument
+        if (!morseString || morseString.trim() === '') {
+            console.log("handleMorseProcessing called with empty morseString.");
+            currentDecodedCharDisplay.textContent = '-';
+            return;
+        }
+
+        let decodedString = morseToText(morseString.trim());
 
         if (decodedString && decodedString.length > 0) {
             let lastChar = decodedString.charAt(decodedString.length - 1).toUpperCase();
@@ -135,21 +132,22 @@ document.addEventListener('DOMContentLoaded', () => {
             while (currentCharacterIndex < currentTargetText.length && currentTargetText[currentCharacterIndex] === ' ') {
                 if (revealedCharacters[currentCharacterIndex] !== ' ') {
                     revealedCharacters[currentCharacterIndex] = ' ';
-                    unlockedTextDisplay.textContent += ' ';
+                    unlockedTextDisplay.textContent += ' '; // Add space to unlocked text as well
                 }
                 currentCharacterIndex++;
             }
-            displayTargetText();
+            // displayTargetText(); // displayTargetText called below if char matches or not.
 
-            if (currentTargetText === '' || currentCharacterIndex >= currentTargetText.length) {
-                if (currentTargetText !== '' && currentCharacterIndex >= currentTargetText.length && !revealedCharacters.includes('_')) {
+            if (currentCharacterIndex >= currentTargetText.length) {
+                if (!revealedCharacters.includes('_')) {
                     alert("Congratulations! You've completed the text!");
-                    bookCipherMorseIO.disabled = true;
+                    if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
                     currentDecodedCharDisplay.textContent = '✓';
                 } else {
+                    // This case should ideally not be reached if logic is correct
                     currentDecodedCharDisplay.textContent = '-';
                 }
-                // DO NOT clear bookCipherMorseIO.value here
+                displayTargetText();
                 return;
             }
 
@@ -157,10 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (lastChar === expectedChar) {
                 revealedCharacters[currentCharacterIndex] = expectedChar;
-                displayTargetText();
                 unlockedTextDisplay.textContent += expectedChar;
                 currentCharacterIndex++;
 
+                // Auto-reveal subsequent spaces after a correct character
                 while (currentCharacterIndex < currentTargetText.length && currentTargetText[currentCharacterIndex] === ' ') {
                     if (revealedCharacters[currentCharacterIndex] !== ' ') {
                         revealedCharacters[currentCharacterIndex] = ' ';
@@ -168,76 +166,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     currentCharacterIndex++;
                 }
-                displayTargetText();
 
-                if (currentCharacterIndex === currentTargetText.length && !revealedCharacters.includes('_')) {
+                if (currentCharacterIndex >= currentTargetText.length && !revealedCharacters.includes('_')) {
                     alert("Congratulations! You've completed the text!");
-                    bookCipherMorseIO.disabled = true;
+                    if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
                     currentDecodedCharDisplay.textContent = '✓';
                 }
             } else {
                 // Incorrect guess
                 const originalColor = currentDecodedCharDisplay.style.backgroundColor;
-                currentDecodedCharDisplay.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+                currentDecodedCharDisplay.style.backgroundColor = 'rgba(255, 0, 0, 0.5)'; // Red flash
                 setTimeout(() => {
                     currentDecodedCharDisplay.style.backgroundColor = originalColor || '';
                 }, 300);
-                // Note: We don't clear currentDecodedCharDisplay.textContent here to show the wrong char.
             }
+            displayTargetText(); // Update display after guess processing
         } else {
-            // Invalid/incomplete Morse, but input was present.
-            // Optionally provide feedback or just leave currentDecodedCharDisplay as is (showing last valid char or '-')
-            // For now, if morseInput was not empty but decodedString is, it implies invalid morse.
-            // Flash the input box or the currentDecodedCharDisplay?
+            // Invalid/incomplete Morse
              const originalColor = currentDecodedCharDisplay.style.backgroundColor;
-             currentDecodedCharDisplay.style.backgroundColor = 'rgba(255, 165, 0, 0.5)'; // Orange for invalid
+             currentDecodedCharDisplay.style.backgroundColor = 'rgba(255, 165, 0, 0.5)'; // Orange flash
              setTimeout(() => {
                  currentDecodedCharDisplay.style.backgroundColor = originalColor || '';
-                 currentDecodedCharDisplay.textContent = '-'; // Reset after invalid Morse
+                 currentDecodedCharDisplay.textContent = '-';
              }, 300);
         }
-        // DO NOT clear bookCipherMorseIO.value here
     }
 
-    // Event listener for the visual tapper's output
     document.addEventListener('visualTapperCharacterComplete', (event) => {
         if (event.detail && typeof event.detail.morseString === 'string') {
             const morseFromTapper = event.detail.morseString;
-            console.log('BookCipher: Received visualTapperCharacterComplete with Morse:', morseFromTapper);
-            if (morseFromTapper) { // Process only if not empty
-                handleMorseProcessing(morseFromTapper);
-            } else {
-                // If tapper sends empty string (e.g. space button with no prior Morse)
-                // current logic in handleMorseProcessing will show '-'
-                // Specific handling for "word space" signal could be added if needed.
-                // For now, an empty morse string effectively resets currentDecodedCharDisplay to '-'
-                // via handleMorseProcessing's initial check.
-                handleMorseProcessing(morseFromTapper); // Call to potentially reset display
-            }
+            // console.log('BookCipher: Received visualTapperCharacterComplete with Morse:', morseFromTapper);
+            handleMorseProcessing(morseFromTapper);
         } else {
-            console.warn('BookCipher: Received visualTapperCharacterComplete event without morseString in detail.');
+            // console.warn('BookCipher: Received visualTapperCharacterComplete event without morseString in detail.');
         }
     });
 
+    // Initial state for Morse IO: disabled until a book is successfully loaded
+    if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
 
-    // Original bookCipherMorseIO related logic (now mostly unused for input)
-    // We keep the reference if other parts of the UI might interact with it,
-    // but the core input is from the visual tapper.
-    if (bookCipherMorseIO) {
-        // Enable bookCipherMorseIO visually (though it's not primary input) 
-        // and reset displays when a book is started.
-        if (startBookButton) {
-            startBookButton.addEventListener('click', () => {
-                if (bookSelectionDropdown.value && bookSelectionDropdown.value !== "Choose a book") {
-                    if(bookCipherMorseIO) bookCipherMorseIO.disabled = false; // Keep it enabled if it exists
-                    // No need to clear its value as it's not the input source for processing
-                    currentDecodedCharDisplay.textContent = '-';
-                    // No characterTimer to clear
-                }
-            });
-        }
-
-    } else {
-        console.error("Book Cipher Morse I/O element not found.");
-    }
 });
