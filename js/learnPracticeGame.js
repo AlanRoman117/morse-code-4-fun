@@ -3,8 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const newChallengeButton = document.getElementById('newChallengeButton');
     const practiceMessage = document.getElementById('practiceMessage');
     const tapperDecodedOutput = document.getElementById('tapperDecodedOutput');
+    const clearTapperInputButton = document.getElementById('clearTapperInputButton');
 
-    if (!practiceText || !newChallengeButton || !practiceMessage || !tapperDecodedOutput) {
+    if (!practiceText || !newChallengeButton || !practiceMessage || !tapperDecodedOutput || !clearTapperInputButton) {
         console.error("Learn & Practice Game Error: One or more essential UI elements not found. Game will not initialize.");
         return;
     }
@@ -74,6 +75,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     newChallengeButton.addEventListener('click', startNewChallenge);
+
+    if (clearTapperInputButton) {
+        clearTapperInputButton.addEventListener('click', () => {
+            tapperDecodedOutput.textContent = '';
+            if (typeof resetVisualTapperState === 'function') {
+                resetVisualTapperState();
+            } else {
+                console.warn("learnPracticeGame: resetVisualTapperState function not found. Cannot reset tapper state.");
+            }
+            currentTappedString = '';
+            practiceMessage.textContent = '';
+            // practiceText (challenge word) remains untouched.
+            console.log("Tapper input cleared by user.");
+        });
+    }
 
     document.addEventListener('visualTapperCharacterComplete', (event) => {
         if (!currentChallengeWord) return; // Ignore taps if no challenge is active
