@@ -111,6 +111,11 @@
             /* Using Tailwind in HTML for most styling */
             /* Example: width: 70px; height: 70px; border-radius: 50%; */
         }
+        .table-highlight {
+            background-color: #f6e05e; /* Tailwind yellow-300 or a similar vibrant color */
+            color: #1a202c; /* Tailwind gray-900 or a dark color for contrast */
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -716,29 +721,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- UI Initialization ---
         function populateMorseReference() {
-            const characters = Object.keys(morseCode);
-            let rowContent = '';
-            for (let i = 0; i < characters.length; i++) {
-                if (i % 4 === 0) { // Start new row
-                    if (i > 0) rowContent += '</tr>';
-                    rowContent += '<tr>';
-                }
-                const char = characters[i];
-                // Handle space explicitly for display if needed, though it's usually implied by '/'
-                const displayChar = char === ' ' ? 'Space' : char;
-                rowContent += `<td>${displayChar}</td><td>${morseCode[char]}</td>`;
+    const characters = Object.keys(morseCode);
+    let rowContent = '';
+    for (let i = 0; i < characters.length; i++) {
+        if (i % 4 === 0) { // Start new row
+            if (i > 0) rowContent += '</tr>';
+            rowContent += '<tr>';
+        }
+        const char = characters[i];
+        const displayChar = char === ' ' ? 'Space' : char;
 
-                if (i === characters.length - 1) { // Ensure last row is closed
-                    // If the last row doesn't have 4 items, add empty cells
-                    while ((i + 1) % 4 !== 0) {
-                        rowContent += '<td></td><td></td>';
-                        i++;
-                    }
-                    rowContent += '</tr>';
+        let idChar = char; // Default to using the char itself for ID
+        // Mapping for characters that are problematic in IDs or need a specific name
+        if (char === '.') idChar = 'Period';
+        else if (char === ',') idChar = 'Comma';
+        else if (char === '?') idChar = 'QuestionMark';
+        else if (char === "'") idChar = 'Apostrophe';
+        else if (char === '!') idChar = 'ExclamationMark';
+        else if (char === '/') idChar = 'Slash';
+        else if (char === '(') idChar = 'ParenthesisOpen';
+        else if (char === ')') idChar = 'ParenthesisClose';
+        else if (char === '&') idChar = 'Ampersand';
+        else if (char === ':') idChar = 'Colon';
+        else if (char === ';') idChar = 'Semicolon';
+        else if (char === '=') idChar = 'Equals';
+        else if (char === '+') idChar = 'Plus';
+        else if (char === '-') idChar = 'Hyphen';
+        else if (char === '_') idChar = 'Underscore';
+        else if (char === '"') idChar = 'Quote';
+        else if (char === '$') idChar = 'Dollar';
+        else if (char === '@') idChar = 'AtSign';
+        else if (char === ' ') idChar = 'Space';
+        // Alphanumeric characters (A-Z, 0-9) will use their own value for idChar.
+
+        rowContent += `<td id="ref-char-${idChar}">${displayChar}</td><td id="ref-morse-${idChar}">${morseCode[char]}</td>`;
+
+        if (i === characters.length - 1) { // Ensure last row is closed correctly
+            let cellsInLastRow = (i % 4) + 1; // Number of items processed for the current row
+            if (cellsInLastRow < 4) {
+                for (let j = cellsInLastRow; j < 4; j++) {
+                    rowContent += '<td></td><td></td>'; // Add empty pairs for missing items
                 }
             }
-            morseReferenceBody.innerHTML = rowContent;
+            rowContent += '</tr>'; // Close the last row
         }
+    }
+    morseReferenceBody.innerHTML = rowContent;
+}
 
 
         function applySavedTheme() {

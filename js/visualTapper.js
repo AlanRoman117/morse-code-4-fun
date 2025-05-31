@@ -58,9 +58,58 @@ document.addEventListener('DOMContentLoaded', () => {
     // let soundInitialized = false; // Not directly used in the provided tapper logic snippet, Tone.js handles its own initialization on first user gesture.
 
     // Dummy/Placeholder functions (if these were meant to be more complex, they'd need full implementation)
-    function updateTableHighlight(morseString) { 
-        // console.log('Tapper: updateTableHighlight called with', morseString); 
+    // This function replaces the existing placeholder for updateTableHighlight
+function updateTableHighlight(morseString) {
+    // First, clear any previously highlighted cells
+    const highlightedCells = document.querySelectorAll('.table-highlight');
+    highlightedCells.forEach(cell => {
+        cell.classList.remove('table-highlight');
+    });
+
+    if (morseString && typeof reversedMorseCode !== 'undefined' && reversedMorseCode[morseString]) {
+        const char = reversedMorseCode[morseString];
+
+        let idChar = char; // Default to using the char itself for ID
+        // Mirror the sanitization logic from populateMorseReference
+        if (char === '.') idChar = 'Period';
+        else if (char === ',') idChar = 'Comma';
+        else if (char === '?') idChar = 'QuestionMark';
+        else if (char === "'") idChar = 'Apostrophe';
+        else if (char === '!') idChar = 'ExclamationMark';
+        else if (char === '/') idChar = 'Slash';
+        else if (char === '(') idChar = 'ParenthesisOpen';
+        else if (char === ')') idChar = 'ParenthesisClose';
+        else if (char === '&') idChar = 'Ampersand';
+        else if (char === ':') idChar = 'Colon';
+        else if (char === ';') idChar = 'Semicolon';
+        else if (char === '=') idChar = 'Equals';
+        else if (char === '+') idChar = 'Plus';
+        else if (char === '-') idChar = 'Hyphen';
+        else if (char === '_') idChar = 'Underscore';
+        else if (char === '"') idChar = 'Quote';
+        else if (char === '$') idChar = 'Dollar';
+        else if (char === '@') idChar = 'AtSign';
+        else if (char === ' ') idChar = 'Space';
+        // Alphanumeric characters (A-Z, 0-9) will use their own value for idChar.
+
+        const charCellId = `ref-char-${idChar}`;
+        const morseCellId = `ref-morse-${idChar}`;
+
+        const charCell = document.getElementById(charCellId);
+        const morseCell = document.getElementById(morseCellId);
+
+        if (charCell) {
+            charCell.classList.add('table-highlight');
+        } else {
+            // console.warn(`Highlight: Character cell not found with ID: ${charCellId}`);
+        }
+        if (morseCell) {
+            morseCell.classList.add('table-highlight');
+        } else {
+            // console.warn(`Highlight: Morse cell not found with ID: ${morseCellId}`);
+        }
     }
+}
     function checkPractice() { 
         // console.log('Tapper: checkPractice called'); 
     }
@@ -128,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (tapperMorseOutput) tapperMorseOutput.textContent = currentMorse;
-        updateTableHighlight(currentMorse); // Dummy call
+        updateTableHighlight(currentMorse); // Ensure this is active for highlighting
         tapStartTime = 0; // Reset for the next tap
 
         // Start the timer to detect end of a letter
@@ -204,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         currentMorse = ""; // Clear Morse buffer for the next character
         if (tapperMorseOutput) tapperMorseOutput.textContent = currentMorse; // Update display
-        updateTableHighlight(currentMorse); // Dummy call
+        updateTableHighlight(currentMorse); // Called with "" to clear highlight
         checkPractice(); // Dummy call
     }
 
@@ -263,6 +312,6 @@ function resetVisualTapperState() {
     if (tapperElement) {
         tapperElement.classList.remove('active');
     }
-    
+    updateTableHighlight(""); // Clear highlight on reset
     console.log("VisualTapper state reset.");
 }
