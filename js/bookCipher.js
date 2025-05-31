@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTargetText = '';
     let currentCharacterIndex = 0;
     let revealedCharacters = [];
+    let currentBookId = null; // Added for saving progress
 
     const bookSelectionDropdown = document.getElementById('book-selection');
     const startBookButton = document.getElementById('start-book-btn');
@@ -19,6 +20,72 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayTargetText() {
         if (!targetTextDisplay) return;
         targetTextDisplay.textContent = revealedCharacters.join('');
+    }
+
+    // Function to save progress
+    function saveProgress(bookId, isCompletedFlag = false) {
+        if (!bookId) {
+            console.error("saveProgress: bookId is missing.");
+            return;
+        }
+        if (typeof currentCharacterIndex === 'undefined' || !unlockedTextDisplay || typeof revealedCharacters === 'undefined') {
+            console.error("saveProgress: One or more global variables needed for saving are not available.");
+            return;
+        }
+
+        const progress = {
+            bookId: bookId,
+            currentCharacterIndex: currentCharacterIndex,
+            unlockedText: unlockedTextDisplay.textContent,
+            revealedCharacters: revealedCharacters,
+            isCompleted: isCompletedFlag
+        };
+
+        try {
+            localStorage.setItem(`bookCipherProgress_${bookId}`, JSON.stringify(progress));
+            // console.log(`Progress saved for ${bookId}:`, progress);
+        } catch (error) {
+            console.error(`Error saving progress for ${bookId}:`, error);
+        }
+    }
+
+    // Function to load progress
+    function loadProgress(bookId) {
+        if (!bookId) {
+            console.error("loadProgress: bookId is missing.");
+            return false;
+        }
+
+        try {
+            const savedProgressString = localStorage.getItem(`bookCipherProgress_${bookId}`);
+            if (savedProgressString) {
+                const savedProgress = JSON.parse(savedProgressString);
+
+                // Restore game state
+                currentCharacterIndex = savedProgress.currentCharacterIndex;
+                unlockedTextDisplay.textContent = savedProgress.unlockedText;
+                revealedCharacters = savedProgress.revealedCharacters;
+
+                displayTargetText(); // Update the obscured text display
+
+                if (savedProgress.isCompleted) {
+                    // Handle game completion UI
+                    currentDecodedCharDisplay.textContent = '✓';
+                    alert("This book is already completed! You can review it or choose another book.");
+                    if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
+                } else {
+                    currentDecodedCharDisplay.textContent = '-'; // Reset for ongoing game
+                    if (bookCipherMorseIO) bookCipherMorseIO.disabled = false;
+                }
+
+                // console.log(`Progress loaded for ${bookId}:`, savedProgress);
+                return true;
+            }
+            return false; // No progress found
+        } catch (error) {
+            console.error(`Error loading progress for ${bookId}:`, error);
+            return false; // Error during loading or parsing
+        }
     }
 
     if (startBookButton) {
@@ -54,35 +121,47 @@ document.addEventListener('DOMContentLoaded', () => {
                     return response.text();
                 })
                 .then(text => {
-                    currentTargetText = text.trim().toUpperCase(); // Trim whitespace and convert to upper case
+                    currentTargetText = text.trim().toUpperCase();
+                    currentBookId = selectedBookKey; // Set currentBookId once book key is known and fetch initiated
+
                     if (currentTargetText.length === 0) {
+                        // Handle empty book scenario
                         console.warn(`Fetched text for ${bookData.filePath} is empty.`);
                         targetTextDisplay.textContent = "Book is empty.";
                         revealedCharacters = [];
                         unlockedTextDisplay.textContent = '';
                         currentDecodedCharDisplay.textContent = '-';
                         currentCharacterIndex = 0;
-                        if(bookCipherMorseIO) bookCipherMorseIO.disabled = true; // Disable input if book is empty
-                        return;
+                        if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
+                        // No progress to load for an empty book.
+                        console.log(`Book is empty: ${bookData.title}`);
+                        return; // Exit early
                     }
 
-                    currentCharacterIndex = 0;
-                    revealedCharacters = [];
-                    for (let i = 0; i < currentTargetText.length; i++) {
-                        if (currentTargetText[i] === ' ') {
-                            revealedCharacters.push(' ');
-                        } else {
-                            revealedCharacters.push('_');
+                    // Attempt to load progress for non-empty book
+                    if (loadProgress(currentBookId)) {
+                        console.log(`Progress loaded for book: ${currentBookId} - ${bookData.title}`);
+                        // UI state (including Morse IO disabled/enabled) is handled by loadProgress
+                    } else {
+                        // No progress found or error loading, initialize for a fresh start
+                        console.log(`No progress found for ${currentBookId} (${bookData.title}), starting fresh.`);
+                        currentCharacterIndex = 0;
+                        revealedCharacters = [];
+                        for (let i = 0; i < currentTargetText.length; i++) {
+                            if (currentTargetText[i] === ' ') {
+                                revealedCharacters.push(' ');
+                            } else {
+                                revealedCharacters.push('_');
+                            }
                         }
+                        displayTargetText(); // Display the initially obscured text
+                        unlockedTextDisplay.textContent = ''; // Clear any previous unlocked text
+                        currentDecodedCharDisplay.textContent = '-'; // Reset current decoded char display
+                        if (bookCipherMorseIO) bookCipherMorseIO.disabled = false; // Enable Morse input for fresh start
                     }
-                    displayTargetText(); // Display the initially obscured text
 
-                    unlockedTextDisplay.textContent = ''; // Clear any previous unlocked text
-                    currentDecodedCharDisplay.textContent = '-'; // Reset current decoded char display
-                    if(bookCipherMorseIO) bookCipherMorseIO.disabled = false; // Enable Morse input area
-
-                    console.log(`Successfully loaded book: ${selectedBookKey} from ${bookData.filePath}`);
-                    console.log(`Target text set to: ${currentTargetText}`);
+                    // Unified logging for when a book (empty or not, loaded or fresh) is processed
+                    console.log(`Book ready: ${bookData.title} (Text length: ${currentTargetText.length}, Loaded from save: ${!!localStorage.getItem('bookCipherProgress_'+currentBookId) && revealedCharacters.length > 0 })`);
                 })
                 .catch(error => {
                     console.error('Error fetching book content:', error);
@@ -92,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     unlockedTextDisplay.textContent = '';
                     currentDecodedCharDisplay.textContent = '-';
                     if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
+                    currentBookId = selectedBookKey; // Ensure currentBookId is set even on fetch error for context
                 });
             // -- FETCH LOGIC END --
         });
@@ -140,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentCharacterIndex >= currentTargetText.length) {
                 if (!revealedCharacters.includes('_')) {
+                    saveProgress(currentBookId, true); // Save progress on completion
                     alert("Congratulations! You've completed the text!");
                     if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
                     currentDecodedCharDisplay.textContent = '✓';
@@ -166,8 +247,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     currentCharacterIndex++;
                 }
+                saveProgress(currentBookId); // Save progress after correct decipher
 
                 if (currentCharacterIndex >= currentTargetText.length && !revealedCharacters.includes('_')) {
+                    saveProgress(currentBookId, true); // Save progress on completion
                     alert("Congratulations! You've completed the text!");
                     if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
                     currentDecodedCharDisplay.textContent = '✓';
