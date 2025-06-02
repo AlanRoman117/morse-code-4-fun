@@ -19,6 +19,11 @@ function updateVisualTapperUnitTime(newUnitTime) {
   console.log("Visual Tapper UNIT_TIME_MS updated to:", UNIT_TIME_MS, "Derived DOT_THRESHOLD_MS:", DOT_THRESHOLD_MS, "LETTER_SPACE_SILENCE_MS:", LETTER_SPACE_SILENCE_MS);
 }
 
+// Add this new getter function
+function getVisualTapperUnitTime() {
+  return UNIT_TIME_MS;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- Visual Tapper JavaScript ---
     const tapper = document.getElementById('tapper');

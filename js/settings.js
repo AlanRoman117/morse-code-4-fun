@@ -24,13 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initialize the UI with the current UNIT_TIME_MS from visualTapper.js
-    // This relies on UNIT_TIME_MS being a global variable (e.g., window.UNIT_TIME_MS or declared with var/let at top scope of visualTapper.js)
+    // This relies on getVisualTapperUnitTime being a global function from visualTapper.js
     // and visualTapper.js having executed its localStorage load logic.
-    if (typeof UNIT_TIME_MS !== 'undefined') {
-        updateSettingsUI(UNIT_TIME_MS);
+    if (typeof getVisualTapperUnitTime === 'function') {
+        updateSettingsUI(getVisualTapperUnitTime());
     } else {
-        console.error("UNIT_TIME_MS is not defined globally. Cannot initialize settings UI. Ensure visualTapper.js is loaded first and defines UNIT_TIME_MS globally.");
-        // Fallback to a default value for the UI if UNIT_TIME_MS is somehow not available
+        console.error("getVisualTapperUnitTime is not defined globally. Cannot initialize settings UI. Ensure visualTapper.js is loaded first. Falling back to default.");
+        // Fallback to a default value for the UI if getVisualTapperUnitTime is somehow not available
         // This helps prevent a broken UI state, though underlying functionality might be impaired.
         updateSettingsUI(150); // Default visual
     }
@@ -59,9 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedbackEl.className = 'text-sm ml-2 feedback-message text-red-500';
                 setTimeout(() => { feedbackEl.textContent = ''; }, 3000);
             }
-            // Revert to the last known good value if UNIT_TIME_MS is available and reliable
-            if (typeof UNIT_TIME_MS !== 'undefined') {
-                unitTimeInput.value = UNIT_TIME_MS;
+            // Revert to the last known good value if getVisualTapperUnitTime is available and reliable
+            if (typeof getVisualTapperUnitTime === 'function') {
+                unitTimeInput.value = getVisualTapperUnitTime();
             }
             return; // Don't proceed with saving or updating if invalid
         }
