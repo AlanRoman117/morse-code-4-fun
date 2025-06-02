@@ -206,6 +206,13 @@
         .light-theme-container .feedback-message.text-yellow-500 {
             color: #d97706; /* Tailwind amber-600 for better contrast on light bg */
         }
+
+    /* Styling for selected friend in Morse Pals list */
+    .selected-friend {
+        background-color: #4A5568; /* Tailwind gray-600, a bit darker than hover to show selection */
+        font-weight: bold; /* Make text bold */
+        border-left: 4px solid #4299e1; /* Tailwind blue-500, for a distinct indicator */
+    }
     </style>
 </head>
 <body>
@@ -1011,5 +1018,6 @@ document.addEventListener('DOMContentLoaded', () => {
     <script src="js/visualTapper.js" defer></script>
     <script src="js/settings.js" defer></script> 
     <script src="js/bookCipher.js" defer></script> 
+    <script src="js/morsePals.js" defer></script>
 </body>
 </html>
