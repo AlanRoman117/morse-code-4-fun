@@ -403,8 +403,41 @@
             </div>
         </div>
         <div id="global-beacon-tab" class="tab-content hidden">
-            <!-- Placeholder for Global Beacon content -->
-            <p class="text-center text-xl p-8">Global Beacon Content Coming Soon!</p>
+            <div class="app-container">
+                <!-- Optional Header/Info Area -->
+                <div class="flex justify-between text-sm text-gray-400 mb-4">
+                    <div>Your Callsign: <span id="user-callsign-gb">NOCALL</span></div>
+                    <div>Listeners Online: <span id="listeners-online-gb">1 (You)</span></div>
+                </div>
+
+                <!-- Public Chat Feed Area -->
+                <div id="global-chat-feed" class="chat-feed bg-gray-700 p-4 rounded-md h-64 overflow-y-auto mb-4">
+                    <!-- Placeholder Messages -->
+                    <div class="message mb-2 p-2 bg-gray-800 rounded-md">
+                        <p><span class="font-semibold text-blue-400">USERXYZ:</span> HELLO WORLD</p>
+                        <p class="text-gray-500 text-xs">(.... . .-.. .-.. --- / .-- --- .-. .-.. -..)</p>
+                        <span class="text-xs text-gray-500 ml-2">10:00 AM</span>
+                    </div>
+                    <div class="message mb-2 p-2 bg-gray-800 rounded-md">
+                        <p><span class="font-semibold text-green-400">CQ_MASTER:</span> CQ CQ CQ DE CQ_MASTER K</p>
+                        <p class="text-gray-500 text-xs">(-.-. --.- / -.-. --.- / -.-. --.- / -.. . / -.-. --.- ..__ -- .- ... - . .-. / -.-)</p>
+                        <span class="text-xs text-gray-500 ml-2">10:01 AM</span>
+                    </div>
+                    <div class="message mb-2 p-2 bg-gray-800 rounded-md">
+                        <p><span class="font-semibold text-purple-400">BEACON_BOT:</span> WELCOME TO THE GLOBAL BEACON. PLEASE BE RESPECTFUL.</p>
+                        <p class="text-gray-500 text-xs">(.-- . .-.. -.-. --- -- . / - --- / - .... . / --. .-.. --- -... .- .-.. / -... . .- -.-. --- -. .-.-.- / .--. .-.. . .- ... . / -... . / .-. . ... .--. . -.-. - ..-. ..- .-.. .-.-.-)</p>
+                        <span class="text-xs text-gray-500 ml-2">10:02 AM</span>
+                    </div>
+                </div>
+
+                <!-- Message Input Area -->
+                <div>
+                    <div id="globalBeaconTapperArea" class="p-4 bg-gray-800 rounded-md my-4 min-h-[180px] flex justify-center items-center">
+                        <p class="text-gray-500">Tapper will appear here.</p>
+                    </div>
+                    <button id="transmit-global-beacon-btn" class="w-full mt-2 p-3 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-green-500">Broadcast Message</button>
+                </div>
+            </div>
         </div>
         <div id="settings-tab" class="tab-content hidden">
             <div class="app-container">
@@ -719,6 +752,8 @@ function showTab(tabIdToShow) {
         attachTapperToArea('learnPracticeTapperArea');
     } else if (tabIdToShow === 'morse-pals-tab') {
         attachTapperToArea('morsePalsTapperArea');
+    } else if (tabIdToShow === 'global-beacon-tab') {
+        attachTapperToArea('globalBeaconTapperArea');
     }
     // No 'else' here, so if it's another tab, tapper remains detached (which is correct)
 }
