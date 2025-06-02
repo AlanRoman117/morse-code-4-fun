@@ -353,8 +353,47 @@
             </div>
         </div>
         <div id="morse-pals-tab" class="tab-content hidden">
-            <!-- Placeholder for Morse Pals content -->
-            <p class="text-center text-xl p-8">Morse Pals Content Coming Soon!</p>
+            <div class="app-container flex flex-col md:flex-row gap-4">
+                <!-- Friend List Area (Left Column) -->
+                <div class="md:w-1/3 lg:w-1/4 bg-gray-700 p-4 rounded-lg">
+                    <input type="text" placeholder="Search Friends..." class="w-full p-2 border border-gray-600 bg-gray-800 text-gray-300 rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button class="w-full p-2 mb-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-blue-500">Add Friend</button>
+                    <ul class="space-y-2">
+                        <li class="p-2 bg-gray-600 hover:bg-gray-500 rounded-md cursor-pointer text-gray-200">Friend Alpha</li>
+                        <li class="p-2 bg-gray-600 hover:bg-gray-500 rounded-md cursor-pointer text-gray-200">Buddy Bravo</li>
+                        <li class="p-2 bg-gray-600 hover:bg-gray-500 rounded-md cursor-pointer text-gray-200">Companion Charlie</li>
+                    </ul>
+                </div>
+
+                <!-- Chat Area (Right Column) -->
+                <div class="md:w-2/3 lg:w-3/4 bg-gray-700 p-4 rounded-lg flex flex-col h-[calc(100vh-250px)]">
+                    <!-- Messages Display -->
+                    <div class="flex-grow overflow-y-auto mb-4 space-y-3">
+                        <p class="text-gray-400 text-center">Select a friend to view messages.</p>
+                        <!-- Example Received Message -->
+                        <div class="flex justify-start">
+                            <div class="bg-gray-600 text-white p-3 rounded-lg max-w-xs lg:max-w-md">
+                                <p class="text-sm">Friend Alpha: Placeholder message content here, something that might be a bit longer to see how it wraps.</p>
+                                <span class="text-xs text-gray-400 block text-right mt-1">10:00 AM</span>
+                            </div>
+                        </div>
+                        <!-- Example Sent Message -->
+                        <div class="flex justify-end">
+                            <div class="bg-blue-500 text-white p-3 rounded-lg max-w-xs lg:max-w-md">
+                                <p class="text-sm">You: This is a placeholder for a message you sent. It's aligned to the right and has a different background.</p>
+                                <span class="text-xs text-blue-200 block text-right mt-1">10:01 AM</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Composition Area -->
+                    <div id="morsePalsTapperArea" class="p-4 bg-gray-800 rounded-md my-4 min-h-[180px] flex justify-center items-center">
+                        <!-- Shared tapper component will be attached here by JavaScript -->
+                        <p class="text-gray-500">Tapper will appear here.</p> 
+                    </div>
+                    <button class="w-full mt-2 p-3 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-green-500">Send Message</button>
+                </div>
+            </div>
         </div>
         <div id="global-beacon-tab" class="tab-content hidden">
             <!-- Placeholder for Global Beacon content -->
@@ -671,6 +710,8 @@ function showTab(tabIdToShow) {
         attachTapperToArea('bookCipherTapperArea');
     } else if (tabIdToShow === 'learn-practice-tab') {
         attachTapperToArea('learnPracticeTapperArea');
+    } else if (tabIdToShow === 'morse-pals-tab') {
+        attachTapperToArea('morsePalsTapperArea');
     }
     // No 'else' here, so if it's another tab, tapper remains detached (which is correct)
 }
