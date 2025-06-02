@@ -1,3 +1,52 @@
+// Moved updateTableHighlight to global scope so it can be called by other scripts like visualTapper.js
+function updateTableHighlight(morseString) {
+    // First, clear any previously highlighted cells
+    const highlightedCells = document.querySelectorAll('.table-highlight');
+    highlightedCells.forEach(cell => {
+        cell.classList.remove('table-highlight');
+    });
+
+    // Ensure reversedMorseCode is available (it's defined in index.html's script block)
+    if (typeof reversedMorseCode !== 'undefined' && morseString && reversedMorseCode[morseString]) {
+        const char = reversedMorseCode[morseString];
+
+        let idChar = char; // Default to using the char itself for ID
+        // Mirror the sanitization logic from populateMorseReference in index.html
+        if (char === '.') idChar = 'Period';
+        else if (char === ',') idChar = 'Comma';
+        else if (char === '?') idChar = 'QuestionMark';
+        else if (char === "'") idChar = 'Apostrophe';
+        else if (char === '!') idChar = 'ExclamationMark';
+        else if (char === '/') idChar = 'Slash';
+        else if (char === '(') idChar = 'ParenthesisOpen';
+        else if (char === ')') idChar = 'ParenthesisClose';
+        else if (char === '&') idChar = 'Ampersand';
+        else if (char === ':') idChar = 'Colon';
+        else if (char === ';') idChar = 'Semicolon';
+        else if (char === '=') idChar = 'Equals';
+        else if (char === '+') idChar = 'Plus';
+        else if (char === '-') idChar = 'Hyphen';
+        else if (char === '_') idChar = 'Underscore';
+        else if (char === '"') idChar = 'Quote';
+        else if (char === '$') idChar = 'Dollar';
+        else if (char === '@') idChar = 'AtSign';
+        else if (char === ' ') idChar = 'Space';
+
+        const charCellId = `ref-char-${idChar}`;
+        const morseCellId = `ref-morse-${idChar}`;
+
+        const charCell = document.getElementById(charCellId);
+        const morseCell = document.getElementById(morseCellId);
+
+        if (charCell) {
+            charCell.classList.add('table-highlight');
+        }
+        if (morseCell) {
+            morseCell.classList.add('table-highlight');
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const practiceText = document.getElementById('practiceText');
     const newChallengeButton = document.getElementById('newChallengeButton');
@@ -127,4 +176,5 @@ document.addEventListener('DOMContentLoaded', () => {
             playTappedMorseBtn.disabled = true;
         }
     }
+    // updateTableHighlight was moved to global scope
 });

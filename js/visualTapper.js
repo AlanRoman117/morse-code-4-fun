@@ -63,54 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // let soundInitialized = false; // Not directly used in the provided tapper logic snippet, Tone.js handles its own initialization on first user gesture.
 
     // Dummy/Placeholder functions (if these were meant to be more complex, they'd need full implementation)
-    // This function replaces the existing placeholder for updateTableHighlight
-function updateTableHighlight(morseString) {
-    // First, clear any previously highlighted cells
-    const highlightedCells = document.querySelectorAll('.table-highlight');
-    highlightedCells.forEach(cell => {
-        cell.classList.remove('table-highlight');
-    });
-
-    if (morseString && typeof reversedMorseCode !== 'undefined' && reversedMorseCode[morseString]) {
-        const char = reversedMorseCode[morseString];
-
-        let idChar = char; // Default to using the char itself for ID
-        // Mirror the sanitization logic from populateMorseReference
-        if (char === '.') idChar = 'Period';
-        else if (char === ',') idChar = 'Comma';
-        else if (char === '?') idChar = 'QuestionMark';
-        else if (char === "'") idChar = 'Apostrophe';
-        else if (char === '!') idChar = 'ExclamationMark';
-        else if (char === '/') idChar = 'Slash';
-        else if (char === '(') idChar = 'ParenthesisOpen';
-        else if (char === ')') idChar = 'ParenthesisClose';
-        else if (char === '&') idChar = 'Ampersand';
-        else if (char === ':') idChar = 'Colon';
-        else if (char === ';') idChar = 'Semicolon';
-        else if (char === '=') idChar = 'Equals';
-        else if (char === '+') idChar = 'Plus';
-        else if (char === '-') idChar = 'Hyphen';
-        else if (char === '_') idChar = 'Underscore';
-        else if (char === '"') idChar = 'Quote';
-        else if (char === '$') idChar = 'Dollar';
-        else if (char === '@') idChar = 'AtSign';
-        else if (char === ' ') idChar = 'Space';
-        // Alphanumeric characters (A-Z, 0-9) will use their own value for idChar.
-
-        const charCellId = `ref-char-${idChar}`;
-        const morseCellId = `ref-morse-${idChar}`;
-
-        const charCell = document.getElementById(charCellId);
-        const morseCell = document.getElementById(morseCellId);
-
-        if (charCell) {
-            charCell.classList.add('table-highlight');
-        }
-        if (morseCell) {
-            morseCell.classList.add('table-highlight');
-        }
-    }
-}
+    // updateTableHighlight is now defined globally in learnPracticeGame.js
+    // Ensure reversedMorseCode (from index.html) and morseCode (from index.html) are available for morseToChar mapping.
     function checkPractice() { 
         // console.log('Tapper: checkPractice called'); 
     }
@@ -178,7 +132,7 @@ function updateTableHighlight(morseString) {
         }
         
         if (tapperMorseOutput) tapperMorseOutput.textContent = currentMorse;
-        updateTableHighlight(currentMorse); // Ensure this is active for highlighting
+        if (typeof window.updateTableHighlight === "function") window.updateTableHighlight(currentMorse); // Ensure this is active for highlighting
         tapStartTime = 0; // Reset for the next tap
 
         // Start the timer to detect end of a letter
@@ -254,7 +208,7 @@ function updateTableHighlight(morseString) {
         
         currentMorse = ""; // Clear Morse buffer for the next character
         if (tapperMorseOutput) tapperMorseOutput.textContent = currentMorse; // Update display
-        updateTableHighlight(currentMorse); // Called with "" to clear highlight
+        if (typeof window.updateTableHighlight === "function") window.updateTableHighlight(currentMorse); // Called with "" to clear highlight
         checkPractice(); // Dummy call
     }
 
@@ -313,6 +267,7 @@ function resetVisualTapperState() {
     if (tapperElement) {
         tapperElement.classList.remove('active');
     }
-    updateTableHighlight(""); // Clear highlight on reset
-    console.log("VisualTapper state reset.");
+    // Temporarily commenting out to isolate the "updateTableHighlight is not defined" error
+    // if (typeof window.updateTableHighlight === "function") window.updateTableHighlight(""); 
+    console.log("VisualTapper state reset. (updateTableHighlight call commented out for testing)");
 }
