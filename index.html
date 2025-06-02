@@ -717,7 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }).join('');
         }
 
-       async function playTone(duration, isLastSignal = false, toneFrequency) {
+       async function playTone(duration, toneFrequency) {
             if (stopMorseCode || !audioContext) return; // Check stop flag and audio context
 
             return new Promise(resolve => {
@@ -821,7 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (signalDuration > 0) {
-                    await playTone(signalDuration, i === signals.length - 1, currentPlaybackFrequency);
+                    await playTone(signalDuration, currentPlaybackFrequency);
                 }
 
                 // After the tone (or if it was a space character that has 0 signal duration), wait for its specific silence duration
