@@ -451,6 +451,10 @@
         let farnsworthWpm = parseInt(farnsworthSlider.value); // Farnsworth WPM
         let frequency = parseInt(freqSlider.value);
 
+        function getPlaybackFrequency() {
+          return frequency;
+        }
+
         // Timing (PARIS standard)
         // Dot is 1 unit
         // Dash is 3 units
@@ -725,9 +729,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 oscillator = audioContext.createOscillator();
                 oscillator.type = 'sine';
-                // Use the provided toneFrequency, or default to global frequency if undefined
-                const currentFrequency = typeof toneFrequency === 'number' ? toneFrequency : frequency;
-                oscillator.frequency.setValueAtTime(currentFrequency, audioContext.currentTime);
+                // Use the provided toneFrequency, falling back to getPlaybackFrequency if necessary
+                const resolvedFrequency = typeof toneFrequency === 'number' ? toneFrequency : getPlaybackFrequency();
+                oscillator.frequency.setValueAtTime(resolvedFrequency, audioContext.currentTime);
 
                 // Ramp up volume smoothly
                 gainNode.gain.setValueAtTime(0, audioContext.currentTime);
@@ -760,7 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
             playMorseBtn.disabled = true;
             if(stopMorseBtn) stopMorseBtn.disabled = false; // Enable stop button
 
-            const currentPlaybackFrequency = typeof customFreq === 'number' ? customFreq : frequency;
+            const currentPlaybackFrequency = typeof customFreq === 'number' ? customFreq : getPlaybackFrequency(); // MODIFIED
 
             let effectiveDotDuration;
             let effectiveInterCharSpace;
@@ -937,29 +941,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         return;
                     }
 
-                    // Assuming UNIT_TIME_MS is globally available (e.g., window.UNIT_TIME_MS)
-                    // This value would typically come from visualTapper.js or settings.js
+                    // Assuming UNIT_TIME_MS is globally available or getVisualTapperUnitTime() exists
                     let currentUnitTimeMs = 150; // Default if not found
-                    if (typeof UNIT_TIME_MS !== 'undefined') {
+                    if (typeof getVisualTapperUnitTime === 'function') {
+                        currentUnitTimeMs = getVisualTapperUnitTime();
+                    } else if (typeof UNIT_TIME_MS !== 'undefined') { // Fallback to global if getter undefined
                         currentUnitTimeMs = UNIT_TIME_MS;
-                    } else if (typeof window.UNIT_TIME_MS !== 'undefined') {
+                        console.warn("Using global UNIT_TIME_MS as getVisualTapperUnitTime() is not defined.");
+                    } else if (typeof window.UNIT_TIME_MS !== 'undefined') { // Further fallback
                         currentUnitTimeMs = window.UNIT_TIME_MS;
+                        console.warn("Using window.UNIT_TIME_MS as getVisualTapperUnitTime() is not defined.");
                     } else {
-                        console.warn("Global UNIT_TIME_MS not found, using default 150ms for playback. This might lead to inconsistent playback speed with tapper settings.");
+                        console.warn("Global UNIT_TIME_MS and getVisualTapperUnitTime() not found, using default 150ms for playback.");
                     }
 
                     const customDotDuration = currentUnitTimeMs / 1000.0; // Convert ms to seconds
-
-                    // The global `frequency` variable (updated by #freq-slider) will be used by playMorseSequence directly
-                    // Or, if playMorseSequence is modified to take frequency, pass it:
-                    // await playMorseSequence(morseToPlay, customDotDuration, frequency);
-                    // For now, assuming playMorseSequence will be modified to accept customDotDuration
-                    // and will continue to use the global `frequency`.
-                    // The subtask asks to call: await playMorseSequence(morseToPlay, customDotDuration, frequency);
-                    // This implies playMorseSequence will be updated to use the passed frequency as well.
-                    // stopMorseBtn.disabled = false; // Enable stop button - handled by playMorseSequence
-                    await playMorseSequence(morseToPlay, customDotDuration, frequency);
-                    // stopMorseBtn.disabled = true; // Disable stop button after completion - handled by playMorseSequence
+                    
+                    await playMorseSequence(morseToPlay, customDotDuration, getPlaybackFrequency()); // MODIFIED to use getter
                 });
             } else {
                 console.error("Could not find 'play-tapped-morse-btn' or 'tapperDecodedOutput' elements.");
