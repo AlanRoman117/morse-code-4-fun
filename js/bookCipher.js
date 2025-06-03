@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } else {
             // --- MISMATCH ---
-            if (bookCipherMessageEl) bookCipherMessageEl.textContent = 'Incorrect. Try again.';
+            if (bookCipherMessageEl) bookCipherMessageEl.textContent = 'Incorrect, try that Morse letter again.';
 
             // Negative visual feedback
             if (currentDecodedCharDisplay) {
