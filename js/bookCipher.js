@@ -144,15 +144,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     const buttonContainer = document.createElement('div');
                     buttonContainer.className = 'flex flex-col items-center space-y-3';
 
-                    const startDecipheringBtn = document.createElement('button');
-                    startDecipheringBtn.id = 'start-deciphering-btn';
-                    startDecipheringBtn.textContent = 'Start Deciphering';
-                    startDecipheringBtn.className = 'w-full max-w-xs px-6 py-3 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500';
-                    buttonContainer.appendChild(startDecipheringBtn);
+                    // Load progress to determine button display
+                    const savedProgressString = localStorage.getItem(`bookCipherProgress_${currentBookId}`);
+                    let isBookMarkedCompleted = false;
+                    if (savedProgressString) {
+                        try {
+                            const savedProgress = JSON.parse(savedProgressString);
+                            if (savedProgress.bookId === currentBookId) {
+                                isBookMarkedCompleted = savedProgress.isCompleted || false;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing progress for button display:', e);
+                        }
+                    }
 
-                    startDecipheringBtn.addEventListener('click', () => {
-                        initializeAndStartBookGame(currentBookId);
-                    });
+                    if (isBookMarkedCompleted) {
+                        const viewUnlockedTextBtn = document.createElement('button');
+                        viewUnlockedTextBtn.id = 'view-unlocked-text-btn';
+                        viewUnlockedTextBtn.textContent = 'View Unlocked Text';
+                        viewUnlockedTextBtn.className = 'w-full max-w-xs px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500';
+                        buttonContainer.appendChild(viewUnlockedTextBtn);
+                        viewUnlockedTextBtn.addEventListener('click', () => {
+                            displayUnlockedBookText(currentBookId);
+                        });
+                        // Event listener for restartDecipheringBtn will be added in a later step
+
+                        const restartDecipheringBtn = document.createElement('button');
+                        restartDecipheringBtn.id = 'restart-deciphering-btn';
+                        restartDecipheringBtn.textContent = 'Restart Deciphering';
+                        // Adjusted class to match yellow-500 and ring-yellow-400 as per plan
+                        restartDecipheringBtn.className = 'w-full max-w-xs px-6 py-3 bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-yellow-400';
+                        buttonContainer.appendChild(restartDecipheringBtn);
+                        restartDecipheringBtn.addEventListener('click', () => {
+                            restartBookDeciphering(currentBookId);
+                        });
+                    } else {
+                        const startDecipheringBtn = document.createElement('button');
+                        startDecipheringBtn.id = 'start-deciphering-btn';
+                        startDecipheringBtn.textContent = 'Start Deciphering';
+                        startDecipheringBtn.className = 'w-full max-w-xs px-6 py-3 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500';
+                        buttonContainer.appendChild(startDecipheringBtn);
+
+                        startDecipheringBtn.addEventListener('click', () => {
+                            initializeAndStartBookGame(currentBookId);
+                        });
+                    }
 
                     const backToLibraryBtn = document.createElement('button');
                     backToLibraryBtn.id = 'back-to-library-btn';
@@ -651,3 +687,138 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set the initial view to the library
     showBookLibraryView();
 });
+
+function restartBookDeciphering(bookId) {
+    if (!bookId) {
+        console.error("restartBookDeciphering: No bookId provided.");
+        alert("Cannot restart book: No book identifier specified.");
+        return;
+    }
+
+    const bookData = bookCipherBooks[bookId];
+    if (!bookData) {
+        console.error("restartBookDeciphering: Book data not found for bookId:", bookId);
+        alert("Cannot restart book: Book data not found.");
+        return;
+    }
+
+    // Confirm with the user before restarting
+    const confirmation = confirm(`Are you sure you want to restart deciphering for "${bookData.title}"? All progress for this book will be lost.`);
+    if (!confirmation) {
+        return; // User cancelled
+    }
+
+    // Clear saved progress from localStorage
+    try {
+        localStorage.removeItem(`bookCipherProgress_${bookId}`);
+        console.log(`Progress for book ${bookId} cleared from localStorage.`);
+    } catch (error) {
+        console.error(`Error removing progress for ${bookId} from localStorage:`, error);
+        alert("An error occurred while trying to clear book progress. Please try again.");
+        return; // Stop if clearing progress failed
+    }
+
+    // Reset global game state variables related to the current book.
+    if (currentBookId === bookId) {
+        currentBookMorseContent = '';
+        fullMorseSequence = [];
+        currentWordIndex = 0;
+        currentMorseLetterIndexInWord = 0;
+        currentTargetMorseLetter = '';
+        isBookCompleted = false; // Explicitly mark as not completed
+
+        // Clear UI elements if the game view for this book was active
+        // Check if elements exist before trying to modify them
+        const gameView = document.getElementById('book-game-view');
+        if (gameView && !gameView.classList.contains('hidden')) {
+            const targetTextDisplay = document.getElementById('target-text-display');
+            if (targetTextDisplay) targetTextDisplay.textContent = 'Morse code will appear here...';
+
+            const unlockedTextDisplay = document.getElementById('unlocked-text-display');
+            if (unlockedTextDisplay) unlockedTextDisplay.textContent = '-';
+
+            const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
+            if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
+
+            const bookCipherMorseIO = document.getElementById('book-cipher-morse-io');
+            if (bookCipherMorseIO) {
+                bookCipherMorseIO.value = '';
+                bookCipherMorseIO.disabled = true;
+            }
+            const bookCipherMessageEl = document.getElementById('book-cipher-message');
+            if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book progress has been reset.";
+        }
+    }
+
+    const detailsView = document.getElementById('book-details-view');
+    if (detailsView) {
+        detailsView.innerHTML = '';
+        const bookElementInLibrary = document.querySelector(`#book-library-container .book-cover-item[data-book-id='${bookId}']`);
+        if (bookElementInLibrary) {
+            bookElementInLibrary.classList.remove('book-cover-selected');
+            bookElementInLibrary.click();
+        } else {
+            showBookLibraryView();
+        }
+    } else {
+        showBookLibraryView();
+    }
+}
+
+function displayUnlockedBookText(bookId) {
+    const bookData = bookCipherBooks[bookId];
+    if (!bookData || !bookData.filePath) {
+        console.error("displayUnlockedBookText: Invalid bookId or missing filePath", bookId);
+        alert("Could not load book text. Data is missing.");
+        return;
+    }
+
+    fetch(bookData.filePath)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
+            }
+            return response.text();
+        })
+        .then(morseContent => {
+            morseContent = morseContent.trim();
+            if (morseContent.length === 0) {
+                alert("This book appears to be empty.");
+                return;
+            }
+
+            // Convert Morse to English text
+            let fullEnglishText = morseContent.split('/')
+                                      .map(morseWord => {
+                                          return morseWord.trim().split(' ')
+                                                        .map(morseChar => reversedMorseCode[morseChar] || '') // Use reversedMorseCode directly
+                                                        .join('');
+                                      }).join(' ');
+
+            const modal = document.getElementById('unlocked-text-modal');
+            const modalTitle = document.getElementById('unlocked-text-modal-title');
+            const modalContent = document.getElementById('unlocked-text-modal-content');
+            const closeModalBtn = document.getElementById('close-unlocked-text-modal-btn');
+
+            if (modal && modalTitle && modalContent && closeModalBtn) {
+                modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
+                modalContent.textContent = fullEnglishText.length > 0 ? fullEnglishText : "No text could be deciphered (book might be empty or in an unrecognized format).";
+                modal.classList.remove('hidden');
+
+                // To prevent multiple listeners, one approach:
+                if (!closeModalBtn.dataset.listenerAttached) {
+                    closeModalBtn.addEventListener('click', () => {
+                        modal.classList.add('hidden');
+                    });
+                    closeModalBtn.dataset.listenerAttached = 'true';
+                }
+            } else {
+                console.error("Modal elements not found for displaying unlocked text.");
+                alert("Error: Could not display the unlocked text. UI elements missing.");
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching or processing book content for displayUnlockedBookText:', error);
+            alert(`Error loading book text: ${error.message}`);
+        });
+}
