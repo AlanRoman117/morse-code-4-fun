@@ -15,11 +15,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const bookSelectionDropdown = document.getElementById('book-selection');
     const startBookButton = document.getElementById('start-book-btn');
+    if (startBookButton) {
+        startBookButton.disabled = true; // Disable button initially
+    }
     const targetTextDisplay = document.getElementById('target-text-display');
     const unlockedTextDisplay = document.getElementById('unlocked-text-display');
     const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
     const bookCipherMorseIO = document.getElementById('book-cipher-morse-io');
     const bookCipherMessageEl = document.getElementById('book-cipher-message'); // Added
+
+    // Function to populate the book library display
+    function populateBookLibrary() {
+        const libraryContainer = document.getElementById('book-library-container');
+        if (!libraryContainer) {
+            console.error("Book library container 'book-library-container' not found.");
+            return;
+        }
+
+        libraryContainer.innerHTML = ''; // Clear existing content
+
+        if (!bookCipherBooks || Object.keys(bookCipherBooks).length === 0) {
+            console.warn("bookCipherBooks object is empty or not defined. Cannot populate library.");
+            libraryContainer.textContent = 'No books available.'; // Display a message
+            return;
+        }
+
+        for (const bookKey in bookCipherBooks) {
+            if (bookCipherBooks.hasOwnProperty(bookKey)) {
+                const book = bookCipherBooks[bookKey];
+                const bookElement = document.createElement('div');
+                bookElement.textContent = book.title;
+                bookElement.classList.add('book-cover-item'); // Add a common class for styling
+                bookElement.setAttribute('data-book-id', bookKey); // Store book key for identification
+
+                bookElement.addEventListener('click', () => {
+                    currentBookId = bookElement.getAttribute('data-book-id');
+
+                    // Manage visual selection
+                    const allBookItems = libraryContainer.querySelectorAll('.book-cover-item');
+                    allBookItems.forEach(item => {
+                        item.classList.remove('book-cover-selected');
+                    });
+                    bookElement.classList.add('book-cover-selected');
+
+                    // Enable the start button
+                    if (startBookButton) {
+                        startBookButton.disabled = false;
+                    }
+                    if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; // Clear any "select a book" message
+                    console.log("Book selected:", currentBookId);
+                });
+
+                libraryContainer.appendChild(bookElement);
+            }
+        }
+    }
+
 
     function displayTargetText() {
         if (!targetTextDisplay) return;
@@ -95,45 +146,47 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startBookButton) {
         startBookButton.addEventListener('click', () => {
             if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; // Clear previous messages
-            startBookButton.disabled = true; // Disable button
 
-            if (!bookSelectionDropdown || !targetTextDisplay || !unlockedTextDisplay || !currentDecodedCharDisplay) {
-                console.error("A required DOM element is missing for the book cipher.");
+            if (!currentBookId) {
                 if (bookCipherMessageEl) {
-                    bookCipherMessageEl.textContent = "Error: A required UI element is missing. Please refresh the page.";
+                    bookCipherMessageEl.textContent = "Please select a book from the library to start.";
                     setTimeout(() => { if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; }, 3000);
                 } else {
-                    alert("Error: A required UI element is missing. Please refresh the page.");
+                    alert("Please select a book from the library to start.");
                 }
-                startBookButton.disabled = false; // Re-enable button
+                // Keep startBookButton disabled if no book is selected. It's likely already disabled.
+                // If it could somehow be enabled without a selection, explicitly disable it:
+                // startBookButton.disabled = true;
                 return;
             }
 
-            const selectedBookKey = bookSelectionDropdown.value;
+            startBookButton.disabled = true; // Disable button once a valid book is chosen and we proceed
 
-            if (!selectedBookKey || selectedBookKey === "Choose a book") {
+            // Check for essential display elements (excluding bookSelectionDropdown)
+            if (!targetTextDisplay || !unlockedTextDisplay || !currentDecodedCharDisplay) {
+                console.error("A required DOM element for book cipher (display areas) is missing.");
                 if (bookCipherMessageEl) {
-                    bookCipherMessageEl.textContent = "Please select a book to start.";
+                    bookCipherMessageEl.textContent = "Error: Essential display elements are missing. Please refresh.";
                     setTimeout(() => { if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; }, 3000);
                 } else {
-                    alert("Please select a book to start.");
+                    alert("Error: Essential display elements are missing. Please refresh.");
                 }
-                startBookButton.disabled = false; // Re-enable button
+                startBookButton.disabled = false; // Re-enable on error
                 return;
             }
 
-            const bookData = bookCipherBooks[selectedBookKey];
+            const bookData = bookCipherBooks[currentBookId]; // Use currentBookId
 
             if (!bookData || !bookData.filePath) {
                 if (bookCipherMessageEl) {
-                    bookCipherMessageEl.textContent = "Selected book definition is missing or has no file path. Please choose another.";
+                    bookCipherMessageEl.textContent = "Selected book data is invalid or missing a file path.";
                     setTimeout(() => { if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; }, 3000);
                 } else {
-                    alert("Selected book definition is missing or has no file path. Please choose another.");
+                    alert("Selected book data is invalid or missing a file path.");
                 }
-                console.error("Selected book key:", selectedBookKey, "Book data:", bookData);
-                targetTextDisplay.textContent = "Error: Book details incomplete."; // This could also use the messageEl
-                startBookButton.disabled = false; // Re-enable button
+                console.error("Current book ID:", currentBookId, "Book data:", bookData);
+                targetTextDisplay.textContent = "Error: Book details incomplete.";
+                startBookButton.disabled = false; // Re-enable on error
                 return;
             }
 
@@ -147,8 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .then(text => {
                     currentTargetText = text.trim().toUpperCase();
-                    currentBookId = selectedBookKey; // Set currentBookId once book key is known and fetch initiated
-                    startBookButton.disabled = false; // Re-enable button
+                    // currentBookId is already set by the book selection logic
+                    startBookButton.disabled = false; // Re-enable button after successful fetch preparations (or keep disabled until game over/reset)
 
                     if (currentTargetText.length === 0) {
                         // Handle empty book scenario
@@ -197,8 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     unlockedTextDisplay.textContent = '';
                     currentDecodedCharDisplay.textContent = '-';
                     if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
-                    currentBookId = selectedBookKey; // Ensure currentBookId is set even on fetch error for context
-                    startBookButton.disabled = false; // Re-enable button
+                        // currentBookId is already set
+                        startBookButton.disabled = false; // Re-enable button as game setup failed or finished here
                 });
             // -- FETCH LOGIC END --
         });
@@ -323,4 +376,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial state for Morse IO: disabled until a book is successfully loaded
     if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
 
+    // Populate the book library on DOMContentLoaded
+    populateBookLibrary();
 });

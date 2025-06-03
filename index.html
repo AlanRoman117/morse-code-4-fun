@@ -213,6 +213,53 @@
         font-weight: bold; /* Make text bold */
         border-left: 4px solid #4299e1; /* Tailwind blue-500, for a distinct indicator */
     }
+
+    /* Book Library Styles */
+    .book-cover-item {
+        background-color: #2D3748; /* Tailwind gray-800 */
+        padding: 0.5rem; /* p-2 */
+        border-radius: 0.375rem; /* rounded-md */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        border: 1px solid #4A5568; /* border-gray-600 */
+        color: white;
+        font-size: 0.875rem; /* text-sm */
+        font-weight: 500; /* font-medium */
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        word-break: break-word; /* Ensure text wraps */
+        height: 8rem; /* h-32 Tailwind equiv. */
+        /* width-full is implied by grid behavior */
+    }
+
+    .book-cover-item:hover {
+        background-color: #4A5568; /* Tailwind gray-600 */
+        border-color: #718096; /* Tailwind gray-500 */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+    }
+
+    .book-cover-selected {
+        background-color: #3182CE; /* Tailwind blue-600 (adjusted from #4299E1 for better match) */
+        border-color: #63B3ED; /* Tailwind blue-400 */
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
+        /* Using a border to simulate ring effect for simplicity and control */
+        border-width: 2px;
+        /* ring-2 ring-blue-300 - Tailwind's ring is often an outline/box-shadow.
+           A border is simpler here if not using @apply.
+           If you want true ring, it's box-shadow: 0 0 0 2px theme('colors.blue.300');
+           but this can conflict with existing shadow. For now, thicker border of a highlight color.
+        */
+        transform: scale(1.05); /* Optional: slight scale */
+    }
+    /* Ensure selected text remains readable if bg changes significantly */
+    .book-cover-selected {
+        color: white; /* Ensure text is white on blue background */
+    }
+
     </style>
 </head>
 <body>
@@ -315,18 +362,12 @@
                     <!-- The shared visual tapper will be inserted here by JavaScript -->
                 </div>
 
-                <!-- Book Selection Dropdown -->
+                <!-- Book Library Container -->
                 <div class="mb-4">
-                    <label for="book-selection" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label>
-                    <select id="book-selection" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        <option selected>Choose a book</option>
-                        <option value="passage_1">Sherlock Holmes Snippet</option>
-                        <option value="mystery_intro">Stormy Night Mystery</option>
-                        <option value="sci_fi_quote">Sci-Fi Classic Quote</option>
-                        <option value="empty_book">Empty Book Test</option>
-                        <option value="short_book">Short Book Test</option>
-                        <option value="long_book">Long Book Test</option>
-                    </select>
+                    <label for="book-library-container" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label>
+                    <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-72 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <!-- Book covers will be dynamically added here by JavaScript -->
+                    </div>
                 </div>
 
                 <!-- Obscured/Target Text Display -->
