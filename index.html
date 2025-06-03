@@ -783,13 +783,23 @@ const sharedVisualTapperWrapper = document.getElementById('sharedVisualTapperWra
 const hiddenTapperStorage = document.getElementById('hiddenTapperStorage');
 
 function attachTapperToArea(targetAreaId) {
+    console.log("[attachTapperToArea] Received targetAreaId:", targetAreaId); // New log
+
     const targetElement = document.getElementById(targetAreaId);
+    console.log("[attachTapperToArea] Found targetElement:", targetElement); // New log
+
     if (sharedVisualTapperWrapper && targetElement) {
+        console.log("[attachTapperToArea] sharedVisualTapperWrapper.style.display (before):", sharedVisualTapperWrapper.style.display); // New log
+        console.log("[attachTapperToArea] sharedVisualTapperWrapper.parentNode (before):", sharedVisualTapperWrapper.parentNode); // New log
+
         targetElement.appendChild(sharedVisualTapperWrapper);
         sharedVisualTapperWrapper.style.display = 'block'; // Or 'flex' if its internal layout needs it
-        console.log(`Tapper attached to ${targetAreaId}`);
+
+        console.log("[attachTapperToArea] sharedVisualTapperWrapper.style.display (after):", sharedVisualTapperWrapper.style.display); // New log
+        console.log("[attachTapperToArea] sharedVisualTapperWrapper.parentNode (after):", sharedVisualTapperWrapper.parentNode); // New log
+        console.log(`[attachTapperToArea] Tapper attached to ${targetAreaId}`); // Existing log, ensure it's still there
     } else {
-        console.error(`Failed to attach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper}) or targetElement (${targetElement} for ID ${targetAreaId}) not found.`);
+        console.error(`[attachTapperToArea] Failed to attach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper ? 'exists' : 'null/undefined'}) or targetElement (${targetElement ? 'exists' : 'null/undefined'} for ID ${targetAreaId}) not found.`); // Enhanced log
     }
 }
 
