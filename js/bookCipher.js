@@ -286,6 +286,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // displayCurrentWordInUI(); // Obsolete: Call removed
 
+                // ------------ START: Reconstruct deciphered characters in full display ------------
+                if (fullMorseSequence && fullMorseSequence.length > 0 && !isBookCompleted) {
+                    for (let wIdx = 0; wIdx <= currentWordIndex; wIdx++) {
+                        if (!fullMorseSequence[wIdx]) continue;
+
+                        const wordLen = fullMorseSequence[wIdx].length;
+                        const letterLimit = (wIdx < currentWordIndex) ? wordLen : currentMorseLetterIndexInWord;
+
+                        for (let lIdx = 0; lIdx < letterLimit; lIdx++) {
+                            const morseChar = fullMorseSequence[wIdx][lIdx];
+                            if (!morseChar) continue;
+
+                            const englishChar = morseToText(morseChar);
+                            if (englishChar) {
+                                const morseSpan = document.querySelector(
+                                    `#full-book-morse-display .morse-char-span[data-word-idx="${wIdx}"][data-letter-idx="${lIdx}"]`
+                                );
+                                if (morseSpan) {
+                                    morseSpan.textContent = englishChar;
+                                    morseSpan.classList.add('deciphered-char');
+                                } else {
+                                    console.warn(`loadProgress: Span not found for w:${wIdx}, l:${lIdx} during deciphered character reconstruction.`);
+                                }
+                            }
+                        }
+                    }
+                }
+                // ------------ END: Reconstruct deciphered characters in full display ------------
+
                 if (isBookCompleted) {
                     if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book Complete!";
                     if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '✓';
@@ -575,6 +604,20 @@ document.addEventListener('DOMContentLoaded', () => {
             //    console.warn(`No English equivalent found for successfully matched Morse: ${currentTargetMorseLetter}`);
             // }
 
+            // ------------ START: Mark character as deciphered in full display ------------
+            const englishChar = morseToText(currentTargetMorseLetter);
+            if (englishChar) {
+                const targetSpan = document.querySelector(
+                    `#full-book-morse-display .morse-char-span[data-word-idx="${currentWordIndex}"][data-letter-idx="${currentMorseLetterIndexInWord}"]`
+                );
+                if (targetSpan) {
+                    targetSpan.textContent = englishChar;
+                    targetSpan.classList.add('deciphered-char');
+                } else {
+                    console.warn(`Could not find span to mark as deciphered for word ${currentWordIndex}, letter ${currentMorseLetterIndexInWord}`);
+                }
+            }
+            // ------------ END: Mark character as deciphered in full display ------------
 
             currentMorseLetterIndexInWord++; // Advance to the next letter index
 

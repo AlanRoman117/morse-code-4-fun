@@ -1,0 +1,4 @@
+.deciphered-char {
+    color: #a0aec0; /* A light gray color (Tailwind gray-500) */
+    font-weight: bold; /* Make it bold to stand out */
+}
