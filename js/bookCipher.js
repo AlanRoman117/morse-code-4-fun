@@ -12,13 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let isBookCompleted = false; // Flag for book completion status
 
     // New global variables for Morse-based book cipher
-    const MORSE_SEGMENT_LENGTH = 40; // Define segment length for display
+    // const MORSE_SEGMENT_LENGTH = 40; // Obsolete: Define segment length for display
     let currentBookMorseContent = '';
-    let currentMorseSegment = '';
-    let currentSegmentStartIndex = 0; // To track the start of the current visible Morse segment
+    // let currentMorseSegment = ''; // Obsolete: To track the current visible Morse segment
+    // let currentSegmentStartIndex = 0; // Obsolete: To track the start of the current visible Morse segment
     // let currentMorseLetterIndex = 0; // To track the current letter in the segment - Considered obsolete
-    let fullMorseSequence = []; // Stores all Morse letters and '/' for spaces
-    let currentSequenceIndex = 0; // Index for the current item in fullMorseSequence
+    let fullMorseSequence = []; // Stores arrays of Morse letters (words)
+    let currentWordIndex = 0; // Index for the current word in fullMorseSequence
+    let currentMorseLetterIndexInWord = 0; // Index for the current Morse letter within the current word
     let currentTargetMorseLetter = ''; // Stores the actual target Morse string, e.g., ".-"
 
     const bookSelectionDropdown = document.getElementById('book-selection');
@@ -181,20 +182,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("saveProgress: bookIdToSave is missing.");
             return;
         }
-        // currentSequenceIndex is global and should be up-to-date.
+        // currentWordIndex is global and should be up-to-date.
         // unlockedTextDisplay is accessed directly.
         // completedStatus is passed as a parameter.
 
         const progress = {
             bookId: bookIdToSave,
-            currentSequenceIndex: currentSequenceIndex, // Current progress in Morse sequence
+            currentWordIndex: currentWordIndex, // Current progress in Morse sequence (word index)
             unlockedText: unlockedTextDisplay ? unlockedTextDisplay.textContent : '', // Revealed English text
             isCompleted: completedStatus // Completion status
         };
 
         try {
             localStorage.setItem(`bookCipherProgress_${bookIdToSave}`, JSON.stringify(progress));
-            // console.log(`Progress saved for ${bookIdToSave}: Index ${currentSequenceIndex}, Completed: ${completedStatus}`);
+            // console.log(`Progress saved for ${bookIdToSave}: Index ${currentWordIndex}, Completed: ${completedStatus}`);
         } catch (error) {
             console.error(`Error saving progress for ${bookIdToSave}:`, error);
         }
@@ -207,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const bookCipherMessageEl = document.getElementById('book-cipher-message');
         const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
 
-
         if (!bookIdToLoad) {
             console.error("loadProgress: bookIdToLoad is missing.");
             return false;
@@ -219,57 +219,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 const savedProgress = JSON.parse(savedProgressString);
 
                 if (savedProgress.bookId !== bookIdToLoad) {
-                    // This case should ideally not happen if keys are managed well.
-                    console.warn("loadProgress: Mismatch bookId in saved data. Ignoring.");
-                    localStorage.removeItem(`bookCipherProgress_${bookIdToLoad}`); // Clean up bad data
-                    return false;
+                    console.warn("loadProgress: Mismatch bookId in saved data. Ignoring old progress.");
+                    localStorage.removeItem(`bookCipherProgress_${bookIdToLoad}`);
+                    return false; // Treat as no progress found
                 }
 
-                // Restore game state from Morse-based progress
+                // Restore game state
+                currentWordIndex = parseInt(savedProgress.currentWordIndex, 10) || 0;
                 unlockedTextDisplay.textContent = savedProgress.unlockedText || '';
-                currentSequenceIndex = savedProgress.currentSequenceIndex || 0;
-                isBookCompleted = savedProgress.isCompleted || false; // Restore completion flag
+                isBookCompleted = typeof savedProgress.isCompleted === 'boolean' ? savedProgress.isCompleted : false;
+                currentMorseLetterIndexInWord = 0; // Always reset letter index on load
 
-                console.log(`Progress loaded for ${bookIdToLoad}: Index ${currentSequenceIndex}, Completed: ${isBookCompleted}, Unlocked: "${savedProgress.unlockedText}"`);
+                console.log(`Progress loaded for ${bookIdToLoad}: Word Index ${currentWordIndex}, Completed: ${isBookCompleted}, Unlocked: "${savedProgress.unlockedText}"`);
 
-                // Calculate currentSegmentStartIndex based on the loaded currentSequenceIndex
-                if (currentSequenceIndex > 0 && fullMorseSequence && fullMorseSequence.length > 0) {
-                    let charOffsetForSavedIndex = 0;
-                    let processedSignals = fullMorseSequence.slice(0, currentSequenceIndex);
-                    if (processedSignals.length > 0) {
-                        let reconstructedProcessedStr = processedSignals.join(' ');
-                        charOffsetForSavedIndex = reconstructedProcessedStr.length;
-                        // Account for the space after the last processed signal, if it's not the very end of the book's signals
-                        if (currentSequenceIndex < currentBookMorseContent.split(' ').filter(s => s.length > 0).length) {
-                           charOffsetForSavedIndex++;
-                        }
-                    }
-                    currentSegmentStartIndex = Math.floor(charOffsetForSavedIndex / MORSE_SEGMENT_LENGTH) * MORSE_SEGMENT_LENGTH;
-                    if (currentSegmentStartIndex >= currentBookMorseContent.length) { // Boundary check
-                        currentSegmentStartIndex = Math.max(0, currentBookMorseContent.length - MORSE_SEGMENT_LENGTH);
-                    }
-
-                } else {
-                    currentSegmentStartIndex = 0; // Start from the beginning if no progress or at the very start
+                // Graceful Handling of Invalid currentWordIndex (assuming fullMorseSequence is populated)
+                // This check is important if the book content/structure changed since last save.
+                if (fullMorseSequence && !isBookCompleted && currentWordIndex >= fullMorseSequence.length) {
+                    console.warn(`Loaded currentWordIndex (${currentWordIndex}) is out of bounds for fullMorseSequence length (${fullMorseSequence.length}). Resetting progress for book ${bookIdToLoad}.`);
+                    currentWordIndex = 0;
+                    currentMorseLetterIndexInWord = 0;
+                    unlockedTextDisplay.textContent = '';
+                    isBookCompleted = false;
+                    // Optionally, clear the invalid saved progress
+                    // localStorage.removeItem(`bookCipherProgress_${bookIdToLoad}`);
                 }
 
-                displayCurrentSegment(); // Display the correct segment based on calculated currentSegmentStartIndex
+                displayCurrentWordInUI(); // Update target Morse display
 
                 if (isBookCompleted) {
                     if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book Complete!";
                     if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '✓';
                     if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
-                    // No need to call setNextTargetMorseLetter if completed, as there's no next target.
                 } else {
-                    // If not completed, set the next target Morse letter.
-                    // displayCurrentSegment would have shown the segment, now set the specific letter.
-                    setNextTargetMorseLetter(); // This will set currentTargetMorseLetter based on new currentSequenceIndex
-                    if (bookCipherMorseIO) bookCipherMorseIO.disabled = false; // Ensure input is enabled
-                    if (bookCipherMessageEl) bookCipherMessageEl.textContent = ""; // Clear any previous messages
+                    // If not completed, set the next target Morse signal.
+                    // This also updates currentDecodedCharDisplay and calls displayCurrentWordInUI again.
+                    setNextTargetMorseSignal();
+                    if (bookCipherMorseIO) bookCipherMorseIO.disabled = false;
+                    if (bookCipherMessageEl) bookCipherMessageEl.textContent = "";
                 }
-
-                console.log(`Calculated currentSegmentStartIndex: ${currentSegmentStartIndex}`);
-                return true; // Progress was successfully loaded
+                return true; // Progress successfully loaded and applied
             }
             console.log(`No saved progress found for ${bookIdToLoad}.`);
             return false; // No progress found
@@ -338,8 +326,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.text();
             })
             .then(text => {
-                currentBookMorseContent = text.trim();
-                currentSegmentStartIndex = 0;
+                currentBookMorseContent = text.trim(); // Keep the raw Morse content for reference if needed
+                // currentSegmentStartIndex = 0; // Obsolete
 
                 if (currentBookMorseContent.length === 0) {
                     targetTextDisplay.textContent = "Book is empty.";
@@ -349,33 +337,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log(`Book is empty: ${bookData.title}`);
                     fullMorseSequence = [];
                     currentTargetMorseLetter = '';
-                    displayCurrentSegment();
+                    // displayCurrentSegment(); // Obsolete
+                    displayCurrentWordInUI(); // Update UI for empty book
                     // Game view will show "Book is empty."
                     return;
                 }
 
-                fullMorseSequence = currentBookMorseContent.trim().split(' ').filter(s => s.length > 0);
+                // Process words separated by '/' and then letters by space
+                fullMorseSequence = currentBookMorseContent.trim().split('/')
+                                        .map(word => word.trim().split(' ').filter(s => s.length > 0))
+                                        .filter(wordArray => wordArray.length > 0);
 
                 if (unlockedTextDisplay) unlockedTextDisplay.textContent = '';
                 isBookCompleted = false;
-                currentSegmentStartIndex = 0;
+                // currentSegmentStartIndex = 0; // Obsolete
 
                 if (loadProgress(bookId)) {
                     console.log(`Progress loaded and restored for ${bookData.title}.`);
+                    // displayCurrentWord() or similar will be called implicitly by loadProgress if not completed
                 } else {
                     console.log(`Starting ${bookData.title} fresh (no progress or error loading).`);
-                    currentSequenceIndex = 0;
-                    displayCurrentSegment();
+                    currentWordIndex = 0;
+                    currentMorseLetterIndexInWord = 0;
+                    // displayCurrentSegment(); // Obsolete
+                    // displayCurrentWord(); // Obsolete, handled by setNextTargetMorseSignal or direct call to displayCurrentWordInUI
 
-                    if (fullMorseSequence.length > 0) {
-                        const initialTargetSet = setNextTargetMorseLetter();
+                    if (fullMorseSequence.length > 0 && fullMorseSequence[currentWordIndex] && fullMorseSequence[currentWordIndex].length > 0) {
+                        const initialTargetSet = setNextTargetMorseSignal(); // This will call displayCurrentWordInUI
                         if (bookCipherMorseIO) {
                                 bookCipherMorseIO.disabled = !initialTargetSet;
                         }
-                    } else {
+                    } else { // Book has no parsable content or is empty after parsing
                         if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
-                        if (targetTextDisplay) targetTextDisplay.textContent = "Book has no parsable content.";
                         if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
+                        displayCurrentWordInUI(); // Display appropriate message (e.g. "No parsable content")
                     }
                     if (bookCipherMessageEl) bookCipherMessageEl.textContent = "";
                 }
@@ -392,52 +387,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Error shown in targetTextDisplay within gameView.
             });
     }
-    function setNextTargetMorseLetter() {
+    function setNextTargetMorseSignal() {
         const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
-        const unlockedTextDisplay = document.getElementById('unlocked-text-display');
-        const bookCipherMorseIO = document.getElementById('book-cipher-morse-io'); // Used for enabling/disabling
-        const bookCipherMessageEl = document.getElementById('book-cipher-message'); // For messages
+        // unlockedTextDisplay is not used here directly for adding spaces anymore
+        const bookCipherMorseIO = document.getElementById('book-cipher-morse-io');
+        const bookCipherMessageEl = document.getElementById('book-cipher-message');
 
-        if (currentSequenceIndex >= fullMorseSequence.length) {
-            console.log("End of book reached. Processing completion...");
-            if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '✓';
+        // Check if currentWordIndex is out of bounds (end of book)
+        if (currentWordIndex >= fullMorseSequence.length) {
+            console.log("End of book reached (all words processed). Processing completion...");
+            currentTargetMorseLetter = ''; // Clear target
+            isBookCompleted = true; // Mark as completed
 
-            if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book Complete!"; // Updated message
+            if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '✓'; // UI update
+            if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book Complete!"; // UI update
+            if (bookCipherMorseIO) bookCipherMorseIO.disabled = true; // UI update
 
-            if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
-            currentTargetMorseLetter = '';
-
-            isBookCompleted = true; // Set the completion flag
-
-            // Call saveProgress - this function will be fully implemented in the next step.
-            // For now, the call is placed here. If saveProgress is still neutralized, it won't do much yet.
-            if (typeof saveProgress === 'function') {
-                saveProgress(currentBookId, isBookCompleted);
-                console.log("Attempted to save progress for completed book.");
-            } else {
-                console.warn("saveProgress function not found during book completion.");
-            }
-
-            return false;
+            displayCurrentWordInUI(); // Update main display (e.g., show "Book Complete!" message via targetTextDisplay)
+            saveProgress(currentBookId, isBookCompleted); // Save final state
+            return false; // No more targets
         }
 
-        let nextSignal = fullMorseSequence[currentSequenceIndex];
+        const currentWord = fullMorseSequence[currentWordIndex];
 
-        if (nextSignal === '/') {
-            if (unlockedTextDisplay) {
-                // Add a space if the unlocked text is empty or doesn't already end with a space.
-                if (unlockedTextDisplay.textContent.length === 0 || !unlockedTextDisplay.textContent.endsWith(' ')) {
-                    unlockedTextDisplay.textContent += ' ';
-                }
-            }
-            currentSequenceIndex++; // Consume the '/'
-            return setNextTargetMorseLetter(); // Recursively call to find the next actual Morse letter or end
-        } else {
-            // It's a Morse letter
-            currentTargetMorseLetter = nextSignal;
-            if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = currentTargetMorseLetter;
-            return true; // Indicate a target is set
+        // Check if currentMorseLetterIndexInWord is out of bounds for the current word
+        if (currentMorseLetterIndexInWord >= currentWord.length) {
+            // This means the current word has been fully processed.
+            // Logic in handleBookCipherInput should advance currentWordIndex and reset currentMorseLetterIndexInWord.
+            // Then it calls setNextTargetMorseSignal again.
+            // So, if we reach here, it's typically after handleBookCipherInput has already advanced the word.
+            // We then proceed to the next word or end of book in the next recursive call.
+            currentWordIndex++;
+            currentMorseLetterIndexInWord = 0;
+            // The space after a completed word is handled in handleBookCipherInput upon successful transcription of the last letter of a word.
+            return setNextTargetMorseSignal(); // Recursively call for the next word or determine end of book
         }
+
+        // Set the target Morse letter from the current position
+        currentTargetMorseLetter = currentWord[currentMorseLetterIndexInWord];
+
+        // Update UI elements
+        if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = currentTargetMorseLetter;
+        displayCurrentWordInUI(); // This function shows the current word and highlights the current letter
+
+        return true; // Target successfully set
     }
 
     function handleBookCipherInput(userTappedMorse) {
@@ -455,38 +448,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!userTappedMorse || userTappedMorse.trim() === '') {
             console.log("handleBookCipherInput: Empty Morse input received.");
             if (bookCipherMessageEl) bookCipherMessageEl.textContent = "No Morse input detected.";
-            // Optional: Visual feedback for empty input if desired
             return;
         }
 
-        // Ensure reversedMorseCode is available (defined in index.html)
-        if (typeof reversedMorseCode === 'undefined' && typeof morseToText === 'undefined') {
-            console.error("reversedMorseCode or morseToText is not available.");
+        if (typeof morseToText === 'undefined') { // Assuming morseToText is preferred
+            console.error("morseToText function is not available.");
             if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Error: Decoding library missing.";
             return;
         }
 
-        // Normalize user input if necessary (e.g. trim)
         const cleanedUserMorse = userTappedMorse.trim();
 
         if (cleanedUserMorse === currentTargetMorseLetter) {
             // --- MATCH ---
-            let englishChar = '';
-            if (typeof morseToText === 'function') {
-                englishChar = morseToText(currentTargetMorseLetter);
-            } else { // Fallback to reversedMorseCode directly
-                englishChar = reversedMorseCode[currentTargetMorseLetter];
-            }
-
-            if (englishChar && unlockedTextDisplay) {
-                unlockedTextDisplay.textContent += englishChar;
-            } else if (!englishChar) {
-                console.warn(`No English equivalent found for Morse: ${currentTargetMorseLetter}`);
-                // Decide how to handle this: maybe append the Morse itself or a placeholder?
-                // For now, we do nothing if no char is found, which is unlikely for valid targets.
-            }
-
-            // Positive visual feedback
+            // Positive visual/text feedback
             if (currentDecodedCharDisplay) {
                 const originalColor = currentDecodedCharDisplay.style.backgroundColor;
                 currentDecodedCharDisplay.style.backgroundColor = 'rgba(0, 255, 0, 0.3)'; // Light green
@@ -499,46 +474,87 @@ document.addEventListener('DOMContentLoaded', () => {
                  if (bookCipherMessageEl && bookCipherMessageEl.textContent === 'Correct!') bookCipherMessageEl.textContent = '';
             }, 1000);
 
+            // Append the single translated character for the current successful match
+            // This was the old behavior - it should be removed if word-by-word translation is done below.
+            // let matchedEnglishChar = morseToText(currentTargetMorseLetter);
+            // if (matchedEnglishChar && unlockedTextDisplay) {
+            //     unlockedTextDisplay.textContent += matchedEnglishChar;
+            // } else if (!matchedEnglishChar) {
+            //    console.warn(`No English equivalent found for successfully matched Morse: ${currentTargetMorseLetter}`);
+            // }
 
-            currentSequenceIndex++; // Advance to the next signal in the sequence
 
-                // --- Segment Progression Logic ---
-                if (currentSequenceIndex < fullMorseSequence.length) { // Only proceed if not past the end of the book
-                    // Determine the character length/offset of the Morse content processed so far.
-                    // This offset represents the starting position of the *next* Morse signal
-                    // in the original currentBookMorseContent string.
-                    let processedMorseSignals = fullMorseSequence.slice(0, currentSequenceIndex);
-                    let reconstructedProcessedMorseString = "";
-                    if (processedMorseSignals.length > 0) {
-                        // Join the processed signals with a space, as they are in currentBookMorseContent
-                        reconstructedProcessedMorseString = processedMorseSignals.join(' ');
+            currentMorseLetterIndexInWord++; // Advance to the next letter index
+
+            // Word Completion Logic
+            if (currentWordIndex < fullMorseSequence.length &&
+                currentMorseLetterIndexInWord >= fullMorseSequence[currentWordIndex].length) {
+
+                // Translate the completed Morse word to English
+                let morseWordSignals = fullMorseSequence[currentWordIndex];
+                let translatedEnglishWord = morseWordSignals.map(signal => morseToText(signal) || '').join('');
+
+                // Update unlockedTextDisplay: clear previous partial word (if any) and append full word + space
+                // To do this correctly, we need to manage how text is added.
+                // For now, if the previous logic of adding char-by-char was removed,
+                // this will append the full word. We need to ensure it replaces the partial word if needed,
+                // or that char-by-char appending is disabled.
+                // Assuming the char-by-char from previous step is removed/commented:
+                let currentUnlocked = unlockedTextDisplay.textContent || "";
+                // Remove characters of the current word being typed, then add the full word.
+                // This is tricky if other words are already there.
+                // A simpler approach for now: if the previous char-by-char was removed,
+                // we'll just append the letters of the current word one by one, and add a space at the end.
+                // The provided plan implies appending the *whole word* at once *after* it's done.
+                // This means the char-by-char `unlockedTextDisplay.textContent += englishChar;` must be removed.
+
+                // Let's refine: The individual `englishChar` appending should be removed.
+                // The `unlockedTextDisplay` should be updated ONLY when a word is complete.
+
+                // To implement the "append whole word at once" strategy:
+                // 1. The old `unlockedTextDisplay.textContent += englishChar;` (if it existed for single chars) must be gone.
+                // 2. We construct the word here.
+
+                // Reconstruct the text in unlockedTextDisplay.
+                // If we are truly doing word-by-word, we need to rebuild the unlocked text from scratch or be very careful.
+                // The current plan asks to *append* the translatedEnglishWord + ' '.
+                // This assumes that individual characters of the current word were NOT added to unlockedTextDisplay before.
+
+                // Let's ensure the previous single-char append is GONE.
+                // The old logic:
+                // if (englishChar && unlockedTextDisplay) {
+                // unlockedTextDisplay.textContent += englishChar;
+                // }
+                // This MUST be removed for word-by-word commit to work as requested.
+                // Assuming it's removed based on the new plan.
+
+                if (unlockedTextDisplay) {
+                    // To correctly append the word, we need to ensure the characters of the current word weren't added one by one.
+                    // If they were, we'd need to remove them first.
+                    // For now, let's assume they were NOT, and we are building the unlocked text word by word.
+                    // So, we find all letters of the current word and translate them.
+                    let currentWordMorse = fullMorseSequence[currentWordIndex];
+                    let currentWordEnglish = currentWordMorse.map(signal => morseToText(signal) || '').join('');
+
+                    // To prevent adding parts of the word then the whole word:
+                    // We need to reconstruct what should be there.
+                    // This is safer: reconstruct based on all *completed* words.
+                    let textToDisplay = "";
+                    for(let i=0; i < currentWordIndex; i++) {
+                        textToDisplay += fullMorseSequence[i].map(s => morseToText(s) || '').join('') + " ";
                     }
+                    textToDisplay += currentWordEnglish + " "; // Add current, now completed word
+                    unlockedTextDisplay.textContent = textToDisplay;
 
-                    let nextTargetCharOffset = reconstructedProcessedMorseString.length;
-
-                    // If there was processed content, and it's not the very last signal in the book,
-                    // account for the space that would follow the reconstructed string in currentBookMorseContent.
-                    // The comparison should be against the count of actual signals in the book.
-                    if (reconstructedProcessedMorseString.length > 0 && currentSequenceIndex < currentBookMorseContent.split(' ').filter(s => s.length > 0).length) {
-                         nextTargetCharOffset++; // Add 1 for the space character
-                    }
-
-                    // Check if the starting character offset of the next target Morse signal
-                    // is at or beyond the end of the currently displayed segment.
-                    if (nextTargetCharOffset >= currentSegmentStartIndex + MORSE_SEGMENT_LENGTH) {
-                        // Also ensure that advancing the segment won't go past the total book content.
-                        if (currentSegmentStartIndex + MORSE_SEGMENT_LENGTH < currentBookMorseContent.length) {
-                            currentSegmentStartIndex += MORSE_SEGMENT_LENGTH;
-                            displayCurrentSegment(); // Update #target-text-display with the new segment
-                            // console.log(`Segment advanced. New currentSegmentStartIndex: ${currentSegmentStartIndex}`);
-                        }
-                    }
                 }
-                // --- End Segment Progression Logic ---
-            setNextTargetMorseLetter(); // Set up the next target or end the game
 
-            // Save progress after successful transcription and potential completion
-            saveProgress(currentBookId, isBookCompleted); // NEW CALL
+
+                currentWordIndex++; // Move to the next word
+                currentMorseLetterIndexInWord = 0; // Reset letter index for the new word
+            }
+
+            setNextTargetMorseSignal(); // Set up the next target
+            saveProgress(currentBookId, isBookCompleted); // Save progress
         } else {
             // --- MISMATCH ---
             if (bookCipherMessageEl) bookCipherMessageEl.textContent = 'Incorrect. Try again.';
@@ -559,36 +575,62 @@ document.addEventListener('DOMContentLoaded', () => {
     // Obsolete function - removed
     // function handleMorseProcessing(morseString) { ... }
 
-    function displayCurrentSegment() {
+    // function displayCurrentSegment() { // Obsolete
+    //     const targetTextDisplay = document.getElementById('target-text-display');
+    //     if (!targetTextDisplay) {
+    //         console.error("target-text-display not found");
+    //         return;
+    //     }
+    //
+    //     if (!currentBookMorseContent) {
+    //         targetTextDisplay.textContent = "No book content loaded.";
+    //         return;
+    //     }
+    //
+    //     let segmentEndIndex = currentSegmentStartIndex + MORSE_SEGMENT_LENGTH;
+    //     currentMorseSegment = currentBookMorseContent.substring(currentSegmentStartIndex, segmentEndIndex);
+    //     targetTextDisplay.textContent = currentMorseSegment;
+    //
+    //     // console.log(`Displaying segment: Start ${currentSegmentStartIndex}, End ${segmentEndIndex}, Content: "${currentMorseSegment}"`);
+    // }
+
+    function displayCurrentWordInUI() {
         const targetTextDisplay = document.getElementById('target-text-display');
         if (!targetTextDisplay) {
-            console.error("target-text-display not found");
+            console.error("target-text-display element not found for book cipher game.");
             return;
         }
 
-        if (!currentBookMorseContent) {
-            targetTextDisplay.textContent = "No book content loaded.";
+        if (isBookCompleted) {
+            targetTextDisplay.innerHTML = '<span class="book-completed-message">Book Complete!</span>';
             return;
         }
 
-        let segmentEndIndex = currentSegmentStartIndex + MORSE_SEGMENT_LENGTH;
-        currentMorseSegment = currentBookMorseContent.substring(currentSegmentStartIndex, segmentEndIndex);
-        targetTextDisplay.textContent = currentMorseSegment;
+        if (currentWordIndex >= fullMorseSequence.length || !fullMorseSequence[currentWordIndex] || fullMorseSequence[currentWordIndex].length === 0) {
+            if (fullMorseSequence.length === 0 && currentBookMorseContent && currentBookMorseContent.length > 0) {
+                 targetTextDisplay.innerHTML = '<span class="book-error-message">Book has no parsable Morse content.</span>';
+            } else if (fullMorseSequence.length === 0) { // Handles initially empty book or book that parses to nothing
+                 targetTextDisplay.innerHTML = '<span class="book-error-message">Book is empty or no words found.</span>';
+            } else { // Should ideally be caught by isBookCompleted or next word logic
+                 targetTextDisplay.innerHTML = '<span class="book-error-message">End of book or no current word to display.</span>';
+            }
+            return;
+        }
 
-        // console.log(`Displaying segment: Start ${currentSegmentStartIndex}, End ${segmentEndIndex}, Content: "${currentMorseSegment}"`);
+        const currentWordArr = fullMorseSequence[currentWordIndex];
+        let htmlContent = '';
 
-        // Important: We need to ensure that setNextTargetMorseLetter is called
-        // to correctly set the currentTargetMorseLetter from the new segment,
-        // but only if we are not in the process of loading saved progress.
-        // For now, this function will be called before loadProgress,
-        // and loadProgress itself will call it again and then set the target.
-        // So, a direct call to setNextTargetMorseLetter() here might be redundant
-        // or premature if loadProgress is going to adjust currentSequenceIndex.
-        // Let's hold off on calling setNextTargetMorseLetter() from here directly in this step.
-        // The existing call to setNextTargetMorseLetter() in startBookButton after parsing
-        // should still pick up the first letter of the first segment.
-        // If loadProgress is implemented, it will be responsible for setting the correct
-        // currentTargetMorseLetter after displaying the loaded segment.
+        currentWordArr.forEach((morseLetter, letterIndex) => {
+            if (letterIndex === currentMorseLetterIndexInWord) {
+                htmlContent += `<span class="current-morse-letter highlight-morse">${morseLetter}</span>`;
+            } else {
+                htmlContent += `<span class="morse-letter">${morseLetter}</span>`;
+            }
+            if (letterIndex < currentWordArr.length - 1) {
+                htmlContent += ' '; // Add space between Morse letters
+            }
+        });
+        targetTextDisplay.innerHTML = htmlContent;
     }
 
     document.addEventListener('visualTapperCharacterComplete', (event) => {
