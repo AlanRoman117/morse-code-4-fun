@@ -374,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     fullMorseSequence = [];
                     currentTargetMorseLetter = '';
                     // displayCurrentSegment(); // Obsolete
-                    displayCurrentWordInUI(); // Update UI for empty book
+                    // displayCurrentWordInUI(); // Obsolete: Call removed
                     // Game view will show "Book is empty."
                     return;
                 }
@@ -390,27 +390,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (loadProgress(bookId)) {
                     console.log(`Progress loaded and restored for ${bookData.title}.`);
-                    // displayCurrentWord() or similar will be called implicitly by loadProgress if not completed
+                    // displayCurrentWordInUI() call removed from loadProgress, setNextTargetMorseSignal will handle highlighting
                 } else {
                     console.log(`Starting ${bookData.title} fresh (no progress or error loading).`);
                     currentWordIndex = 0;
                     currentMorseLetterIndexInWord = 0;
-                    // displayCurrentSegment(); // Obsolete
-                    // displayCurrentWord(); // Obsolete, handled by setNextTargetMorseSignal or direct call to displayCurrentWordInUI
 
                     if (fullMorseSequence.length > 0 && fullMorseSequence[currentWordIndex] && fullMorseSequence[currentWordIndex].length > 0) {
-                        const initialTargetSet = setNextTargetMorseSignal(); // This will call displayCurrentWordInUI
+                        const initialTargetSet = setNextTargetMorseSignal();
                         if (bookCipherMorseIO) {
                                 bookCipherMorseIO.disabled = !initialTargetSet;
                         }
                     } else { // Book has no parsable content or is empty after parsing
                         if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
                         if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
-                        displayCurrentWordInUI(); // Display appropriate message (e.g. "No parsable content")
+                        // displayCurrentWordInUI(); // Obsolete: Call removed
                     }
                     if (bookCipherMessageEl) bookCipherMessageEl.textContent = "";
                 }
                 console.log(`Book ready for game: ${bookData.title}.`);
+
+                // START - Modified code to populate #full-book-morse-display with spans
+                const fullBookMorseDisplay = document.getElementById('full-book-morse-display');
+                if (fullBookMorseDisplay) {
+                    if (fullMorseSequence && fullMorseSequence.length > 0) {
+                        let htmlContent = '';
+                        fullMorseSequence.forEach((wordArray, wordIndex) => {
+                            let wordHtml = wordArray.map((morseLetter, letterIndex) => {
+                                return `<span class="morse-char-span" data-word-idx="${wordIndex}" data-letter-idx="${letterIndex}">${morseLetter}</span>`;
+                            }).join(' '); // Join Morse letter spans with a space
+
+                            htmlContent += wordHtml;
+                            if (wordIndex < fullMorseSequence.length - 1) {
+                                htmlContent += ' / '; // Word separator
+                            }
+                        });
+                        fullBookMorseDisplay.innerHTML = htmlContent;
+                    } else {
+                        // Handle cases like empty book or book with no parsable Morse.
+                        if (currentBookMorseContent.trim().length === 0) {
+                            fullBookMorseDisplay.textContent = "Book is empty."; // textContent is fine for simple messages
+                        } else {
+                            fullBookMorseDisplay.textContent = "No parsable Morse content found in this book.";
+                        }
+                    }
+                } else {
+                    console.error("#full-book-morse-display element not found.");
+                }
+                // END - Modified code to populate #full-book-morse-display with spans
+
             })
             .catch(error => {
                 console.error('Error fetching book content for game:', error);
@@ -429,6 +457,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const bookCipherMorseIO = document.getElementById('book-cipher-morse-io');
         const bookCipherMessageEl = document.getElementById('book-cipher-message');
 
+        // Remove highlight from the previous target
+        const previouslyHighlighted = document.querySelector('#full-book-morse-display .current-morse-target');
+        if (previouslyHighlighted) {
+            previouslyHighlighted.classList.remove('current-morse-target');
+        }
+
         // Check if currentWordIndex is out of bounds (end of book)
         if (currentWordIndex >= fullMorseSequence.length) {
             console.log("End of book reached (all words processed). Processing completion...");
@@ -439,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book Complete!"; // UI update
             if (bookCipherMorseIO) bookCipherMorseIO.disabled = true; // UI update
 
-            displayCurrentWordInUI(); // Update main display (e.g., show "Book Complete!" message via targetTextDisplay)
+            // displayCurrentWordInUI(); // Obsolete: Call removed
             saveProgress(currentBookId, isBookCompleted); // Save final state
             return false; // No more targets
         }
@@ -448,25 +482,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Check if currentMorseLetterIndexInWord is out of bounds for the current word
         if (currentMorseLetterIndexInWord >= currentWord.length) {
-            // This means the current word has been fully processed.
-            // Logic in handleBookCipherInput should advance currentWordIndex and reset currentMorseLetterIndexInWord.
-            // Then it calls setNextTargetMorseSignal again.
-            // So, if we reach here, it's typically after handleBookCipherInput has already advanced the word.
-            // We then proceed to the next word or end of book in the next recursive call.
             currentWordIndex++;
             currentMorseLetterIndexInWord = 0;
-            // The space after a completed word is handled in handleBookCipherInput upon successful transcription of the last letter of a word.
             return setNextTargetMorseSignal(); // Recursively call for the next word or determine end of book
         }
 
         // Set the target Morse letter from the current position
         currentTargetMorseLetter = currentWord[currentMorseLetterIndexInWord];
 
-        // Update UI elements
-        if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = currentTargetMorseLetter;
-        displayCurrentWordInUI(); // This function shows the current word and highlights the current letter
+        // Update UI elements and highlight the new target
+        if (currentTargetMorseLetter && currentTargetMorseLetter !== '') {
+            const newTargetSpan = document.querySelector(
+                `#full-book-morse-display .morse-char-span[data-word-idx="${currentWordIndex}"][data-letter-idx="${currentMorseLetterIndexInWord}"]`
+            );
 
-        return true; // Target successfully set
+            if (newTargetSpan) {
+                newTargetSpan.classList.add('current-morse-target');
+                if (currentDecodedCharDisplay) { // currentDecodedCharDisplay is already an element reference
+                    currentDecodedCharDisplay.textContent = newTargetSpan.textContent;
+                }
+                newTargetSpan.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            } else {
+                console.warn(`Target span not found for word ${currentWordIndex}, letter ${currentMorseLetterIndexInWord}`);
+                if (currentDecodedCharDisplay) {
+                    currentDecodedCharDisplay.textContent = '-'; // Reset if span not found
+                }
+            }
+        } else {
+            // This case should be handled by the end-of-book logic earlier.
+            // If somehow currentTargetMorseLetter is empty here, reset display.
+            if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
+        }
+        // displayCurrentWordInUI(); // Obsolete: Call removed
+
+        return true; // Target successfully set (or end of book handled)
     }
 
     function handleBookCipherInput(userTappedMorse) {
@@ -631,42 +680,43 @@ document.addEventListener('DOMContentLoaded', () => {
     // }
 
     function displayCurrentWordInUI() {
-        const targetTextDisplay = document.getElementById('target-text-display');
-        if (!targetTextDisplay) {
-            console.error("target-text-display element not found for book cipher game.");
-            return;
-        }
-
-        if (isBookCompleted) {
-            targetTextDisplay.innerHTML = '<span class="book-completed-message">Book Complete!</span>';
-            return;
-        }
-
-        if (currentWordIndex >= fullMorseSequence.length || !fullMorseSequence[currentWordIndex] || fullMorseSequence[currentWordIndex].length === 0) {
-            if (fullMorseSequence.length === 0 && currentBookMorseContent && currentBookMorseContent.length > 0) {
-                 targetTextDisplay.innerHTML = '<span class="book-error-message">Book has no parsable Morse content.</span>';
-            } else if (fullMorseSequence.length === 0) { // Handles initially empty book or book that parses to nothing
-                 targetTextDisplay.innerHTML = '<span class="book-error-message">Book is empty or no words found.</span>';
-            } else { // Should ideally be caught by isBookCompleted or next word logic
-                 targetTextDisplay.innerHTML = '<span class="book-error-message">End of book or no current word to display.</span>';
-            }
-            return;
-        }
-
-        const currentWordArr = fullMorseSequence[currentWordIndex];
-        let htmlContent = '';
-
-        currentWordArr.forEach((morseLetter, letterIndex) => {
-            if (letterIndex === currentMorseLetterIndexInWord) {
-                htmlContent += `<span class="current-morse-letter highlight-morse">${morseLetter}</span>`;
-            } else {
-                htmlContent += `<span class="morse-letter">${morseLetter}</span>`;
-            }
-            if (letterIndex < currentWordArr.length - 1) {
-                htmlContent += ' '; // Add space between Morse letters
-            }
-        });
-        targetTextDisplay.innerHTML = htmlContent;
+        // const targetTextDisplay = document.getElementById('target-text-display');
+        // if (!targetTextDisplay) {
+        //     console.error("target-text-display element not found for book cipher game.");
+        //     return;
+        // }
+        //
+        // if (isBookCompleted) {
+        //     targetTextDisplay.innerHTML = '<span class="book-completed-message">Book Complete!</span>';
+        //     return;
+        // }
+        //
+        // if (currentWordIndex >= fullMorseSequence.length || !fullMorseSequence[currentWordIndex] || fullMorseSequence[currentWordIndex].length === 0) {
+        //     if (fullMorseSequence.length === 0 && currentBookMorseContent && currentBookMorseContent.length > 0) {
+        //          targetTextDisplay.innerHTML = '<span class="book-error-message">Book has no parsable Morse content.</span>';
+        //     } else if (fullMorseSequence.length === 0) { // Handles initially empty book or book that parses to nothing
+        //          targetTextDisplay.innerHTML = '<span class="book-error-message">Book is empty or no words found.</span>';
+        //     } else { // Should ideally be caught by isBookCompleted or next word logic
+        //          targetTextDisplay.innerHTML = '<span class="book-error-message">End of book or no current word to display.</span>';
+        //     }
+        //     return;
+        // }
+        //
+        // const currentWordArr = fullMorseSequence[currentWordIndex];
+        // let htmlContent = '';
+        //
+        // currentWordArr.forEach((morseLetter, letterIndex) => {
+        //     if (letterIndex === currentMorseLetterIndexInWord) {
+        //         htmlContent += `<span class="current-morse-letter highlight-morse">${morseLetter}</span>`;
+        //     } else {
+        //         htmlContent += `<span class="morse-letter">${morseLetter}</span>`;
+        //     }
+        //     if (letterIndex < currentWordArr.length - 1) {
+        //         htmlContent += ' '; // Add space between Morse letters
+        //     }
+        // });
+        // targetTextDisplay.innerHTML = htmlContent;
+        console.log("displayCurrentWordInUI is now obsolete and its call should be removed.");
     }
 
     document.addEventListener('visualTapperCharacterComplete', (event) => {
