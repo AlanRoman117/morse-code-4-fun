@@ -8,10 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
         'long_book': { title: 'Long Book Test', filePath: 'assets/book_cipher_texts/long_passage_morse.txt' }
     };
 
-    let currentTargetText = '';
-    let currentCharacterIndex = 0;
-    let revealedCharacters = [];
+    let currentTargetText = ''; // This will likely be deprecated or repurposed for the original English text
+    let currentCharacterIndex = 0; // This might be repurposed for character index within the English text if needed later
+    let revealedCharacters = []; // This will likely be deprecated or repurposed
+
     let currentBookId = null; // Added for saving progress
+
+    // New global variables for Morse-based book cipher
+    let currentBookMorseContent = '';
+    let currentMorseSegment = '';
+    let currentMorseLetterIndex = 0; // To track the current letter in the segment
 
     const bookSelectionDropdown = document.getElementById('book-selection');
     const startBookButton = document.getElementById('start-book-btn');
@@ -79,6 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to save progress
     function saveProgress(bookId, isCompletedFlag = false) {
+        console.warn("Book Cipher: saveProgress is temporarily neutralized for Morse segment update. No progress will be saved at this stage.");
+        return;
+        // Original saveProgress logic below for reference, currently unreachable:
         if (!bookId) {
             console.error("saveProgress: bookId is missing.");
             return;
@@ -199,59 +208,96 @@ document.addEventListener('DOMContentLoaded', () => {
                     return response.text();
                 })
                 .then(text => {
-                    currentTargetText = text.trim().toUpperCase();
-                    // currentBookId is already set by the book selection logic
-                    startBookButton.disabled = false; // Re-enable button after successful fetch preparations (or keep disabled until game over/reset)
+                    currentBookMorseContent = text.trim(); // Store fetched Morse content, preserving case
 
-                    if (currentTargetText.length === 0) {
+                    if (currentBookMorseContent.length === 0) {
                         // Handle empty book scenario
-                        console.warn(`Fetched text for ${bookData.filePath} is empty.`);
                         targetTextDisplay.textContent = "Book is empty.";
-                        revealedCharacters = [];
                         unlockedTextDisplay.textContent = '';
                         currentDecodedCharDisplay.textContent = '-';
-                        currentCharacterIndex = 0;
+                        currentMorseSegment = '';
+                        currentMorseLetterIndex = 0;
                         if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
-                        // No progress to load for an empty book.
                         console.log(`Book is empty: ${bookData.title}`);
+                        startBookButton.disabled = false; // Re-enable start button
                         return; // Exit early
                     }
 
-                    // Attempt to load progress for non-empty book
+                    // Process Non-Empty Book Content
+                    const segmentLength = 40; // Define segment length
+                    currentMorseSegment = currentBookMorseContent.substring(0, segmentLength);
+                    targetTextDisplay.textContent = currentMorseSegment; // Display the Morse segment
+
+                    unlockedTextDisplay.textContent = ''; // Clear unlocked text
+                    currentMorseLetterIndex = 0; // Initialize position in the Morse segment
+                    // currentDecodedCharDisplay.textContent = '-'; // This will be set by the new logic below
+
+                    // Display the first Morse letter of the segment
+                    if (currentMorseSegment && currentMorseSegment.length > 0) {
+                        let firstMorseLetter = '';
+                        for (let i = 0; i < currentMorseSegment.length; i++) {
+                            if (currentMorseSegment[i] === ' ') {
+                                break; // Stop at the first space
+                            }
+                            firstMorseLetter += currentMorseSegment[i];
+                        }
+
+                        if (firstMorseLetter.length > 0) {
+                            currentDecodedCharDisplay.textContent = firstMorseLetter;
+                        } else {
+                            currentDecodedCharDisplay.textContent = '-'; // Segment might be spaces or empty
+                        }
+                    } else {
+                        currentDecodedCharDisplay.textContent = '-';
+                    }
+
+                    if (bookCipherMorseIO) bookCipherMorseIO.disabled = false; // Enable Morse IO for interaction
+
+                    // Temporarily comment out progress logic
+                    /*
                     if (loadProgress(currentBookId)) {
                         console.log(`Progress loaded for book: ${currentBookId} - ${bookData.title}`);
                         // UI state (including Morse IO disabled/enabled) is handled by loadProgress
                     } else {
                         // No progress found or error loading, initialize for a fresh start
                         console.log(`No progress found for ${currentBookId} (${bookData.title}), starting fresh.`);
-                        currentCharacterIndex = 0;
-                        revealedCharacters = [];
-                        for (let i = 0; i < currentTargetText.length; i++) {
-                            if (currentTargetText[i] === ' ') {
-                                revealedCharacters.push(' ');
-                            } else {
-                                revealedCharacters.push('_');
-                            }
-                        }
-                        displayTargetText(); // Display the initially obscured text
-                        unlockedTextDisplay.textContent = ''; // Clear any previous unlocked text
-                        currentDecodedCharDisplay.textContent = '-'; // Reset current decoded char display
-                        if (bookCipherMorseIO) bookCipherMorseIO.disabled = false; // Enable Morse input for fresh start
-                    }
+                        // The old logic based on currentTargetText, revealedCharacters etc. is not directly applicable here.
+                        // We are now displaying a segment of Morse code.
+                        // The old logic for `revealedCharacters` and `displayTargetText()` might need rethinking
+                        // if we want to show an obscured version of the *entire* Morse book.
+                        // For now, we just display the current segment.
 
-                    // Unified logging for when a book (empty or not, loaded or fresh) is processed
-                    console.log(`Book ready: ${bookData.title} (Text length: ${currentTargetText.length}, Loaded from save: ${!!localStorage.getItem('bookCipherProgress_'+currentBookId) && revealedCharacters.length > 0 })`);
+                        // Old initialization (commented out as it might not be relevant for Morse segment display)
+                        // currentCharacterIndex = 0;
+                        // revealedCharacters = [];
+                        // for (let i = 0; i < currentTargetText.length; i++) {
+                        //     if (currentTargetText[i] === ' ') {
+                        //         revealedCharacters.push(' ');
+                        //     } else {
+                        //         revealedCharacters.push('_');
+                        //     }
+                        // }
+                        // displayTargetText(); // Display the initially obscured text
+                        // unlockedTextDisplay.textContent = ''; // Clear any previous unlocked text
+                        // currentDecodedCharDisplay.textContent = '-'; // Reset current decoded char display
+                        // if (bookCipherMorseIO) bookCipherMorseIO.disabled = false; // Enable Morse input for fresh start
+                    }
+                    */
+
+                    console.log(`Book ready: ${bookData.title}. Morse segment displayed.`);
+                    startBookButton.disabled = false; // Re-enable the start button
                 })
                 .catch(error => {
                     console.error('Error fetching book content:', error);
                     targetTextDisplay.textContent = `Error: Could not load '${bookData.title}'. File not found or unreadable.`;
-                    currentTargetText = '';
-                    revealedCharacters = [];
+                    // Reset relevant global variables on error
+                    currentBookMorseContent = '';
+                    currentMorseSegment = '';
+                    currentMorseLetterIndex = 0;
                     unlockedTextDisplay.textContent = '';
                     currentDecodedCharDisplay.textContent = '-';
                     if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
-                        // currentBookId is already set
-                        startBookButton.disabled = false; // Re-enable button as game setup failed or finished here
+                    startBookButton.disabled = false; // Re-enable button on error
                 });
             // -- FETCH LOGIC END --
         });
@@ -291,11 +337,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let decodedString = morseToText(morseString.trim());
+        console.log("Book Cipher: handleMorseProcessing received Morse:", morseString, "Decoded as:", decodedString);
 
         if (decodedString && decodedString.length > 0) {
             let lastChar = decodedString.charAt(decodedString.length - 1).toUpperCase();
             currentDecodedCharDisplay.textContent = lastChar;
 
+            // The rest of the original game logic is commented out for now.
+            /*
             // Auto-reveal spaces and advance
             while (currentCharacterIndex < currentTargetText.length && currentTargetText[currentCharacterIndex] === ' ') {
                 if (revealedCharacters[currentCharacterIndex] !== ' ') {
@@ -352,6 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 300);
             }
             displayTargetText(); // Update display after guess processing
+            */
         } else {
             // Invalid/incomplete Morse
              const originalColor = currentDecodedCharDisplay.style.backgroundColor;
