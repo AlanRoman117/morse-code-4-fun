@@ -359,46 +359,50 @@
         <div id="book-cipher-tab" class="tab-content hidden">
             <div class="app-container mx-auto p-6 bg-gray-800 shadow-xl rounded-lg">
                 <p id="book-cipher-message" class="text-center feedback-message text-yellow-500 mb-3 h-6"></p> <!-- Message area, h-6 for consistent height -->
-                <div id="bookCipherTapperArea" class="text-center my-4">
-                    <!-- The shared visual tapper will be inserted here by JavaScript -->
-                </div>
 
-                <!-- Book Library Container -->
-                <div class="mb-4">
-                    <label for="book-library-container" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label>
-                    <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-72 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                        <!-- Book covers will be dynamically added here by JavaScript -->
+                <div id="book-library-view">
+                    <!-- Book Library Container -->
+                    <div class="mb-4">
+                        <label for="book-library-container" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label>
+                        <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-72 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                            <!-- Book covers will be dynamically added here by JavaScript -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- Obscured/Target Text Display -->
-                <div class="mb-4">
-                    <label for="target-text-display" class="block mb-2 text-sm font-medium text-gray-300">Target Morse Segment:</label>
-                    <div id="target-text-display" class="p-3 min-h-[100px] bg-gray-700 border border-gray-600 rounded-md text-gray-300 whitespace-pre-wrap word-wrap-break-word">Morse code will appear here...</div>
-                </div>
+                <div id="book-details-view" class="hidden"></div>
 
-                <!-- Unlocked Text Display -->
-                <div class="mb-4">
-                    <label for="unlocked-text-display" class="block mb-2 text-sm font-medium text-gray-300">Your Unlocked Text:</label>
-                    <div id="unlocked-text-display" class="p-3 min-h-[100px] bg-gray-700 border border-gray-600 rounded-md text-gray-300 whitespace-pre-wrap word-wrap-break-word">-</div>
-                </div>
+                <div id="book-game-view" class="hidden">
+                    <div id="bookCipherTapperArea" class="text-center my-4">
+                        <!-- The shared visual tapper will be inserted here by JavaScript -->
+                    </div>
 
-                <!-- Current Decoded Character Display -->
-                <div class="mb-4 text-center">
-                    <label for="current-decoded-char" class="block mb-2 text-sm font-medium text-gray-300">Current Target Morse Letter:</label>
-                    <div id="current-decoded-char" class="p-2 bg-gray-700 rounded-md text-xl font-mono text-center min-w-[50px] inline-block text-gray-300">-</div>
-                </div>
-                
-                <!-- Morse Input/Output Area -->
-                <div class="mb-6">
-                    <label for="book-cipher-morse-io" class="block text-sm font-medium text-gray-300 mb-2">Morse Input/Output:</label>
-                    <textarea id="book-cipher-morse-io" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Morse input/output for book cipher..."></textarea>
-                </div>
+                    <!-- Obscured/Target Text Display -->
+                    <div class="mb-4">
+                        <label for="target-text-display" class="block mb-2 text-sm font-medium text-gray-300">Target Morse Segment:</label>
+                        <div id="target-text-display" class="p-3 min-h-[100px] bg-gray-700 border border-gray-600 rounded-md text-gray-300 whitespace-pre-wrap word-wrap-break-word">Morse code will appear here...</div>
+                    </div>
 
-                <!-- Start Button -->
-                <div class="text-center">
-                    <button id="start-book-btn" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-lg shadow-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed">Start Selected Book</button>
-                </div>
+                    <!-- Unlocked Text Display -->
+                    <div class="mb-4">
+                        <label for="unlocked-text-display" class="block mb-2 text-sm font-medium text-gray-300">Your Unlocked Text:</label>
+                        <div id="unlocked-text-display" class="p-3 min-h-[100px] bg-gray-700 border border-gray-600 rounded-md text-gray-300 whitespace-pre-wrap word-wrap-break-word">-</div>
+                    </div>
+
+                    <!-- Current Decoded Character Display -->
+                    <div class="mb-4 text-center">
+                        <label for="current-decoded-char" class="block mb-2 text-sm font-medium text-gray-300">Current Target Morse Letter:</label>
+                        <div id="current-decoded-char" class="p-2 bg-gray-700 rounded-md text-xl font-mono text-center min-w-[50px] inline-block text-gray-300">-</div>
+                    </div>
+
+                    <!-- Morse Input/Output Area -->
+                    <div class="mb-6">
+                        <label for="book-cipher-morse-io" class="block text-sm font-medium text-gray-300 mb-2">Morse Input/Output:</label>
+                        <textarea id="book-cipher-morse-io" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Morse input/output for book cipher..."></textarea>
+                    </div>
+
+                    <!-- Start Button (Removed from here) -->
+                </div> <!-- End of book-game-view -->
             </div>
         </div>
         <div id="morse-pals-tab" class="tab-content hidden">

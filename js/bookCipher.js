@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const bookCipherBooks = {
-        'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1_morse.txt' },
-        'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro_morse.txt' },
-        'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote_morse.txt' },
-        'empty_book': { title: 'Empty Book Test', filePath: 'assets/book_cipher_texts/empty_morse.txt' },
-        'short_book': { title: 'Short Book Test', filePath: 'assets/book_cipher_texts/very_short_morse.txt' },
-        'long_book': { title: 'Long Book Test', filePath: 'assets/book_cipher_texts/long_passage_morse.txt' }
+        'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+        'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+        'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+        'empty_book': { title: 'Empty Book Test', filePath: 'assets/book_cipher_texts/empty_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+        'short_book': { title: 'Short Book Test', filePath: 'assets/book_cipher_texts/very_short_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+        'long_book': { title: 'Long Book Test', filePath: 'assets/book_cipher_texts/long_passage_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." }
     };
 
     let currentBookId = null; // Added for saving progress
@@ -22,15 +22,52 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTargetMorseLetter = ''; // Stores the actual target Morse string, e.g., ".-"
 
     const bookSelectionDropdown = document.getElementById('book-selection');
-    const startBookButton = document.getElementById('start-book-btn');
-    if (startBookButton) {
-        startBookButton.disabled = true; // Disable button initially
-    }
+    // const startBookButton = document.getElementById('start-book-btn'); // Old button reference, removed
     const targetTextDisplay = document.getElementById('target-text-display');
     const unlockedTextDisplay = document.getElementById('unlocked-text-display');
     const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
     const bookCipherMorseIO = document.getElementById('book-cipher-morse-io');
     const bookCipherMessageEl = document.getElementById('book-cipher-message'); // Added
+
+    // --- View Switching Functions ---
+    function showBookLibraryView() {
+        const libraryView = document.getElementById('book-library-view');
+        const detailsView = document.getElementById('book-details-view');
+        const gameView = document.getElementById('book-game-view');
+
+        if (libraryView) libraryView.classList.remove('hidden');
+        if (detailsView) detailsView.classList.add('hidden');
+        if (gameView) gameView.classList.add('hidden');
+
+        // Reset selected book item visual state when going back to library
+        const allBookItems = document.querySelectorAll('#book-library-container .book-cover-item');
+        allBookItems.forEach(item => {
+            item.classList.remove('book-cover-selected');
+        });
+        currentBookId = null; // Deselect book
+        if (bookCipherMessageEl) bookCipherMessageEl.textContent = 'Select a book from the library.';
+    }
+
+    function showBookDetailsView() {
+        const libraryView = document.getElementById('book-library-view');
+        const detailsView = document.getElementById('book-details-view');
+        const gameView = document.getElementById('book-game-view');
+
+        if (libraryView) libraryView.classList.add('hidden');
+        if (detailsView) detailsView.classList.remove('hidden');
+        if (gameView) gameView.classList.add('hidden');
+    }
+
+    function showGameView() {
+        const libraryView = document.getElementById('book-library-view');
+        const detailsView = document.getElementById('book-details-view');
+        const gameView = document.getElementById('book-game-view');
+
+        if (libraryView) libraryView.classList.add('hidden');
+        if (detailsView) detailsView.classList.add('hidden');
+        if (gameView) gameView.classList.remove('hidden');
+    }
+    // --- End View Switching Functions ---
 
     // Function to populate the book library display
     function populateBookLibrary() {
@@ -53,25 +90,82 @@ document.addEventListener('DOMContentLoaded', () => {
                 const book = bookCipherBooks[bookKey];
                 const bookElement = document.createElement('div');
                 bookElement.textContent = book.title;
-                bookElement.classList.add('book-cover-item'); // Add a common class for styling
-                bookElement.setAttribute('data-book-id', bookKey); // Store book key for identification
+                bookElement.classList.add('book-cover-item');
+                bookElement.setAttribute('data-book-id', bookKey);
 
                 bookElement.addEventListener('click', () => {
                     currentBookId = bookElement.getAttribute('data-book-id');
-
-                    // Manage visual selection
+                     // Visually mark selected book in library
                     const allBookItems = libraryContainer.querySelectorAll('.book-cover-item');
                     allBookItems.forEach(item => {
                         item.classList.remove('book-cover-selected');
                     });
                     bookElement.classList.add('book-cover-selected');
 
-                    // Enable the start button
-                    if (startBookButton) {
-                        startBookButton.disabled = false;
+                    if (bookCipherMessageEl) bookCipherMessageEl.textContent = '';
+                    console.log("Book selected for details view:", currentBookId);
+
+                    const detailsView = document.getElementById('book-details-view');
+                    if (!detailsView) {
+                        console.error("Book details view container 'book-details-view' not found.");
+                        return;
                     }
-                    if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; // Clear any "select a book" message
-                    console.log("Book selected:", currentBookId);
+                    detailsView.innerHTML = ''; // Clear previous details
+
+                    const bookData = bookCipherBooks[currentBookId];
+                    if (!bookData) {
+                        console.error("Could not find data for bookId:", currentBookId);
+                        detailsView.textContent = 'Error: Book data not found.';
+                        showBookDetailsView();
+                        return;
+                    }
+
+                    const titleEl = document.createElement('h2');
+                    titleEl.textContent = bookData.title;
+                    titleEl.className = 'text-2xl font-bold mb-2 text-center text-white';
+                    detailsView.appendChild(titleEl);
+
+                    const authorEl = document.createElement('p');
+                    authorEl.textContent = `Author: ${bookData.author}`;
+                    authorEl.className = 'text-md text-gray-400 mb-1 text-center';
+                    detailsView.appendChild(authorEl);
+
+                    const coverPlaceholder = document.createElement('div');
+                    coverPlaceholder.className = 'w-full h-48 bg-gray-700 flex items-center justify-center text-gray-500 my-4 rounded-md shadow-inner';
+                    coverPlaceholder.textContent = 'Book Cover Placeholder';
+                    detailsView.appendChild(coverPlaceholder);
+
+                    const descriptionEl = document.createElement('p');
+                    descriptionEl.textContent = bookData.description;
+                    descriptionEl.className = 'text-sm text-gray-300 mb-6 text-center leading-relaxed';
+                    detailsView.appendChild(descriptionEl);
+
+                    const buttonContainer = document.createElement('div');
+                    buttonContainer.className = 'flex flex-col items-center space-y-3';
+
+                    const startDecipheringBtn = document.createElement('button');
+                    startDecipheringBtn.id = 'start-deciphering-btn';
+                    startDecipheringBtn.textContent = 'Start Deciphering';
+                    startDecipheringBtn.className = 'w-full max-w-xs px-6 py-3 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500';
+                    buttonContainer.appendChild(startDecipheringBtn);
+
+                    startDecipheringBtn.addEventListener('click', () => {
+                        initializeAndStartBookGame(currentBookId);
+                    });
+
+                    const backToLibraryBtn = document.createElement('button');
+                    backToLibraryBtn.id = 'back-to-library-btn';
+                    backToLibraryBtn.textContent = 'Back to Library';
+                    backToLibraryBtn.className = 'w-full max-w-xs px-6 py-3 bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500';
+                    buttonContainer.appendChild(backToLibraryBtn);
+
+                    detailsView.appendChild(buttonContainer);
+
+                    document.getElementById('back-to-library-btn').addEventListener('click', () => {
+                        showBookLibraryView();
+                    });
+
+                    showBookDetailsView();
                 });
 
                 libraryContainer.appendChild(bookElement);
@@ -185,139 +279,119 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (startBookButton) {
-        startBookButton.addEventListener('click', () => {
-            if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; // Clear previous messages
-
-            if (!currentBookId) {
-                if (bookCipherMessageEl) {
-                    bookCipherMessageEl.textContent = "Please select a book from the library to start.";
-                    setTimeout(() => { if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; }, 3000);
-                } else {
-                    alert("Please select a book from the library to start.");
-                }
-                // Keep startBookButton disabled if no book is selected. It's likely already disabled.
-                // If it could somehow be enabled without a selection, explicitly disable it:
-                // startBookButton.disabled = true;
-                return;
-            }
-
-            startBookButton.disabled = true; // Disable button once a valid book is chosen and we proceed
-
-            // Check for essential display elements (excluding bookSelectionDropdown)
-            if (!targetTextDisplay || !unlockedTextDisplay || !currentDecodedCharDisplay) {
-                console.error("A required DOM element for book cipher (display areas) is missing.");
-                if (bookCipherMessageEl) {
-                    bookCipherMessageEl.textContent = "Error: Essential display elements are missing. Please refresh.";
-                    setTimeout(() => { if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; }, 3000);
-                } else {
-                    alert("Error: Essential display elements are missing. Please refresh.");
-                }
-                startBookButton.disabled = false; // Re-enable on error
-                return;
-            }
-
-            const bookData = bookCipherBooks[currentBookId]; // Use currentBookId
-
-            if (!bookData || !bookData.filePath) {
-                if (bookCipherMessageEl) {
-                    bookCipherMessageEl.textContent = "Selected book data is invalid or missing a file path.";
-                    setTimeout(() => { if (bookCipherMessageEl) bookCipherMessageEl.textContent = ''; }, 3000);
-                } else {
-                    alert("Selected book data is invalid or missing a file path.");
-                }
-                console.error("Current book ID:", currentBookId, "Book data:", bookData);
-                targetTextDisplay.textContent = "Error: Book details incomplete.";
-                startBookButton.disabled = false; // Re-enable on error
-                return;
-            }
-
-            // -- FETCH LOGIC START --
-            isBookCompleted = false; // Reset completion status for new book
-            fetch(bookData.filePath)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
-                    }
-                    return response.text();
-                })
-                .then(text => {
-                    currentBookMorseContent = text.trim(); // Store fetched Morse content
-                    currentSegmentStartIndex = 0; // Initialize segment start index
-
-                    // The old lines for currentMorseSegment and targetTextDisplay.textContent are removed/commented:
-                    // const segmentLength = 40;
-                    // currentMorseSegment = currentBookMorseContent.substring(0, segmentLength);
-                    // if (targetTextDisplay) targetTextDisplay.textContent = currentMorseSegment;
-
-                    if (currentBookMorseContent.length === 0) {
-                        // Handle empty book scenario
-                        targetTextDisplay.textContent = "Book is empty.";
-                        unlockedTextDisplay.textContent = '';
-                        currentDecodedCharDisplay.textContent = '-';
-                        if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
-                        console.log(`Book is empty: ${bookData.title}`);
-                        startBookButton.disabled = false; // Re-enable start button
-                        fullMorseSequence = []; // Ensure sequence is empty
-                        currentTargetMorseLetter = '';
-                        displayCurrentSegment(); // Display "No book content loaded."
-                        return; // Exit early
-                    }
-
-                    // Process Non-Empty Book Content
-                    fullMorseSequence = currentBookMorseContent.trim().split(' ').filter(s => s.length > 0);
-                    // This filter correctly includes '/' if present, as its length is 1.
-
-                    // For non-empty books:
-                    if (unlockedTextDisplay) unlockedTextDisplay.textContent = ''; // Clear for new book
-                    isBookCompleted = false;
-                    currentSegmentStartIndex = 0;
-                    // currentSequenceIndex will be set by loadProgress or default to 0 if starting fresh
-
-                    if (loadProgress(currentBookId)) {
-                        console.log(`Progress loaded and restored for ${bookData.title}.`);
-                        // bookCipherMorseIO enabled/disabled and other UI is handled by loadProgress
-                    } else {
-                        console.log(`Starting ${bookData.title} fresh (no progress or error loading).`);
-                        currentSequenceIndex = 0; // Ensure starting from the beginning
-                        displayCurrentSegment();  // Display the first segment based on reset currentSegmentStartIndex
-
-                        if (fullMorseSequence.length > 0) {
-                            const initialTargetSet = setNextTargetMorseLetter(); // Set the first target Morse letter
-                            if (bookCipherMorseIO) {
-                                 bookCipherMorseIO.disabled = !initialTargetSet; // Disable if no target could be set
-                            }
-                        } else {
-                             // This case should ideally be caught by the "Book is empty" check earlier,
-                             // but as a fallback, ensure IO is disabled.
-                            if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
-                            if (targetTextDisplay) targetTextDisplay.textContent = "Book has no parsable content."; // Should be covered by displayCurrentSegment
-                            if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
-                        }
-                        if (bookCipherMessageEl) bookCipherMessageEl.textContent = ""; // Clear any messages
-                    }
-
-                    console.log(`Book ready: ${bookData.title}.`);
-                    startBookButton.disabled = false; // Re-enable the start button
-                })
-                .catch(error => {
-                    console.error('Error fetching book content:', error);
-                    targetTextDisplay.textContent = `Error: Could not load '${bookData.title}'. File not found or unreadable.`;
-                    // Reset relevant global variables on error
-                    currentBookMorseContent = '';
-                    currentMorseSegment = '';
-                    currentMorseLetterIndex = 0;
-                    unlockedTextDisplay.textContent = '';
-                    currentDecodedCharDisplay.textContent = '-';
-                    if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
-                    startBookButton.disabled = false; // Re-enable button on error
-                });
-            // -- FETCH LOGIC END --
-        });
-    } else {
-        console.error("Start button not found for book cipher.");
+    // Removing the old startBookButton variable and its event listener.
+    // The new button 'start-deciphering-btn' will have its listener added later.
+    // The variable `startBookButton` itself was already removed/commented out at the top.
+    const oldStartBookButtonElement = document.getElementById('start-book-btn');
+    if (oldStartBookButtonElement && oldStartBookButtonElement.parentElement) {
+        // If the old button is still somehow in the DOM, remove it.
+        // This is a safeguard; it should have been removed by HTML changes.
+        // oldStartBookButtonElement.parentElement.removeChild(oldStartBookButtonElement);
+        // console.log("Old start-book-btn HTML element explicitly removed if found.");
+        // For now, we assume HTML changes handled its removal from the structure.
+        // The JS variable `startBookButton` is already dealt with.
     }
 
+    // This function encapsulates the logic previously in startBookButton's event listener
+    function initializeAndStartBookGame(bookId) {
+        if (bookCipherMessageEl) bookCipherMessageEl.textContent = '';
+
+        if (!bookId) {
+            console.error("initializeAndStartBookGame: No bookId provided.");
+            if (bookCipherMessageEl) {
+                bookCipherMessageEl.textContent = "Error: No book selected to start.";
+            }
+            showBookDetailsView(); // Stay or go back to details view if bookId is missing
+            return;
+        }
+
+        // Ensure game view elements are present
+        if (!targetTextDisplay || !unlockedTextDisplay || !currentDecodedCharDisplay || !bookCipherMorseIO) {
+            console.error("A required DOM element for the game view is missing.");
+            if (bookCipherMessageEl) {
+                bookCipherMessageEl.textContent = "Error: Game display elements are missing. Please refresh.";
+            }
+            showBookDetailsView(); // Critical error, return to details view
+            return;
+        }
+
+        const bookData = bookCipherBooks[bookId];
+
+        if (!bookData || !bookData.filePath) {
+            if (bookCipherMessageEl) {
+                bookCipherMessageEl.textContent = "Selected book data is invalid or missing a file path.";
+            }
+            console.error("Book ID for game start:", bookId, "Book data:", bookData);
+            if (targetTextDisplay) targetTextDisplay.textContent = "Error: Book details incomplete."; // Show error in game view
+            showGameView(); // Show game view even with this error to display the message
+            return;
+        }
+
+        showGameView(); // Switch to the game view first
+
+        isBookCompleted = false;
+        fetch(bookData.filePath)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
+                }
+                return response.text();
+            })
+            .then(text => {
+                currentBookMorseContent = text.trim();
+                currentSegmentStartIndex = 0;
+
+                if (currentBookMorseContent.length === 0) {
+                    targetTextDisplay.textContent = "Book is empty.";
+                    unlockedTextDisplay.textContent = '';
+                    currentDecodedCharDisplay.textContent = '-';
+                    if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
+                    console.log(`Book is empty: ${bookData.title}`);
+                    fullMorseSequence = [];
+                    currentTargetMorseLetter = '';
+                    displayCurrentSegment();
+                    // Game view will show "Book is empty."
+                    return;
+                }
+
+                fullMorseSequence = currentBookMorseContent.trim().split(' ').filter(s => s.length > 0);
+
+                if (unlockedTextDisplay) unlockedTextDisplay.textContent = '';
+                isBookCompleted = false;
+                currentSegmentStartIndex = 0;
+
+                if (loadProgress(bookId)) {
+                    console.log(`Progress loaded and restored for ${bookData.title}.`);
+                } else {
+                    console.log(`Starting ${bookData.title} fresh (no progress or error loading).`);
+                    currentSequenceIndex = 0;
+                    displayCurrentSegment();
+
+                    if (fullMorseSequence.length > 0) {
+                        const initialTargetSet = setNextTargetMorseLetter();
+                        if (bookCipherMorseIO) {
+                                bookCipherMorseIO.disabled = !initialTargetSet;
+                        }
+                    } else {
+                        if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
+                        if (targetTextDisplay) targetTextDisplay.textContent = "Book has no parsable content.";
+                        if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
+                    }
+                    if (bookCipherMessageEl) bookCipherMessageEl.textContent = "";
+                }
+                console.log(`Book ready for game: ${bookData.title}.`);
+            })
+            .catch(error => {
+                console.error('Error fetching book content for game:', error);
+                if (targetTextDisplay) targetTextDisplay.textContent = `Error: Could not load '${bookData.title}'.`;
+                currentBookMorseContent = '';
+                currentMorseSegment = '';
+                if (unlockedTextDisplay) unlockedTextDisplay.textContent = '';
+                if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
+                if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
+                // Error shown in targetTextDisplay within gameView.
+            });
+    }
     function setNextTargetMorseLetter() {
         const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
         const unlockedTextDisplay = document.getElementById('unlocked-text-display');
@@ -532,4 +606,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Populate the book library on DOMContentLoaded
     populateBookLibrary();
+    // Set the initial view to the library
+    showBookLibraryView();
 });
