@@ -392,6 +392,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showGameView(); // Switch to the game view first
 
+console.log("initializeAndStartBookGame: Attempting to attach tapper. Tapper area (#bookCipherTapperArea) visibility:", document.getElementById('bookCipherTapperArea') ? document.getElementById('bookCipherTapperArea').checkVisibility() : 'not found');
+if (typeof attachTapperToArea === 'function') {
+    console.log("initializeAndStartBookGame: Calling attachTapperToArea('bookCipherTapperArea').");
+    attachTapperToArea('bookCipherTapperArea');
+} else {
+    console.error("initializeAndStartBookGame: attachTapperToArea function not found.");
+}
         isBookCompleted = false;
         fetch(bookData.filePath)
             .then(response => {
