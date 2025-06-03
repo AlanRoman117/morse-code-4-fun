@@ -1,18 +1,18 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const bookCipherBooks = {
-        'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-        'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-        'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-        'empty_book': { title: 'Empty Book Test', filePath: 'assets/book_cipher_texts/empty_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-        'short_book': { title: 'Short Book Test', filePath: 'assets/book_cipher_texts/very_short_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-    'long_book': { title: 'Long Book Test', filePath: 'assets/book_cipher_texts/long_passage_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-    'pride_and_prejudice': { title: 'Pride and Prejudice Quote', filePath: 'assets/book_cipher_texts/pride_and_prejudice_morse.txt', author: 'Jane Austen', description: 'A truth universally acknowledged, from Pride and Prejudice.' },
-    'moby_dick': { title: 'Moby Dick Opening', filePath: 'assets/book_cipher_texts/moby_dick_morse.txt', author: 'Herman Melville', description: 'The famous opening line from Moby Dick.' },
-    'dream_within_dream': { title: 'Poe - Dream Within a Dream', filePath: 'assets/book_cipher_texts/dream_within_dream_morse.txt', author: 'Edgar Allan Poe', description: 'A haunting line from an Edgar Allan Poe poem.' },
-    'tale_of_two_cities': { title: 'Tale of Two Cities Intro', filePath: 'assets/book_cipher_texts/tale_of_two_cities_morse.txt', author: 'Charles Dickens', description: 'The iconic opening of A Tale of Two Cities.' },
-    'hamlet': { title: 'Hamlet - To Be Or Not To Be', filePath: 'assets/book_cipher_texts/hamlet_morse.txt', author: 'William Shakespeare', description: 'The profound question from Shakespeare\'s Hamlet.' }
-    };
+const bookCipherBooks = {
+    'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+    'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+    'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+    'empty_book': { title: 'Empty Book Test', filePath: 'assets/book_cipher_texts/empty_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+    'short_book': { title: 'Short Book Test', filePath: 'assets/book_cipher_texts/very_short_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+'long_book': { title: 'Long Book Test', filePath: 'assets/book_cipher_texts/long_passage_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
+'pride_and_prejudice': { title: 'Pride and Prejudice Quote', filePath: 'assets/book_cipher_texts/pride_and_prejudice_morse.txt', author: 'Jane Austen', description: 'A truth universally acknowledged, from Pride and Prejudice.' },
+'moby_dick': { title: 'Moby Dick Opening', filePath: 'assets/book_cipher_texts/moby_dick_morse.txt', author: 'Herman Melville', description: 'The famous opening line from Moby Dick.' },
+'dream_within_dream': { title: 'Poe - Dream Within a Dream', filePath: 'assets/book_cipher_texts/dream_within_dream_morse.txt', author: 'Edgar Allan Poe', description: 'A haunting line from an Edgar Allan Poe poem.' },
+'tale_of_two_cities': { title: 'Tale of Two Cities Intro', filePath: 'assets/book_cipher_texts/tale_of_two_cities_morse.txt', author: 'Charles Dickens', description: 'The iconic opening of A Tale of Two Cities.' },
+'hamlet': { title: 'Hamlet - To Be Or Not To Be', filePath: 'assets/book_cipher_texts/hamlet_morse.txt', author: 'William Shakespeare', description: 'The profound question from Shakespeare\'s Hamlet.' }
+};
 
+document.addEventListener('DOMContentLoaded', () => {
     let currentBookId = null; // Added for saving progress
     let isBookCompleted = false; // Flag for book completion status
 
