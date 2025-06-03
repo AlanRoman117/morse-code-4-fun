@@ -75,6 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sound functions using Tone.js (if available)
     function playTapSound() {
+        // Check master sound setting FIRST
+        if (typeof window.isMasterSoundEnabled !== 'undefined' && !window.isMasterSoundEnabled) {
+            // console.log('Master sound is OFF, playTapSound will not play.'); // Debug log
+            return; // Exit if master sound is disabled
+        }
+
         if (typeof Tone !== 'undefined' && Tone && Tone.Synth) {
             if (!tapperTone) {
                 try {

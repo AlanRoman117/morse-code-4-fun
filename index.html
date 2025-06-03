@@ -494,6 +494,17 @@
                         <p class="text-sm font-medium text-gray-300">Current effective value: <span id="current-unit-time-display" class="font-bold text-white">150</span> ms</p>
                     </div>
                 </div>
+
+                <!-- New Sound Settings Section -->
+                <h2 class="section-title text-2xl font-semibold mt-6 mb-3 text-center">Sound Settings</h2>
+                <div class="flex items-center justify-center p-4">
+                    <label for="master-sound-toggle" class="mr-4 text-sm font-medium text-gray-300">Master Sound</label>
+                    <div class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="master-sound-toggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span id="master-sound-status-text" class="ml-3 text-sm font-medium text-gray-300">On</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -843,7 +854,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
        async function playTone(duration, toneFrequency) {
-            if (stopMorseCode || !audioContext) return; // Check stop flag and audio context
+            // Check master sound setting FIRST
+            if (typeof window.isMasterSoundEnabled !== 'undefined' && !window.isMasterSoundEnabled) {
+                // console.log('Master sound is OFF, playTone will not play.'); // Debug log
+                return Promise.resolve(); // Exit if master sound is disabled
+            }
+
+            if (stopMorseCode || !audioContext) {
+                // console.warn("playTone: stopMorseCode active or no audioContext. Aborting tone."); // Optional log
+                return Promise.resolve(); // Correctly return a resolved promise
+            }
 
             return new Promise(resolve => {
                 if (!audioContext || audioContext.state === 'suspended') {
