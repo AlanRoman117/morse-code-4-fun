@@ -12,11 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let isBookCompleted = false; // Flag for book completion status
 
     // New global variables for Morse-based book cipher
-    // const MORSE_SEGMENT_LENGTH = 40; // Obsolete: Define segment length for display
     let currentBookMorseContent = '';
-    // let currentMorseSegment = ''; // Obsolete: To track the current visible Morse segment
-    // let currentSegmentStartIndex = 0; // Obsolete: To track the start of the current visible Morse segment
-    // let currentMorseLetterIndex = 0; // To track the current letter in the segment - Considered obsolete
+    // let currentMorseLetterIndex = 0; // Obsolete: To track the current letter in the segment
     let fullMorseSequence = []; // Stores arrays of Morse letters (words)
     let currentWordIndex = 0; // Index for the current word in fullMorseSequence
     let currentMorseLetterIndexInWord = 0; // Index for the current Morse letter within the current word
@@ -225,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const progress = {
             bookId: bookIdToSave,
             currentWordIndex: currentWordIndex, // Current progress in Morse sequence (word index)
+            currentMorseLetterIndexInWord: currentMorseLetterIndexInWord, // Current progress within the word
             unlockedText: unlockedTextDisplay ? unlockedTextDisplay.textContent : '', // Revealed English text
             isCompleted: completedStatus // Completion status
         };
@@ -264,14 +262,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentWordIndex = parseInt(savedProgress.currentWordIndex, 10) || 0;
                 unlockedTextDisplay.textContent = savedProgress.unlockedText || '';
                 isBookCompleted = typeof savedProgress.isCompleted === 'boolean' ? savedProgress.isCompleted : false;
-                currentMorseLetterIndexInWord = 0; // Always reset letter index on load
+                // Load currentMorseLetterIndexInWord, defaulting to 0 if not present (for backward compatibility)
+                currentMorseLetterIndexInWord = parseInt(savedProgress.currentMorseLetterIndexInWord, 10) || 0;
 
-                console.log(`Progress loaded for ${bookIdToLoad}: Word Index ${currentWordIndex}, Completed: ${isBookCompleted}, Unlocked: "${savedProgress.unlockedText}"`);
+                console.log(`Progress loaded for ${bookIdToLoad}: Word Index ${currentWordIndex}, Letter Index ${currentMorseLetterIndexInWord}, Completed: ${isBookCompleted}, Unlocked: "${savedProgress.unlockedText}"`);
 
                 // Graceful Handling of Invalid currentWordIndex (assuming fullMorseSequence is populated)
                 // This check is important if the book content/structure changed since last save.
-                if (fullMorseSequence && !isBookCompleted && currentWordIndex >= fullMorseSequence.length) {
-                    console.warn(`Loaded currentWordIndex (${currentWordIndex}) is out of bounds for fullMorseSequence length (${fullMorseSequence.length}). Resetting progress for book ${bookIdToLoad}.`);
+                if (fullMorseSequence && !isBookCompleted &&
+                    (currentWordIndex >= fullMorseSequence.length ||
+                     (fullMorseSequence[currentWordIndex] && currentMorseLetterIndexInWord >= fullMorseSequence[currentWordIndex].length))) {
+                    console.warn(`Loaded progress (Word: ${currentWordIndex}, Letter: ${currentMorseLetterIndexInWord}) is out of bounds. Resetting progress for book ${bookIdToLoad}.`);
                     currentWordIndex = 0;
                     currentMorseLetterIndexInWord = 0;
                     unlockedTextDisplay.textContent = '';
@@ -280,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // localStorage.removeItem(`bookCipherProgress_${bookIdToLoad}`);
                 }
 
-                displayCurrentWordInUI(); // Update target Morse display
+                // displayCurrentWordInUI(); // Obsolete: Call removed
 
                 if (isBookCompleted) {
                     if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book Complete!";
@@ -363,7 +364,6 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(text => {
                 currentBookMorseContent = text.trim(); // Keep the raw Morse content for reference if needed
-                // currentSegmentStartIndex = 0; // Obsolete
 
                 if (currentBookMorseContent.length === 0) {
                     targetTextDisplay.textContent = "Book is empty.";
@@ -373,8 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log(`Book is empty: ${bookData.title}`);
                     fullMorseSequence = [];
                     currentTargetMorseLetter = '';
-                    // displayCurrentSegment(); // Obsolete
-                    // displayCurrentWordInUI(); // Obsolete: Call removed
                     // Game view will show "Book is empty."
                     return;
                 }
@@ -386,11 +384,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (unlockedTextDisplay) unlockedTextDisplay.textContent = '';
                 isBookCompleted = false;
-                // currentSegmentStartIndex = 0; // Obsolete
 
                 if (loadProgress(bookId)) {
                     console.log(`Progress loaded and restored for ${bookData.title}.`);
-                    // displayCurrentWordInUI() call removed from loadProgress, setNextTargetMorseSignal will handle highlighting
+                    // setNextTargetMorseSignal (called in loadProgress) will handle highlighting
                 } else {
                     console.log(`Starting ${bookData.title} fresh (no progress or error loading).`);
                     currentWordIndex = 0;
@@ -404,7 +401,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else { // Book has no parsable content or is empty after parsing
                         if (bookCipherMorseIO) bookCipherMorseIO.disabled = true;
                         if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
-                        // displayCurrentWordInUI(); // Obsolete: Call removed
                     }
                     if (bookCipherMessageEl) bookCipherMessageEl.textContent = "";
                 }
@@ -444,7 +440,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error fetching book content for game:', error);
                 if (targetTextDisplay) targetTextDisplay.textContent = `Error: Could not load '${bookData.title}'.`;
                 currentBookMorseContent = '';
-                currentMorseSegment = '';
                 if (unlockedTextDisplay) unlockedTextDisplay.textContent = '';
                 if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
                 if(bookCipherMorseIO) bookCipherMorseIO.disabled = true;
@@ -473,7 +468,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book Complete!"; // UI update
             if (bookCipherMorseIO) bookCipherMorseIO.disabled = true; // UI update
 
-            // displayCurrentWordInUI(); // Obsolete: Call removed
             saveProgress(currentBookId, isBookCompleted); // Save final state
             return false; // No more targets
         }
@@ -513,7 +507,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // If somehow currentTargetMorseLetter is empty here, reset display.
             if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
         }
-        // displayCurrentWordInUI(); // Obsolete: Call removed
 
         return true; // Target successfully set (or end of book handled)
     }
@@ -660,64 +653,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Obsolete function - removed
     // function handleMorseProcessing(morseString) { ... }
 
-    // function displayCurrentSegment() { // Obsolete
-    //     const targetTextDisplay = document.getElementById('target-text-display');
-    //     if (!targetTextDisplay) {
-    //         console.error("target-text-display not found");
-    //         return;
-    //     }
-    //
-    //     if (!currentBookMorseContent) {
-    //         targetTextDisplay.textContent = "No book content loaded.";
-    //         return;
-    //     }
-    //
-    //     let segmentEndIndex = currentSegmentStartIndex + MORSE_SEGMENT_LENGTH;
-    //     currentMorseSegment = currentBookMorseContent.substring(currentSegmentStartIndex, segmentEndIndex);
-    //     targetTextDisplay.textContent = currentMorseSegment;
-    //
-    //     // console.log(`Displaying segment: Start ${currentSegmentStartIndex}, End ${segmentEndIndex}, Content: "${currentMorseSegment}"`);
-    // }
-
-    function displayCurrentWordInUI() {
-        // const targetTextDisplay = document.getElementById('target-text-display');
-        // if (!targetTextDisplay) {
-        //     console.error("target-text-display element not found for book cipher game.");
-        //     return;
-        // }
-        //
-        // if (isBookCompleted) {
-        //     targetTextDisplay.innerHTML = '<span class="book-completed-message">Book Complete!</span>';
-        //     return;
-        // }
-        //
-        // if (currentWordIndex >= fullMorseSequence.length || !fullMorseSequence[currentWordIndex] || fullMorseSequence[currentWordIndex].length === 0) {
-        //     if (fullMorseSequence.length === 0 && currentBookMorseContent && currentBookMorseContent.length > 0) {
-        //          targetTextDisplay.innerHTML = '<span class="book-error-message">Book has no parsable Morse content.</span>';
-        //     } else if (fullMorseSequence.length === 0) { // Handles initially empty book or book that parses to nothing
-        //          targetTextDisplay.innerHTML = '<span class="book-error-message">Book is empty or no words found.</span>';
-        //     } else { // Should ideally be caught by isBookCompleted or next word logic
-        //          targetTextDisplay.innerHTML = '<span class="book-error-message">End of book or no current word to display.</span>';
-        //     }
-        //     return;
-        // }
-        //
-        // const currentWordArr = fullMorseSequence[currentWordIndex];
-        // let htmlContent = '';
-        //
-        // currentWordArr.forEach((morseLetter, letterIndex) => {
-        //     if (letterIndex === currentMorseLetterIndexInWord) {
-        //         htmlContent += `<span class="current-morse-letter highlight-morse">${morseLetter}</span>`;
-        //     } else {
-        //         htmlContent += `<span class="morse-letter">${morseLetter}</span>`;
-        //     }
-        //     if (letterIndex < currentWordArr.length - 1) {
-        //         htmlContent += ' '; // Add space between Morse letters
-        //     }
-        // });
-        // targetTextDisplay.innerHTML = htmlContent;
-        console.log("displayCurrentWordInUI is now obsolete and its call should be removed.");
-    }
+    // Obsolete function displayCurrentSegment() was removed.
+    // Obsolete function displayCurrentWordInUI() was removed.
+    // Calls to these functions have also been removed from:
+    // - loadProgress()
+    // - initializeAndStartBookGame()
+    // - setNextTargetMorseSignal()
+    // UI updates for the target Morse character are now handled by setNextTargetMorseSignal()
+    // and the full book display is managed by #full-book-morse-display.
 
     document.addEventListener('visualTapperCharacterComplete', (event) => {
         if (event.detail && typeof event.detail.morseString === 'string') {
@@ -736,6 +679,45 @@ document.addEventListener('DOMContentLoaded', () => {
     populateBookLibrary();
     // Set the initial view to the library
     showBookLibraryView();
+
+    // --- Auto-Scroll Preference Logic ---
+    const autoScrollToggle = document.getElementById('auto-scroll-toggle');
+    const autoScrollStorageKey = 'bookCipherAutoScroll';
+
+    function saveAutoScrollPreference(isEnabled) {
+        try {
+            localStorage.setItem(autoScrollStorageKey, JSON.stringify(isEnabled));
+        } catch (e) {
+            console.error("Could not save auto-scroll preference:", e);
+        }
+    }
+
+    function loadAutoScrollPreference() {
+        try {
+            const storedPreference = localStorage.getItem(autoScrollStorageKey);
+            if (storedPreference === null) {
+                return true; // Default to true if not set
+            }
+            return JSON.parse(storedPreference);
+        } catch (e) {
+            console.error("Could not load auto-scroll preference, defaulting to true:", e);
+            return true; // Default to true on error
+        }
+    }
+
+    if (autoScrollToggle) {
+        autoScrollToggle.checked = loadAutoScrollPreference();
+
+        autoScrollToggle.addEventListener('input', () => {
+            saveAutoScrollPreference(autoScrollToggle.checked);
+            // Optionally, dispatch an event or call a function if other parts of the app need to react immediately
+            // For example: document.dispatchEvent(new CustomEvent('autoScrollPreferenceChanged', { detail: { isEnabled: autoScrollToggle.checked } }));
+            console.log("Auto-scroll preference changed to:", autoScrollToggle.checked);
+        });
+    } else {
+        console.warn("#auto-scroll-toggle element not found.");
+    }
+    // --- End Auto-Scroll Preference Logic ---
 });
 
 function restartBookDeciphering(bookId) {
