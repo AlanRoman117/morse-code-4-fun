@@ -801,139 +801,141 @@ if (typeof attachTapperToArea === 'function') {
         console.warn("#auto-scroll-toggle element not found.");
     }
     // --- End Auto-Scroll Preference Logic ---
-});
 
-function restartBookDeciphering(bookId) {
-    if (!bookId) {
-        console.error("restartBookDeciphering: No bookId provided.");
-        alert("Cannot restart book: No book identifier specified.");
-        return;
-    }
-
-    const bookData = bookCipherBooks[bookId];
-    if (!bookData) {
-        console.error("restartBookDeciphering: Book data not found for bookId:", bookId);
-        alert("Cannot restart book: Book data not found.");
-        return;
-    }
-
-    // Confirm with the user before restarting
-    const confirmation = confirm(`Are you sure you want to restart deciphering for "${bookData.title}"? All progress for this book will be lost.`);
-    if (!confirmation) {
-        return; // User cancelled
-    }
-
-    // Clear saved progress from localStorage
-    try {
-        localStorage.removeItem(`bookCipherProgress_${bookId}`);
-        console.log(`Progress for book ${bookId} cleared from localStorage.`);
-    } catch (error) {
-        console.error(`Error removing progress for ${bookId} from localStorage:`, error);
-        alert("An error occurred while trying to clear book progress. Please try again.");
-        return; // Stop if clearing progress failed
-    }
-
-    // Reset global game state variables related to the current book.
-    if (currentBookId === bookId) {
-        currentBookMorseContent = '';
-        fullMorseSequence = [];
-        currentWordIndex = 0;
-        currentMorseLetterIndexInWord = 0;
-        currentTargetMorseLetter = '';
-        isBookCompleted = false; // Explicitly mark as not completed
-
-        // Clear UI elements if the game view for this book was active
-        // Check if elements exist before trying to modify them
-        const gameView = document.getElementById('book-game-view');
-        if (gameView && !gameView.classList.contains('hidden')) {
-            // const targetTextDisplay = document.getElementById('target-text-display'); // Removed
-            // if (targetTextDisplay) targetTextDisplay.textContent = 'Morse code will appear here...'; // Removed
-
-            const unlockedTextDisplay = document.getElementById('unlocked-text-display');
-            if (unlockedTextDisplay) unlockedTextDisplay.textContent = '-';
-
-            const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
-            if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
-
-            // const bookCipherMorseIO = document.getElementById('book-cipher-morse-io'); // Removed
-            // if (bookCipherMorseIO) { // Removed
-            //     bookCipherMorseIO.value = ''; // Removed
-            //     bookCipherMorseIO.disabled = true; // Removed
-            // } // Removed
-            const bookCipherMessageEl = document.getElementById('book-cipher-message');
-            if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book progress has been reset.";
+    function restartBookDeciphering(bookId) {
+        if (!bookId) {
+            console.error("restartBookDeciphering: No bookId provided.");
+            alert("Cannot restart book: No book identifier specified.");
+            return;
         }
-    }
 
-    const detailsView = document.getElementById('book-details-view');
-    if (detailsView) {
-        detailsView.innerHTML = '';
-        const bookElementInLibrary = document.querySelector(`#book-library-container .book-cover-item[data-book-id='${bookId}']`);
-        if (bookElementInLibrary) {
-            bookElementInLibrary.classList.remove('book-cover-selected');
-            bookElementInLibrary.click();
+        const bookData = bookCipherBooks[bookId]; // Assumes bookCipherBooks is accessible (global or closure)
+        if (!bookData) {
+            console.error("restartBookDeciphering: Book data not found for bookId:", bookId);
+            alert("Cannot restart book: Book data not found.");
+            return;
+        }
+
+        // Confirm with the user before restarting
+        const confirmation = confirm(`Are you sure you want to restart deciphering for "${bookData.title}"? All progress for this book will be lost.`);
+        if (!confirmation) {
+            return; // User cancelled
+        }
+
+        // Clear saved progress from localStorage
+        try {
+            localStorage.removeItem(`bookCipherProgress_${bookId}`);
+            console.log(`Progress for book ${bookId} cleared from localStorage.`);
+        } catch (error) {
+            console.error(`Error removing progress for ${bookId} from localStorage:`, error);
+            alert("An error occurred while trying to clear book progress. Please try again.");
+            return; // Stop if clearing progress failed
+        }
+
+        // Reset global game state variables related to the current book.
+        // currentBookId, currentBookMorseContent, etc. are defined in the outer scope of DOMContentLoaded
+        if (currentBookId === bookId) {
+            currentBookMorseContent = '';
+            fullMorseSequence = [];
+            currentWordIndex = 0;
+            currentMorseLetterIndexInWord = 0;
+            currentTargetMorseLetter = '';
+            isBookCompleted = false; // Explicitly mark as not completed
+
+            const gameView = document.getElementById('book-game-view');
+            if (gameView && !gameView.classList.contains('hidden')) {
+                const unlockedTextDisplay = document.getElementById('unlocked-text-display');
+                if (unlockedTextDisplay) unlockedTextDisplay.textContent = '-';
+
+                const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
+                if (currentDecodedCharDisplay) currentDecodedCharDisplay.textContent = '-';
+
+                const bookCipherMessageEl = document.getElementById('book-cipher-message');
+                if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book progress has been reset.";
+            }
+        }
+
+        // After resetting, simulate clicking the book in the library to refresh the details view
+        // or go back to library if the element isn't found (less ideal, but a fallback)
+        const detailsView = document.getElementById('book-details-view');
+        if (detailsView) { // Check if detailsView itself exists
+            detailsView.innerHTML = ''; // Clear current details view content
+
+            // Find the book item in the library to simulate a click, which re-populates details view
+            const bookElementInLibrary = document.querySelector(`#book-library-container .book-cover-item[data-book-id='${bookId}']`);
+            if (bookElementInLibrary) {
+                // Ensure it's not marked as selected if it was the one being reset, then click
+                // bookElementInLibrary.classList.remove('book-cover-selected');
+                // The click handler in populateBookLibrary should handle selection state.
+                bookElementInLibrary.click(); // This re-triggers the detail view generation
+            } else {
+                // Fallback if the specific book item isn't found (e.g., library not populated or error)
+                showBookLibraryView(); // Go back to the main library view
+            }
         } else {
+            // Fallback if the details view container itself doesn't exist
             showBookLibraryView();
         }
-    } else {
-        showBookLibraryView();
-    }
-}
-
-function displayUnlockedBookText(bookId) {
-    const bookData = bookCipherBooks[bookId];
-    if (!bookData || !bookData.filePath) {
-        console.error("displayUnlockedBookText: Invalid bookId or missing filePath", bookId);
-        alert("Could not load book text. Data is missing.");
-        return;
     }
 
-    fetch(bookData.filePath)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
-            }
-            return response.text();
-        })
-        .then(morseContent => {
-            morseContent = morseContent.trim();
-            if (morseContent.length === 0) {
-                alert("This book appears to be empty.");
-                return;
-            }
+    function displayUnlockedBookText(bookId) {
+        const bookData = bookCipherBooks[bookId]; // Assumes bookCipherBooks is accessible
+        if (!bookData || !bookData.filePath) {
+            console.error("displayUnlockedBookText: Invalid bookId or missing filePath", bookId);
+            alert("Could not load book text. Data is missing.");
+            return;
+        }
 
-            // Convert Morse to English text
-            let fullEnglishText = morseContent.split('/')
-                                      .map(morseWord => {
-                                          return morseWord.trim().split(' ')
-                                                        .map(morseChar => reversedMorseCode[morseChar] || '') // Use reversedMorseCode directly
-                                                        .join('');
-                                      }).join(' ');
-
-            const modal = document.getElementById('unlocked-text-modal');
-            const modalTitle = document.getElementById('unlocked-text-modal-title');
-            const modalContent = document.getElementById('unlocked-text-modal-content');
-            const closeModalBtn = document.getElementById('close-unlocked-text-modal-btn');
-
-            if (modal && modalTitle && modalContent && closeModalBtn) {
-                modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
-                modalContent.textContent = fullEnglishText.length > 0 ? fullEnglishText : "No text could be deciphered (book might be empty or in an unrecognized format).";
-                modal.classList.remove('hidden');
-
-                // To prevent multiple listeners, one approach:
-                if (!closeModalBtn.dataset.listenerAttached) {
-                    closeModalBtn.addEventListener('click', () => {
-                        modal.classList.add('hidden');
-                    });
-                    closeModalBtn.dataset.listenerAttached = 'true';
+        fetch(bookData.filePath)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
                 }
-            } else {
-                console.error("Modal elements not found for displaying unlocked text.");
-                alert("Error: Could not display the unlocked text. UI elements missing.");
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching or processing book content for displayUnlockedBookText:', error);
-            alert(`Error loading book text: ${error.message}`);
-        });
-}
+                return response.text();
+            })
+            .then(morseContent => {
+                morseContent = morseContent.trim();
+                if (morseContent.length === 0) {
+                    alert("This book appears to be empty.");
+                    return;
+                }
+
+                // Convert Morse to English text
+                // reversedMorseCode needs to be accessible here.
+                // If reversedMorseCode is defined globally (e.g. in morseCode.js and included in HTML), this is fine.
+                // Otherwise, it needs to be passed or defined within this scope.
+                // For now, assuming reversedMorseCode is globally available as per typical structure.
+                let fullEnglishText = morseContent.split('/')
+                                          .map(morseWord => {
+                                              return morseWord.trim().split(' ')
+                                                            .map(morseChar => reversedMorseCode[morseChar] || '')
+                                                            .join('');
+                                          }).join(' ');
+
+                const modal = document.getElementById('unlocked-text-modal');
+                const modalTitle = document.getElementById('unlocked-text-modal-title');
+                const modalContent = document.getElementById('unlocked-text-modal-content');
+                const closeModalBtn = document.getElementById('close-unlocked-text-modal-btn');
+
+                if (modal && modalTitle && modalContent && closeModalBtn) {
+                    modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
+                    modalContent.textContent = fullEnglishText.length > 0 ? fullEnglishText : "No text could be deciphered (book might be empty or in an unrecognized format).";
+                    modal.classList.remove('hidden');
+
+                    if (!closeModalBtn.dataset.listenerAttached) {
+                        closeModalBtn.addEventListener('click', () => {
+                            modal.classList.add('hidden');
+                        });
+                        closeModalBtn.dataset.listenerAttached = 'true';
+                    }
+                } else {
+                    console.error("Modal elements not found for displaying unlocked text.");
+                    alert("Error: Could not display the unlocked text. UI elements missing.");
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching or processing book content for displayUnlockedBookText:', error);
+                alert(`Error loading book text: ${error.message}`);
+            });
+    }
+});
