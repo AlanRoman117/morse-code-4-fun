@@ -53,16 +53,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const practiceMessage = document.getElementById('practiceMessage');
     const tapperDecodedOutput = document.getElementById('tapperDecodedOutput');
     const clearTapperInputButton = document.getElementById('clearTapperInputButton');
-    const playTappedMorseBtn = document.getElementById('play-tapped-morse-btn'); // Added
+    const playTappedMorseBtn = document.getElementById('play-tapped-morse-btn');
 
-    if (!practiceText || !newChallengeButton || !practiceMessage || !tapperDecodedOutput || !clearTapperInputButton || !playTappedMorseBtn) { // Added playTappedMorseBtn
-        console.error("Learn & Practice Game Error: One or more essential UI elements not found. Game will not initialize.");
-        return;
+    // Elements for "Receive & Type" mode
+    const playReceiveChallengeButton = document.getElementById('playReceiveChallengeButton');
+    const receiveChallengeInput = document.getElementById('receiveChallengeInput');
+    const submitReceiveChallengeButton = document.getElementById('submitReceiveChallengeButton');
+    const receiveChallengeFeedback = document.getElementById('receiveChallengeFeedback');
+
+    // Combined check for all essential elements
+    if (!practiceText || !newChallengeButton || !practiceMessage || !tapperDecodedOutput || !clearTapperInputButton || !playTappedMorseBtn ||
+        !playReceiveChallengeButton || !receiveChallengeInput || !submitReceiveChallengeButton || !receiveChallengeFeedback) {
+        console.error("Learn & Practice Game Error: One or more essential UI elements for tapping practice or receive challenge not found. Affected modes may not initialize correctly.");
+        // Depending on which elements are missing, we might selectively disable parts of the script.
+        // For now, if essential common elements are missing, it's a critical error.
+        if (!practiceText || !newChallengeButton) return; // Critical for tapping practice
     }
 
-    const practiceWords = ['HELLO', 'WORLD', 'MORSE', 'CODE', 'PRACTICE', 'LEARNER', 'BUTTON', 'SIGNAL', 'TAPPER', 'YELLOW'];
-    let currentChallengeWord = '';
-    let currentTappedString = '';
+    const practiceWords = ['HELLO', 'WORLD', 'MORSE', 'CODE', 'PRACTICE', 'LEARNER', 'BUTTON', 'SIGNAL', 'TAPPER', 'YELLOW', 'LISTEN', 'DECODE', 'ANSWER', 'CHALLENGE'];
+    let currentChallengeWord = ''; // Used for tapping practice
+    let currentTappedString = '';  // Used for tapping practice
+
+    // Variables for "Receive & Type" mode
+    let currentReceiveChallengeWord = '';
+    let isReceiveChallengeActive = false;
 
     // Function to get character from Morse (relies on reversedMorseCode from index.html)
     function getCharFromMorse(morseString) {
@@ -177,4 +191,144 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     // updateTableHighlight was moved to global scope
+
+    // --- "Receive & Type" Morse Challenge Logic ---
+
+    async function startNewReceiveChallenge() {
+        // Check if audio is already playing globally
+        if (typeof window.isPlaying !== 'undefined' && window.isPlaying) {
+            receiveChallengeFeedback.textContent = "Audio is busy. Please wait.";
+            receiveChallengeFeedback.style.color = 'orange'; // Using direct style for simplicity matching existing feedback
+            if(playReceiveChallengeButton) playReceiveChallengeButton.disabled = false; // Allow user to try again shortly
+            if(submitReceiveChallengeButton) submitReceiveChallengeButton.disabled = true;
+            if(receiveChallengeInput) receiveChallengeInput.disabled = true;
+            isReceiveChallengeActive = false; // Ensure challenge is not considered active
+            return;
+        }
+
+        isReceiveChallengeActive = true;
+        if(playReceiveChallengeButton) playReceiveChallengeButton.disabled = true;
+        if(submitReceiveChallengeButton) submitReceiveChallengeButton.disabled = true;
+        if(receiveChallengeInput) receiveChallengeInput.disabled = false;
+        if(receiveChallengeInput) receiveChallengeInput.value = '';
+        if(receiveChallengeFeedback) receiveChallengeFeedback.textContent = '';
+        if(receiveChallengeFeedback) receiveChallengeFeedback.className = 'text-lg text-center min-h-[24px] mt-2'; // Reset class
+
+        const randomIndex = Math.floor(Math.random() * practiceWords.length);
+        currentReceiveChallengeWord = practiceWords[randomIndex].toUpperCase();
+
+        // Ensure textToMorse function is available (defined in index.html script)
+        if (typeof textToMorse !== 'function') {
+            console.error("textToMorse function is not defined. Cannot play Morse sequence.");
+            if(receiveChallengeFeedback) {
+                receiveChallengeFeedback.textContent = "Error: Cannot prepare Morse audio.";
+                receiveChallengeFeedback.style.color = 'red';
+            }
+            isReceiveChallengeActive = false;
+            if(playReceiveChallengeButton) playReceiveChallengeButton.disabled = false; // Re-enable play button
+            if(receiveChallengeInput) receiveChallengeInput.disabled = true;
+            return;
+        }
+
+        const morseVersionOfWord = textToMorse(currentReceiveChallengeWord);
+
+        // Ensure playMorseSequence is available (defined in index.html script)
+        // And initAudio has been called by user gesture (e.g. clicking playMorseBtn in main interface)
+        if (typeof playMorseSequence !== 'function' || typeof window.audioContext === 'undefined' || window.audioContext.state === 'suspended') {
+            console.error("playMorseSequence function is not defined, or audio context not ready. Cannot play Morse sequence.");
+            if(receiveChallengeFeedback) {
+                receiveChallengeFeedback.textContent = "Error: Audio system not ready. Please interact with main player first.";
+                receiveChallengeFeedback.style.color = 'red';
+            }
+            isReceiveChallengeActive = false;
+            if(playReceiveChallengeButton) playReceiveChallengeButton.disabled = false;
+            if(receiveChallengeInput) receiveChallengeInput.disabled = true;
+            // A more robust solution might try to call initAudio() here if possible,
+            // but generally, AudioContext needs a direct user gesture on its first activation.
+            return;
+        }
+
+        if(receiveChallengeFeedback) {
+            receiveChallengeFeedback.textContent = "Listen...";
+            receiveChallengeFeedback.style.color = 'lightblue';
+        }
+
+        try {
+            await playMorseSequence(morseVersionOfWord); // Assumes playMorseSequence is async or returns a Promise
+            // Playback finished
+            if(submitReceiveChallengeButton) submitReceiveChallengeButton.disabled = false;
+            if(receiveChallengeInput) receiveChallengeInput.focus();
+            if(receiveChallengeFeedback) {
+                receiveChallengeFeedback.textContent = "Your turn! Type what you heard.";
+                receiveChallengeFeedback.style.color = 'yellow'; // Or another neutral/prompting color
+            }
+        } catch (error) {
+            console.error("Error during Morse playback for receive challenge:", error);
+            if(receiveChallengeFeedback) {
+                receiveChallengeFeedback.textContent = "Error playing Morse. Try again.";
+                receiveChallengeFeedback.style.color = 'red';
+            }
+            isReceiveChallengeActive = false;
+            if(playReceiveChallengeButton) playReceiveChallengeButton.disabled = false; // Re-enable play button
+            if(receiveChallengeInput) receiveChallengeInput.disabled = true;
+            if(submitReceiveChallengeButton) submitReceiveChallengeButton.disabled = true;
+        }
+        // playReceiveChallengeButton remains disabled until the current challenge is submitted or reset
+    }
+
+    function checkReceiveChallengeAnswer() {
+        // Added null checks for UI elements, though they are checked at the top of DOMContentLoaded
+        if (!isReceiveChallengeActive && !currentReceiveChallengeWord) {
+             console.log("No active receive challenge to check or word not set.");
+             // If UI elements might be null, ensure checks:
+             if(playReceiveChallengeButton) playReceiveChallengeButton.disabled = false;
+             if(submitReceiveChallengeButton) submitReceiveChallengeButton.disabled = true;
+             if(receiveChallengeInput) receiveChallengeInput.disabled = true;
+             return;
+        }
+        isReceiveChallengeActive = false; // Mark as no longer active once submitted
+        const userAnswer = receiveChallengeInput ? receiveChallengeInput.value.trim().toUpperCase() : "";
+
+        if (userAnswer === currentReceiveChallengeWord) {
+            if(receiveChallengeFeedback) {
+                receiveChallengeFeedback.textContent = `Correct! The word was '${currentReceiveChallengeWord}'.`;
+                receiveChallengeFeedback.style.color = 'lightgreen';
+            }
+        } else {
+            if(receiveChallengeFeedback) {
+                receiveChallengeFeedback.textContent = `Incorrect. You typed '${userAnswer || "[empty]"}'. The correct word was '${currentReceiveChallengeWord}'.`;
+                receiveChallengeFeedback.style.color = '#DC2626'; // Tailwind red-600
+            }
+        }
+
+        if(playReceiveChallengeButton) playReceiveChallengeButton.disabled = false;
+        if(submitReceiveChallengeButton) submitReceiveChallengeButton.disabled = true;
+        if(receiveChallengeInput) receiveChallengeInput.disabled = true;
+        currentReceiveChallengeWord = ''; // Clear the word after checking
+    }
+
+    // Ensure elements exist before adding listeners (already done by the top-level check, but good practice if functions were standalone)
+    if (playReceiveChallengeButton) {
+        playReceiveChallengeButton.addEventListener('click', startNewReceiveChallenge);
+    }
+
+    if (submitReceiveChallengeButton) {
+        submitReceiveChallengeButton.addEventListener('click', checkReceiveChallengeAnswer);
+    }
+
+    if (receiveChallengeInput) {
+        receiveChallengeInput.addEventListener('keypress', (event) => {
+            // Check if submit button is available and not disabled
+            if (event.key === 'Enter' && isReceiveChallengeActive && submitReceiveChallengeButton && !submitReceiveChallengeButton.disabled) {
+                checkReceiveChallengeAnswer();
+            }
+        });
+    }
+
+    // Initial state for Receive & Type mode (buttons should be set by HTML, but good to confirm)
+    // Null checks here are defensive.
+    if (playReceiveChallengeButton) playReceiveChallengeButton.disabled = false;
+    if (submitReceiveChallengeButton) submitReceiveChallengeButton.disabled = true;
+    if (receiveChallengeInput) receiveChallengeInput.disabled = true;
+
 });
