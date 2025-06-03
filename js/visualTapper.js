@@ -80,31 +80,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     tapperTone = new Tone.Synth({
                         oscillator: { type: 'sine' },
-                        envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+                        envelope: {
+                            attack: 0.005,
+                            decay: 0.01,  // Can be short if sustain is high
+                            sustain: 0.9, // Make sure this allows sound to hold
+                            release: 0.05 // Quick release
+                        }
                     }).toDestination();
+                    // console.log("TapperTone synth re-configured for sustain."); // Optional: for debugging
                 } catch (e) {
                     console.error("Failed to create Tone.Synth for tapper:", e);
                     return; // Don't proceed if synth creation fails
                 }
             }
             // Ensure Tone.js audio context is running (often requires user gesture)
+            // console.log("Tone.context.state before Tone.start():", Tone.context.state);
             if (Tone.context.state !== 'running') {
-                Tone.start().catch(e => console.warn("Tone.js audio context couldn't start on tap: ", e));
-            }
-            if (tapperTone && typeof tapperTone.triggerAttackRelease === 'function') {
-                 tapperTone.triggerAttackRelease(TAP_SOUND_FREQ, '8n'); // '8n' is a short duration
+                Tone.start().then(() => {
+                    // console.log("Tone.start() successful, context state:", Tone.context.state);
+                    if (tapperTone && typeof tapperTone.triggerAttack === 'function') { // CHANGED
+                         // console.log("Attempting to triggerAttack on tapperTone.");
+                         tapperTone.triggerAttack(TAP_SOUND_FREQ); // CHANGED to triggerAttack
+                    }
+                }).catch(e => console.warn("Tone.js audio context couldn't start on tap: ", e));
+            } else {
+                 if (tapperTone && typeof tapperTone.triggerAttack === 'function') { // CHANGED
+                     // console.log("AudioContext already running. Attempting to triggerAttack on tapperTone.");
+                     tapperTone.triggerAttack(TAP_SOUND_FREQ); // CHANGED to triggerAttack
+                }
             }
         } else {
-            // console.log("Tone.js not available for tap sound."); // Optional: log if Tone not found
+            // console.warn("Tone.js not available for tap sound.");
         }
     }
 
     function stopTapSound() {
-        // For a simple synth like the one defined, explicit stop isn't usually needed
-        // as it has a very short release. If using a synth with sustain, this would be important.
-        // if (tapperTone && typeof tapperTone.triggerRelease === 'function') {
-        //     tapperTone.triggerRelease();
-        // }
+        // console.log("stopTapSound called."); // For debugging
+        if (tapperTone && typeof tapperTone.triggerRelease === 'function') {
+            // console.log("Attempting to triggerRelease on tapperTone.");
+            tapperTone.triggerRelease(); // This stops the sound based on the envelope's release phase
+        }
     }
     
     // Event Listeners for the Tapper UI
