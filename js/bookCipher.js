@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const unlockedTextDisplay = document.getElementById('unlocked-text-display');
     const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
     const bookCipherMessageEl = document.getElementById('book-cipher-message'); // Added
+    const returnToLibraryFromGameBtn = document.getElementById('return-to-library-from-game-btn');
 
     // --- View Switching Functions ---
     function showBookLibraryView() {
@@ -731,6 +732,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial state for Morse IO: disabled until a book is successfully loaded
     // if(bookCipherMorseIO) bookCipherMorseIO.disabled = true; // Removed, as bookCipherMorseIO is removed
+
+    if (returnToLibraryFromGameBtn) {
+        returnToLibraryFromGameBtn.addEventListener('click', () => {
+            console.log("'Return to Library' button clicked from game view.");
+            if (currentBookId) { // currentBookId is a global in this file
+                // isBookCompleted is also a global in this file
+                saveProgress(currentBookId, isBookCompleted);
+            }
+            // detachSharedTapper is a global function from index.html
+            if (typeof detachSharedTapper === 'function') {
+                detachSharedTapper();
+            } else {
+                console.error("detachSharedTapper function not found. Tapper may not be handled correctly.");
+            }
+            // showBookLibraryView is defined in this file
+            showBookLibraryView();
+        });
+    }
 
     // Populate the book library on DOMContentLoaded
     populateBookLibrary();
