@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const bookCipherBooks = {
-        'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1.txt' },
-        'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro.txt' },
-        'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote.txt' },
-        'empty_book': { title: 'Empty Book Test', filePath: 'assets/book_cipher_texts/empty.txt' },
-        'short_book': { title: 'Short Book Test', filePath: 'assets/book_cipher_texts/very_short.txt' },
-        'long_book': { title: 'Long Book Test', filePath: 'assets/book_cipher_texts/long_passage.txt' }
+        'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1_morse.txt' },
+        'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro_morse.txt' },
+        'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote_morse.txt' },
+        'empty_book': { title: 'Empty Book Test', filePath: 'assets/book_cipher_texts/empty_morse.txt' },
+        'short_book': { title: 'Short Book Test', filePath: 'assets/book_cipher_texts/very_short_morse.txt' },
+        'long_book': { title: 'Long Book Test', filePath: 'assets/book_cipher_texts/long_passage_morse.txt' }
     };
 
     let currentTargetText = '';
