@@ -312,12 +312,10 @@
                     <div class="w-full md:w-1/2 p-2">
                         <div class="morse-reference">
                             <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Code Reference</h2>
-                            <div class="overflow-x-auto">
+                            <div class="">
                                 <table class="reference-table mx-auto">
                                     <thead>
                                         <tr>
-                                            <th>Character</th>
-                                            <th>Morse</th>
                                             <th>Character</th>
                                             <th>Morse</th>
                                             <th>Character</th>
@@ -1055,7 +1053,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const characters = Object.keys(morseCode);
     let rowContent = '';
     for (let i = 0; i < characters.length; i++) {
-        if (i % 4 === 0) { // Start new row
+        if (i % 3 === 0) { // Start new row
             if (i > 0) rowContent += '</tr>';
             rowContent += '<tr>';
         }
@@ -1088,9 +1086,9 @@ document.addEventListener('DOMContentLoaded', () => {
         rowContent += `<td id="ref-char-${idChar}">${displayChar}</td><td id="ref-morse-${idChar}">${morseCode[char]}</td>`;
 
         if (i === characters.length - 1) { // Ensure last row is closed correctly
-            let cellsInLastRow = (i % 4) + 1; // Number of items processed for the current row
-            if (cellsInLastRow < 4) {
-                for (let j = cellsInLastRow; j < 4; j++) {
+            let cellsInLastRow = (i % 3) + 1; // Number of items processed for the current row
+            if (cellsInLastRow < 3) {
+                for (let j = cellsInLastRow; j < 3; j++) {
                     rowContent += '<td></td><td></td>'; // Add empty pairs for missing items
                 }
             }
