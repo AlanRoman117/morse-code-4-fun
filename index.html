@@ -851,6 +851,11 @@ function showTab(tabIdToShow) {
         selectedNavButton.classList.add('bg-blue-600', 'text-white');
     }
 
+    // If switching to the Learn & Practice tab, start a new challenge.
+    if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') {
+        startNewChallenge();
+    }
+
     // Attach tapper to the new tab if it's the book cipher tab or learn & practice tab
     if (tabIdToShow === 'book-cipher-tab') {
         attachTapperToArea('bookCipherTapperArea');
