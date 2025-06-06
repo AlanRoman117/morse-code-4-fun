@@ -306,15 +306,45 @@
     <div id="tab-content-wrapper">
         <div id="learn-practice-tab" class="tab-content">
             <div class="app-container">
-
-                <!-- Tapper Area for Learn & Practice Tab -->
-                <div id="learnPracticeTapperArea" class="text-center my-4">
-                    <!-- The shared visual tapper will be inserted here by JavaScript -->
-                     <h2 class="section-title text-2xl font-semibold mb-3 text-center">Practice Tapping Morse</h2>
+                <!-- NEW TOP CONTAINER STARTS HERE -->
+                <div class="w-full flex flex-col space-y-4 md:flex-row md:space-x-4 md:items-start mb-6">
+                    <!-- Left column for Morse reference -->
+                    <div class="w-full md:w-1/2 p-2">
+                        <div class="morse-reference">
+                            <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Code Reference</h2>
+                            <div class="overflow-x-auto">
+                                <table class="reference-table mx-auto">
+                                    <thead>
+                                        <tr>
+                                            <th>Character</th>
+                                            <th>Morse</th>
+                                            <th>Character</th>
+                                            <th>Morse</th>
+                                            <th>Character</th>
+                                            <th>Morse</th>
+                                            <th>Character</th>
+                                            <th>Morse</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="morse-reference-body">
+                                        <!-- Dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Right column for Tapper -->
+                    <div class="w-full md:w-1/2 p-2">
+                        <div id="learnPracticeTapperArea" class="text-center my-4">
+                            <!-- The shared visual tapper will be inserted here by JavaScript -->
+                             <h2 class="section-title text-2xl font-semibold mb-3 text-center">Practice Tapping Morse</h2>
+                        </div>
+                    </div>
                 </div>
+                <!-- NEW TOP CONTAINER ENDS HERE -->
 
                 <!-- Interactive Practice Game Area -->
-                <div id="interactivePracticeGame" class="mt-4">
+                <div id="interactivePracticeGame">
                     <p id="practiceText" class="text-3xl font-bold text-yellow-400 min-h-[40px] text-center"></p>
                     <p id="tapperDecodedOutput" class="text-2xl min-h-[30px] break-all text-center bg-gray-700 p-2 rounded mt-2"></p>
                     <p id="practiceMessage" class="text-lg text-center min-h-[24px] mt-2"></p>
@@ -375,28 +405,6 @@
             </div>
         </div>
 
-        <div class="morse-reference">
-            <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Code Reference</h2>
-            <div class="overflow-x-auto">
-                <table class="reference-table mx-auto">
-                    <thead>
-                        <tr>
-                            <th>Character</th>
-                            <th>Morse</th>
-                            <th>Character</th>
-                            <th>Morse</th>
-                            <th>Character</th>
-                            <th>Morse</th>
-                            <th>Character</th>
-                            <th>Morse</th>
-                        </tr>
-                    </thead>
-                    <tbody id="morse-reference-body">
-                        <!-- Dynamically populated -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
         </div>
         <div id="book-cipher-tab" class="tab-content hidden">
