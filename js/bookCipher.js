@@ -728,6 +728,11 @@ if (typeof attachTapperToArea === 'function') {
     // and the full book display is managed by #full-book-morse-display.
 
     document.addEventListener('visualTapperCharacterComplete', (event) => {
+    const bookCipherTab = document.getElementById('book-cipher-tab');
+    if (bookCipherTab && bookCipherTab.classList.contains('hidden')) {
+        return; // Do nothing if the Book Cipher tab is not active
+    }
+
         if (event.detail && typeof event.detail.morseString === 'string') {
             const morseFromTapper = event.detail.morseString;
             // console.log('BookCipher: Received visualTapperCharacterComplete with Morse:', morseFromTapper);

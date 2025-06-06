@@ -159,6 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener('visualTapperCharacterComplete', (event) => {
+    const learnPracticeTab = document.getElementById('learn-practice-tab');
+    if (learnPracticeTab && learnPracticeTab.classList.contains('hidden')) {
+        return; // Do nothing if the Learn & Practice tab is not active
+    }
+
         if (!currentChallengeWord) return; // Ignore taps if no challenge is active
 
         const morseString = event.detail.morseString;
