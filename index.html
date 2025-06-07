@@ -320,8 +320,6 @@
                                             <th>Morse</th>
                                             <th>Character</th>
                                             <th>Morse</th>
-                                            <th>Character</th>
-                                            <th>Morse</th>
                                         </tr>
                                     </thead>
                                     <tbody id="morse-reference-body">
@@ -1053,7 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const characters = Object.keys(morseCode);
     let rowContent = '';
     for (let i = 0; i < characters.length; i++) {
-        if (i % 3 === 0) { // Start new row
+        if (i % 2 === 0) { // Start new row
             if (i > 0) rowContent += '</tr>';
             rowContent += '<tr>';
         }
@@ -1086,9 +1084,9 @@ document.addEventListener('DOMContentLoaded', () => {
         rowContent += `<td id="ref-char-${idChar}">${displayChar}</td><td id="ref-morse-${idChar}">${morseCode[char]}</td>`;
 
         if (i === characters.length - 1) { // Ensure last row is closed correctly
-            let cellsInLastRow = (i % 3) + 1; // Number of items processed for the current row
-            if (cellsInLastRow < 3) {
-                for (let j = cellsInLastRow; j < 3; j++) {
+            let cellsInLastRow = (i % 2) + 1; // Number of items processed for the current row
+            if (cellsInLastRow < 2) {
+                for (let j = cellsInLastRow; j < 2; j++) {
                     rowContent += '<td></td><td></td>'; // Add empty pairs for missing items
                 }
             }
