@@ -313,7 +313,7 @@
                 <div class="w-full flex flex-col space-y-4 md:grid md:grid-cols-3 md:gap-4 md:items-start mb-6">
                     <!-- Left column for Morse reference -->
                     <div class="w-full p-2 md:col-span-2">
-                        <div class="morse-reference">
+                        <div class="morse-reference" id="morse-reference-container">
                             <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Code Reference</h2>
                             <div class="">
                                 <table class="reference-table mx-auto">
@@ -601,6 +601,7 @@
         let gainNode;
         let isPlaying = false;
         let stopMorseCode = false; // Flag to stop ongoing Morse playback
+        let resizeTimer; // For debouncing resize events
 
         // DOM Elements
         const textInput = document.getElementById('text-input');
@@ -1051,18 +1052,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- UI Initialization ---
         function populateMorseReference() {
+    const container = document.getElementById('morse-reference-container');
+    if (!container) {
+        console.error("Morse reference container not found!");
+        return;
+    }
+    const containerWidth = container.offsetWidth;
+
+    let numPairs;
+    if (containerWidth > 900) {
+        numPairs = 4;
+    } else if (containerWidth > 600) {
+        numPairs = 3;
+    } else {
+        numPairs = 2;
+    }
+
+    const referenceTable = container.querySelector('.reference-table');
+    if (!referenceTable) {
+        console.error("Reference table not found inside container!");
+        return;
+    }
+
+    // Dynamically Generate Header (<thead>)
+    const thead = referenceTable.querySelector('thead');
+    if (!thead) {
+        console.error("Thead not found in reference table!");
+        return;
+    }
+    thead.innerHTML = ''; // Clear existing header
+    const headerRow = document.createElement('tr');
+    for (let k = 0; k < numPairs; k++) {
+        const thChar = document.createElement('th');
+        thChar.textContent = 'Character';
+        headerRow.appendChild(thChar);
+        const thMorse = document.createElement('th');
+        thMorse.textContent = 'Morse';
+        headerRow.appendChild(thMorse);
+    }
+    thead.appendChild(headerRow);
+
+    // Dynamically Generate Body (<tbody>)
+    const morseReferenceBody = document.getElementById('morse-reference-body');
+    if (!morseReferenceBody) {
+        console.error("Morse reference body not found!");
+        return;
+    }
+    morseReferenceBody.innerHTML = ''; // Clear existing body content
+
     const characters = Object.keys(morseCode);
     let rowContent = '';
+
     for (let i = 0; i < characters.length; i++) {
-        if (i % 2 === 0) { // Start new row
-            if (i > 0) rowContent += '</tr>';
+        if (i % numPairs === 0) { // Start of a new row
+            if (i > 0) {
+                rowContent += '</tr>';
+            }
             rowContent += '<tr>';
         }
+
         const char = characters[i];
         const displayChar = char === ' ' ? 'Space' : char;
-
-        let idChar = char; // Default to using the char itself for ID
-        // Mapping for characters that are problematic in IDs or need a specific name
+        let idChar = char;
         if (char === '.') idChar = 'Period';
         else if (char === ',') idChar = 'Comma';
         else if (char === '?') idChar = 'QuestionMark';
@@ -1082,15 +1133,14 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (char === '$') idChar = 'Dollar';
         else if (char === '@') idChar = 'AtSign';
         else if (char === ' ') idChar = 'Space';
-        // Alphanumeric characters (A-Z, 0-9) will use their own value for idChar.
 
         rowContent += `<td id="ref-char-${idChar}">${displayChar}</td><td id="ref-morse-${idChar}">${morseCode[char]}</td>`;
 
-        if (i === characters.length - 1) { // Ensure last row is closed correctly
-            let cellsInLastRow = (i % 2) + 1; // Number of items processed for the current row
-            if (cellsInLastRow < 2) {
-                for (let j = cellsInLastRow; j < 2; j++) {
-                    rowContent += '<td></td><td></td>'; // Add empty pairs for missing items
+        if (i === characters.length - 1) { // Last character
+            const cellsInLastRow = (i % numPairs) + 1;
+            if (cellsInLastRow < numPairs) {
+                for (let j = cellsInLastRow; j < numPairs; j++) {
+                    rowContent += '<td></td><td></td>'; // Add empty pairs for padding
                 }
             }
             rowContent += '</tr>'; // Close the last row
@@ -1172,6 +1222,14 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error("Could not find 'play-tapped-morse-btn' or 'tapperDecodedOutput' elements.");
             }
+        });
+
+        // Debounced resize listener
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                populateMorseReference();
+            }, 250); // Adjust delay as needed
         });
 
         // VISUAL TAPPER JS HAS BEEN MOVED FROM HERE
