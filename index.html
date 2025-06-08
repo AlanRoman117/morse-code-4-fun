@@ -334,10 +334,11 @@
                     </div>
                     <!-- Right column for Tapper -->
                     <div class="w-full p-2">
-                        <div id="learnPracticeTapperArea" class="text-center my-4">
+                        <div id="learnPracticeTapperArea" class="text-center my-4 flex flex-col items-center">
                             <!-- The shared visual tapper will be inserted here by JavaScript -->
                              <h2 class="section-title text-2xl font-semibold mb-3 text-center">Practice Tapping Morse</h2>
-                            <div class="mt-4 flex flex-col space-y-2">
+                            <div id="tapper-placeholder"></div> <!-- New placeholder -->
+                            <div id="tapperGameControls" class="mt-4 flex flex-col space-y-2"> <!-- Moved and ID'd button container -->
                                 <button id="newChallengeButton" class="mt-2 w-full bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">New Challenge</button>
                                 <button id="play-tapped-morse-btn" class="mt-2 w-full bg-purple-500 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Play My Tapped Morse</button>
                                 <button id="clearTapperInputButton" class="mt-2 w-full bg-red-500 hover:bg-red-700 active:bg-red-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Clear My Tapping</button>
@@ -870,7 +871,7 @@ function showTab(tabIdToShow) {
     if (tabIdToShow === 'book-cipher-tab') {
         attachTapperToArea('bookCipherTapperArea');
     } else if (tabIdToShow === 'learn-practice-tab') {
-        attachTapperToArea('learnPracticeTapperArea');
+        attachTapperToArea('tapper-placeholder');
     } else if (tabIdToShow === 'morse-pals-tab') {
         attachTapperToArea('morsePalsTapperArea');
     } else if (tabIdToShow === 'global-beacon-tab') {
