@@ -158,30 +158,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.addEventListener('visualTapperCharacterComplete', (event) => {
-    const learnPracticeTab = document.getElementById('learn-practice-tab');
-    if (learnPracticeTab && learnPracticeTab.classList.contains('hidden')) {
-        return; // Do nothing if the Learn & Practice tab is not active
-    }
+    document.addEventListener('visualTapperInput', (event) => {
+        const learnPracticeTab = document.getElementById('learn-practice-tab');
+        if (learnPracticeTab && learnPracticeTab.classList.contains('hidden')) {
+            return; // Do nothing if the Learn & Practice tab is not active
+        }
 
         if (!currentChallengeWord) return; // Ignore taps if no challenge is active
 
-        const morseString = event.detail.morseString;
-        if (morseString) { // Ensure there's a Morse string to decode
-            const decodedChar = getCharFromMorse(morseString);
-            if (decodedChar) {
-                checkPractice(decodedChar);
-            } else {
-                // This case means the tapper completed a sequence, but it's not valid Morse.
-                // visualTapper.js already handles showing "Unknown Morse" locally.
-                // Here, we might want to provide feedback in the game context.
-                practiceMessage.textContent = `Unknown Morse: ${morseString}. Try again.`;
-                practiceMessage.style.color = '#F59E0B'; // Tailwind amber-500 (similar to orange)
+        const detail = event.detail;
+        if (!detail) return; // No detail object
+
+        if (detail.type === 'char') {
+            const morseString = detail.value;
+            if (morseString) { // Ensure there's a Morse string to decode
+                const decodedChar = getCharFromMorse(morseString);
+                if (decodedChar) {
+                    checkPractice(decodedChar); // This function already updates tapperDecodedOutput and currentTappedString
+                } else {
+                    practiceMessage.textContent = `Unknown Morse: ${morseString}. Try again.`;
+                    practiceMessage.style.color = '#F59E0B'; // Tailwind amber-500
+                }
             }
-        } else {
-            // This can happen if the spaceButton is pressed when currentMorse in tapper is empty.
-            // For this game, it doesn't represent a character input, so we can ignore it.
-            // console.log("Learn & Practice: visualTapperCharacterComplete with empty morseString.");
+        } else if (detail.type === 'word_space') {
+            // Append a literal space
+            currentTappedString += ' ';
+            tapperDecodedOutput.textContent = currentTappedString;
+            updatePlayTappedMorseButtonState();
+            // Optionally, provide feedback or move to next word if that's part of the game logic
+            // For now, just adding a space.
+            practiceMessage.textContent = "Space added.";
+            practiceMessage.style.color = 'lightblue'; // Or some neutral color
+            // If we want to check if the space was correctly placed (e.g., end of a word in challenge):
+            // if (currentTappedString.trim() === currentChallengeWord.substring(0, currentTappedString.length).trim() && currentTappedString.endsWith(' ')) {
+            //     // Potentially part of a multi-word challenge, or just confirming space.
+            // }
         }
     });
 

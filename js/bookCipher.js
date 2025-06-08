@@ -727,18 +727,56 @@ if (typeof attachTapperToArea === 'function') {
     // UI updates for the target Morse character are now handled by setNextTargetMorseSignal()
     // and the full book display is managed by #full-book-morse-display.
 
-    document.addEventListener('visualTapperCharacterComplete', (event) => {
-    const bookCipherTab = document.getElementById('book-cipher-tab');
-    if (bookCipherTab && bookCipherTab.classList.contains('hidden')) {
-        return; // Do nothing if the Book Cipher tab is not active
-    }
+    document.addEventListener('visualTapperInput', (event) => {
+        const bookCipherTab = document.getElementById('book-cipher-tab');
+        if (bookCipherTab && bookCipherTab.classList.contains('hidden')) {
+            return; // Do nothing if the Book Cipher tab is not active
+        }
 
-        if (event.detail && typeof event.detail.morseString === 'string') {
-            const morseFromTapper = event.detail.morseString;
-            // console.log('BookCipher: Received visualTapperCharacterComplete with Morse:', morseFromTapper);
-            handleBookCipherInput(morseFromTapper); // NEW CALL
-        } else {
-            // console.warn('BookCipher: Received visualTapperCharacterComplete event without morseString in detail.');
+        const detail = event.detail;
+        if (!detail) return; // No detail object
+
+        if (detail.type === 'char') {
+            const morseFromTapper = detail.value;
+            if (morseFromTapper) {
+                // console.log('BookCipher: Received visualTapperInput type "char" with Morse:', morseFromTapper);
+                handleBookCipherInput(morseFromTapper);
+            }
+        } else if (detail.type === 'word_space') {
+            // console.log('BookCipher: Received visualTapperInput type "word_space".');
+            const unlockedTextDisplay = document.getElementById('unlocked-text-display');
+            if (unlockedTextDisplay) {
+                // This case implies the user explicitly wants to add a space,
+                // potentially before a word is fully completed or after a word.
+                // The current handleBookCipherInput logic adds a space AFTER a word is correctly completed.
+                // If a user adds a space via button, it might be for various reasons:
+                // 1. They believe a word is done, but made a mistake and want to force a space.
+                // 2. They are trying to skip a word (not supported by current logic directly).
+                // 3. They finished a word correctly, and the game added a space, then they press space again.
+
+                // For now, let's append a space to the display.
+                // This might lead to double spaces if the game also adds one on word completion.
+                // Or, if a word isn't complete, it might look like "PARTIALWOR D"
+                // The current logic in `handleBookCipherInput` reconstructs `unlockedTextDisplay.textContent`
+                // when a word is completed. So, a manually added space might be overwritten.
+
+                // A simple append as requested:
+                unlockedTextDisplay.textContent += ' ';
+
+                // If this explicit space should also advance the word logic (e.g., skip current word):
+                // This would be more complex. For now, just visual append.
+                // Consider if `saveProgress` is needed here. If a space means "word complete",
+                // then `handleBookCipherInput` should have handled it. If it's an extra space,
+                // saving might not be critical unless it signifies something game-mechanic-wise.
+                // Let's assume for now that if a word was completed, handleBookCipherInput did its job.
+                // This explicit space is more like a user's manual text entry.
+                // However, if the user taps space *instead* of finishing a letter, it might be meaningful.
+                // The prompt implies simply appending to display.
+                // Let's also save progress, as any user input that changes state should ideally be saveable.
+                 if (currentBookId) {
+                    saveProgress(currentBookId, isBookCompleted);
+                 }
+            }
         }
     });
 

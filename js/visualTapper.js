@@ -216,15 +216,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Dispatch custom event for other modules (like bookCipher.js) to consume
-        // Dispatch even if morseStringForEvent is empty, if it's an explicit action (space button)
-        if (morseStringForEvent || isExplicitAction) {
-            const event = new CustomEvent('visualTapperCharacterComplete', {
-                detail: {
-                    morseString: morseStringForEvent 
-                }
+        let eventDetail = null;
+
+        if (morseStringForEvent && morseStringForEvent.length > 0) {
+            // A character was completed
+            eventDetail = { type: 'char', value: morseStringForEvent };
+        } else if (isExplicitAction && currentMorse.length === 0) {
+            // Space button clicked and no Morse code was pending (i.e., it's an intentional word space)
+            eventDetail = { type: 'word_space' };
+        }
+
+        if (eventDetail) {
+            const event = new CustomEvent('visualTapperInput', {
+                detail: eventDetail
             });
             document.dispatchEvent(event);
-            // console.log("VisualTapper: Dispatched visualTapperCharacterComplete with morse:", morseStringForEvent);
+            // console.log("VisualTapper: Dispatched visualTapperInput with detail:", eventDetail);
         }
         
         currentMorse = ""; // Clear Morse buffer for the next character
