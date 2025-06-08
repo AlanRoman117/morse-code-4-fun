@@ -287,34 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // displayCurrentWordInUI(); // Obsolete: Call removed
 
-                // ------------ START: Reconstruct deciphered characters in full display ------------
-                if (fullMorseSequence && fullMorseSequence.length > 0 && !isBookCompleted) {
-                    for (let wIdx = 0; wIdx <= currentWordIndex; wIdx++) {
-                        if (!fullMorseSequence[wIdx]) continue;
-
-                        const wordLen = fullMorseSequence[wIdx].length;
-                        const letterLimit = (wIdx < currentWordIndex) ? wordLen : currentMorseLetterIndexInWord;
-
-                        for (let lIdx = 0; lIdx < letterLimit; lIdx++) {
-                            const morseChar = fullMorseSequence[wIdx][lIdx];
-                            if (!morseChar) continue;
-
-                            const englishChar = morseToText(morseChar);
-                            if (englishChar) {
-                                const morseSpan = document.querySelector(
-                                    `#full-book-morse-display .morse-char-span[data-word-idx="${wIdx}"][data-letter-idx="${lIdx}"]`
-                                );
-                                if (morseSpan) {
-                                    morseSpan.textContent = englishChar;
-                                    morseSpan.classList.add('deciphered-char');
-                                } else {
-                                    console.warn(`loadProgress: Span not found for w:${wIdx}, l:${lIdx} during deciphered character reconstruction.`);
-                                }
-                            }
-                        }
-                    }
-                }
-                // ------------ END: Reconstruct deciphered characters in full display ------------
+                // The block for reconstructing deciphered characters directly in loadProgress has been removed.
+                // This is now handled by initializeAndStartBookGame after loadProgress completes.
 
                 if (isBookCompleted) {
                     if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Book Complete!";
@@ -432,7 +406,9 @@ if (typeof attachTapperToArea === 'function') {
                 if (unlockedTextDisplayEl) unlockedTextDisplayEl.textContent = '';
                 isBookCompleted = false;
 
-                if (loadProgress(bookId)) {
+                const progressLoaded = loadProgress(bookId); // Store the result of loadProgress
+
+                if (progressLoaded) {
                     console.log(`Progress loaded and restored for ${bookData.title}.`);
                     // setNextTargetMorseSignal (called in loadProgress) will handle highlighting
                 } else {
@@ -458,13 +434,27 @@ if (typeof attachTapperToArea === 'function') {
                 if (fullBookMorseDisplay) {
                     if (fullMorseSequence && fullMorseSequence.length > 0) {
                         let htmlContent = '';
-                        fullMorseSequence.forEach((wordArray, wordIndex) => {
-                            let wordHtml = wordArray.map((morseLetter, letterIndex) => {
-                                return `<span class="morse-char-span" data-word-idx="${wordIndex}" data-letter-idx="${letterIndex}">${morseLetter}</span>`;
+                        fullMorseSequence.forEach((wordArray, wordIdx) => { // Renamed for clarity against global currentWordIndex
+                            let wordHtml = wordArray.map((morseLetter, letterIdx) => { // Renamed for clarity
+                                let charContent = morseLetter;
+                                let spanClass = "morse-char-span";
+
+                                // Check if progress was loaded and if this char should be deciphered
+                                if (progressLoaded) {
+                                    // currentWordIndex and currentMorseLetterIndexInWord are global variables updated by loadProgress
+                                    const isDeciphered = (wordIdx < currentWordIndex) ||
+                                                         (wordIdx === currentWordIndex && letterIdx < currentMorseLetterIndexInWord);
+                                    if (isDeciphered) {
+                                        // Ensure morseToText is available (assumed global or accessible)
+                                        charContent = typeof morseToText === 'function' ? (morseToText(morseLetter) || morseLetter) : morseLetter;
+                                        spanClass += " deciphered-char";
+                                    }
+                                }
+                                return `<span class="${spanClass}" data-word-idx="${wordIdx}" data-letter-idx="${letterIdx}">${charContent}</span>`;
                             }).join(' '); // Join Morse letter spans with a space
 
                             htmlContent += wordHtml;
-                            if (wordIndex < fullMorseSequence.length - 1) {
+                            if (wordIdx < fullMorseSequence.length - 1) {
                                 htmlContent += ' / '; // Word separator
                             }
                         });
