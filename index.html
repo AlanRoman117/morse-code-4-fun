@@ -303,6 +303,7 @@
         <button id="book-cipher-nav-btn" data-tab="book-cipher-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Book Cipher</button>
         <button id="morse-pals-nav-btn" data-tab="morse-pals-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Morse Pals</button>
         <button id="global-beacon-nav-btn" data-tab="global-beacon-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Global Beacon</button>
+        <button id="koch-method-nav-btn" data-tab="koch-method-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Koch Method</button>
         <button id="settings-nav-btn" data-tab="settings-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Settings</button>
     </nav>
     <h1 class="text-4xl font-bold mb-8 text-center main-title">Morse Code Learner</h1>
@@ -514,6 +515,48 @@
                         <p class="text-gray-500">Tapper will appear here.</p>
                     </div>
                     <button id="transmit-global-beacon-btn" class="w-full mt-2 p-3 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-green-500">Broadcast Message</button>
+                </div>
+            </div>
+        </div>
+        <div id="koch-method-tab" class="tab-content hidden">
+            <div class="app-container">
+                <!-- Instructions Area -->
+                <div class="mb-6 p-4 bg-gray-700 rounded-lg">
+                    <h2 class="text-2xl font-semibold mb-3 text-center section-title">Koch Method Trainer</h2>
+                    <p class="text-center text-gray-300">
+                        Listen to the character played at full speed. Type the character you heard.
+                        A new character will be added to the set once you achieve 90% accuracy with the current set.
+                    </p>
+                </div>
+
+                <!-- Status Display Area -->
+                <div class="mb-6 p-4 bg-gray-700 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2 text-center text-blue-400">Current Status</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-300">Current Characters:</h4>
+                            <p id="koch-char-set-display" class="text-2xl font-bold text-yellow-400">K, M</p>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-300">Session Accuracy:</h4>
+                            <p id="koch-accuracy-display" class="text-2xl font-bold text-green-400">--% (Correct: 0, Total: 0)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Practice Area -->
+                <div class="p-4 bg-gray-700 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-center text-blue-400">Practice</h3>
+                    <div class="flex flex-col items-center space-y-4">
+                        <button id="koch-start-btn" class="w-full md:w-auto bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500 text-lg">
+                            Start Practice Session
+                        </button>
+                        <button id="koch-play-btn" class="w-full md:w-auto bg-blue-500 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 text-lg hidden">
+                            Play Next Character
+                        </button>
+                        <input type="text" id="koch-answer-input" maxlength="1" class="text-center text-2xl font-semibold p-3 rounded-md bg-gray-800 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-3/4 md:w-1/2 lg:w-1/4 uppercase placeholder-gray-500" placeholder="Type character here">
+                        <p id="koch-feedback-message" class="text-lg text-center min-h-[28px] font-medium"></p> <!-- Adjusted min-height -->
+                    </div>
                 </div>
             </div>
         </div>
