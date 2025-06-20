@@ -1,5 +1,8 @@
 // js/kochMethod.js
 
+// Define Session Length
+const SESSION_LENGTH = 50;
+
 // 1. Define Koch Character Order
 const kochCharacterOrder = [
     'K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ',',
@@ -154,14 +157,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateKochDisplays();
                 kochAnswerInput.value = ''; // Clear input field
 
-                // After a short delay, play the next character
-                setTimeout(() => {
-                    if(kochFeedbackMessage && (kochFeedbackMessage.textContent === "Correct!" || kochFeedbackMessage.textContent.startsWith("Incorrect"))) {
-                        // Clear feedback before next character, or let it persist a bit longer
-                        // kochFeedbackMessage.textContent = '';
-                    }
-                    playNextKochCharacter();
-                }, 1500); // 1.5 second delay
+                // Check if session is complete
+                if (sessionStats.total >= SESSION_LENGTH) {
+                    const accuracy = (sessionStats.correct / sessionStats.total) * 100;
+                    handleSessionCompletion(accuracy);
+                    // Do not play next character automatically, session has ended.
+                } else {
+                    // After a short delay, play the next character
+                    setTimeout(() => {
+                        if(kochFeedbackMessage && (kochFeedbackMessage.textContent === "Correct!" || kochFeedbackMessage.textContent.startsWith("Incorrect."))) {
+                            // Clear only the specific "Correct!" or "Incorrect..." message before next char.
+                            // Other messages (like session end, or general info) should persist if set by other logic.
+                            kochFeedbackMessage.textContent = '';
+                            kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium'; // Reset class
+                        }
+                        playNextKochCharacter();
+                    }, 1500); // 1.5 second delay
+                }
             }
         });
     }
@@ -177,3 +189,54 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Initial Unlocked Characters:", unlockedCharacters);
     console.log("Initial Session Stats:", sessionStats);
 });
+
+// Function to handle session completion (to be fully implemented in Step 3)
+function handleSessionCompletion(accuracy) {
+    console.log(`Session complete. Accuracy: ${accuracy.toFixed(2)}%`);
+    if (kochFeedbackMessage) {
+        if (accuracy >= 90) {
+            let nextCharToAdd = null;
+            for (const char of kochCharacterOrder) {
+                if (!unlockedCharacters.includes(char)) {
+                    nextCharToAdd = char;
+                    break;
+                }
+            }
+
+            if (nextCharToAdd) {
+                unlockedCharacters.push(nextCharToAdd);
+                localStorage.setItem('kochUnlockedCharacters', JSON.stringify(unlockedCharacters));
+                kochFeedbackMessage.textContent = `Congratulations! You've unlocked a new character: ${nextCharToAdd}`;
+                kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
+                updateKochDisplays(); // Update character set display
+            } else {
+                kochFeedbackMessage.textContent = "Congratulations! You've mastered all characters!";
+                kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
+            }
+        } else {
+            kochFeedbackMessage.textContent = `Your accuracy was ${accuracy.toFixed(0)}%. Keep practicing with the current set to reach 90%!`;
+            kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-yellow-400'; // Encouragement style
+        }
+    }
+
+    // Manage UI for session end
+    if (kochStartBtn) {
+        kochStartBtn.classList.remove('hidden');
+    }
+    if (kochPlayBtn) {
+        kochPlayBtn.classList.add('hidden');
+    }
+    if (kochAnswerInput) {
+        kochAnswerInput.disabled = true;
+        kochAnswerInput.value = ''; // Clear any residual input
+    }
+    if (kochFeedbackMessage && kochFeedbackMessage.textContent === "Correct!") {
+        // If the last input was correct, this message might still be there.
+        // The session end message from above should take precedence.
+        // This check is more of a safeguard; the logic above should already set the message.
+    }
+     // Ensure focus is not trapped in the now-disabled input
+    if(document.activeElement === kochAnswerInput) {
+        kochStartBtn.focus(); // Or any other appropriate element
+    }
+}
