@@ -6,6 +6,7 @@
     <title>Morse Code Learner</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -295,6 +296,33 @@
        font-weight: bold; /* Make it bold to stand out */
    }
 
+    /* Input feedback animations */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    @keyframes glow-green {
+        0% { box-shadow: 0 0 3px rgba(74, 222, 128, 0.7); } /* Tailwind green-400 */
+        50% { box-shadow: 0 0 15px 5px rgba(74, 222, 128, 1); }
+        100% { box-shadow: 0 0 3px rgba(74, 222, 128, 0.7); }
+    }
+
+    .shake-red {
+        animation: shake 0.5s ease-in-out;
+        background-color: #fca5a5; /* Tailwind red-300 */
+        border-color: #ef4444 !important; /* Tailwind red-500, !important to override focus styles if needed */
+        color: #7f1d1d; /* Tailwind red-900 for text */
+    }
+
+    .glow-green {
+        animation: glow-green 0.8s ease-out;
+        background-color: #86efac; /* Tailwind green-300 */
+        border-color: #22c55e !important; /* Tailwind green-500, !important to override focus styles */
+        color: #14532d; /* Tailwind green-900 for text */
+    }
+
     </style>
 </head>
 <body>
@@ -527,6 +555,11 @@
                         Listen to the character played at full speed. Type the character you heard.
                         A new character will be added to the set once you achieve 90% accuracy with the current set.
                     </p>
+                </div>
+
+                <!-- Level Progression Display Area -->
+                <div id="koch-levels-container" class="flex flex-wrap justify-center gap-2 my-4">
+                    <!-- Dynamically populated level cells will go here -->
                 </div>
 
                 <!-- Status Display Area -->

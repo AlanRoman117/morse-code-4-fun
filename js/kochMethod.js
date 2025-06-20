@@ -31,9 +31,38 @@ loadUnlockedCharacters();
 // (Rest of the Koch method logic will be added here in subsequent steps)
 
 // DOM Elements
-let kochStartBtn, kochPlayBtn, kochAnswerInput, kochAccuracyDisplay, kochCharSetDisplay, kochFeedbackMessage;
+let kochStartBtn, kochPlayBtn, kochAnswerInput, kochAccuracyDisplay, kochCharSetDisplay, kochFeedbackMessage, kochLevelsContainer;
 
-// Function to update Koch displays (will be fully implemented in a later step)
+// Function to populate Koch Levels display
+function populateKochLevels() {
+    if (!kochLevelsContainer) return;
+    kochLevelsContainer.innerHTML = ''; // Clear existing cells
+
+    const mostRecentUnlockedChar = unlockedCharacters.length > 0 ? unlockedCharacters[unlockedCharacters.length - 1] : null;
+
+    kochCharacterOrder.forEach(char => {
+        const cell = document.createElement('div');
+        cell.textContent = char;
+        cell.className = 'w-10 h-10 flex items-center justify-center rounded-md text-lg shadow-md'; // Base style
+
+        if (unlockedCharacters.includes(char)) {
+            // If this character is the most recently unlocked one, it's "current"
+            if (char === mostRecentUnlockedChar) {
+                cell.classList.add('bg-yellow-400', 'text-black', 'font-bold', 'ring-2', 'ring-yellow-200', 'animate-pulse');
+            } else {
+                // Otherwise, if it's unlocked, it's "completed"
+                cell.classList.add('bg-green-500', 'text-white', 'font-bold');
+            }
+        } else {
+            // Not in unlockedCharacters, so it's "locked"
+            cell.classList.add('bg-gray-600', 'text-gray-400', 'opacity-75'); // Locked
+        }
+        kochLevelsContainer.appendChild(cell);
+    });
+}
+
+
+// Function to update Koch displays
 function updateKochDisplays() {
     if (kochAccuracyDisplay) {
         const accuracy = sessionStats.total > 0 ? (sessionStats.correct / sessionStats.total * 100).toFixed(0) : 0;
@@ -42,6 +71,7 @@ function updateKochDisplays() {
     if (kochCharSetDisplay) {
         kochCharSetDisplay.textContent = unlockedCharacters.join(', ');
     }
+    populateKochLevels(); // Update level display
 }
 
 // Function to play the next Koch character
@@ -94,7 +124,9 @@ async function playNextKochCharacter() {
     // Focus on the answer input
     if (kochAnswerInput) {
         kochAnswerInput.focus();
-        kochAnswerInput.value = ''; // Clear previous answer
+        // The input is now cleared by the calling function's timeout,
+        // right before playNextKochCharacter is invoked.
+        // kochAnswerInput.value = '';
     }
 }
 
@@ -107,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     kochAccuracyDisplay = document.getElementById('koch-accuracy-display');
     kochCharSetDisplay = document.getElementById('koch-char-set-display');
     kochFeedbackMessage = document.getElementById('koch-feedback-message');
+    kochLevelsContainer = document.getElementById('koch-levels-container');
 
     // Initial UI setup
     if (kochPlayBtn) kochPlayBtn.classList.add('hidden');
@@ -143,36 +176,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 const userAnswer = kochAnswerInput.value.toUpperCase();
                 sessionStats.total++;
 
+                // Temporarily disable input to prevent spamming during animation
+                kochAnswerInput.disabled = true;
+
                 if (userAnswer === correctAnswer) {
                     sessionStats.correct++;
                     if(kochFeedbackMessage) kochFeedbackMessage.textContent = "Correct!";
-                    // Optionally, add a class for styling success
                     if(kochFeedbackMessage) kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400';
+
+                    kochAnswerInput.classList.add('glow-green');
+
+                    setTimeout(() => {
+                        kochAnswerInput.classList.remove('glow-green');
+                        kochAnswerInput.disabled = false; // Re-enable input
+                        // Input is cleared before next character or after session
+                    }, 800); // Match glow-green animation duration
+
                 } else {
                     if(kochFeedbackMessage) kochFeedbackMessage.textContent = `Incorrect. The character was: ${correctAnswer}`;
-                    // Optionally, add a class for styling error
                     if(kochFeedbackMessage) kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-red-400';
+
+                    kochAnswerInput.classList.add('shake-red');
+
+                    setTimeout(() => {
+                        kochAnswerInput.classList.remove('shake-red');
+                        kochAnswerInput.disabled = false;
+                        // Input is cleared before next character or after session
+                    }, 500); // Match shake animation duration
                 }
 
                 updateKochDisplays();
-                kochAnswerInput.value = ''; // Clear input field
+                // DO NOT clear kochAnswerInput.value here. It will be cleared later.
 
                 // Check if session is complete
                 if (sessionStats.total >= SESSION_LENGTH) {
                     const accuracy = (sessionStats.correct / sessionStats.total) * 100;
-                    handleSessionCompletion(accuracy);
-                    // Do not play next character automatically, session has ended.
+                    // Delay session completion handling slightly to allow animation to mostly finish
+                    setTimeout(() => {
+                        handleSessionCompletion(accuracy);
+                        // If session is complete, input field might be cleared by handleSessionCompletion or remain with last char
+                    }, Math.max(500, 800) + 50); // Wait for the longest animation + a small buffer
                 } else {
-                    // After a short delay, play the next character
+                    // After a short delay (that includes animation time), clear input and play the next character
                     setTimeout(() => {
                         if(kochFeedbackMessage && (kochFeedbackMessage.textContent === "Correct!" || kochFeedbackMessage.textContent.startsWith("Incorrect."))) {
-                            // Clear only the specific "Correct!" or "Incorrect..." message before next char.
-                            // Other messages (like session end, or general info) should persist if set by other logic.
                             kochFeedbackMessage.textContent = '';
                             kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium'; // Reset class
                         }
+                        kochAnswerInput.value = ''; // Clear input field BEFORE next char
                         playNextKochCharacter();
-                    }, 1500); // 1.5 second delay
+                    }, 1500); // Existing delay, should be enough for animation + pause
                 }
             }
         });
@@ -209,9 +262,33 @@ function handleSessionCompletion(accuracy) {
                 kochFeedbackMessage.textContent = `Congratulations! You've unlocked a new character: ${nextCharToAdd}`;
                 kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
                 updateKochDisplays(); // Update character set display
+
+                // Trigger confetti
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 150,
+                        spread: 80,
+                        origin: { y: 0.6 }
+                    });
+                    setTimeout(() => confetti({ particleCount: 100, spread: 120, startVelocity: 25, angle: 60, origin: { x: 0, y: 0.7 } }), 250);
+                    setTimeout(() => confetti({ particleCount: 100, spread: 120, startVelocity: 25, angle: 120, origin: { x: 1, y: 0.7 } }), 500);
+                    setTimeout(() => confetti({ particleCount: 100, spread: 150, startVelocity: 30, angle: 90, origin: { y: 0.5 } }), 800);
+                }
+
             } else {
                 kochFeedbackMessage.textContent = "Congratulations! You've mastered all characters!";
                 kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
+                // Optional: Confetti for mastering all characters too? For now, only on new char.
+                if (typeof confetti === 'function') { // Also celebrate mastering everything!
+                    confetti({
+                        particleCount: 250,
+                        spread: 100,
+                        origin: { y: 0.5 },
+                        gravity: 0.5,
+                        ticks: 400,
+                        colors: ['#4a90e2', '#f6e05e', '#4caf50', '#ffeb3b', '#e91e63']
+                    });
+                }
             }
         } else {
             kochFeedbackMessage.textContent = `Your accuracy was ${accuracy.toFixed(0)}%. Keep practicing with the current set to reach 90%!`;
