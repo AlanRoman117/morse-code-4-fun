@@ -478,6 +478,7 @@
 <body>
     <nav class="flex justify-center mb-4 space-x-2">
         <button id="learn-practice-nav-btn" data-tab="learn-practice-tab" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active-tab-button">Learn & Practice</button>
+        <button id="morse-io-nav-btn" data-tab="morse-io-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Morse I/O</button>
         <button id="book-cipher-nav-btn" data-tab="book-cipher-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Book Cipher</button>
         <button id="koch-method-nav-btn" data-tab="koch-method-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Koch Method</button>
         <button id="settings-nav-btn" data-tab="settings-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Settings</button>
@@ -527,42 +528,6 @@
                     </div>
                 </div>
                 <!-- NEW TOP CONTAINER ENDS HERE -->
-
-                <div class="controls mb-6 text-center">
-            <button id="play-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Play Morse Code</button>
-            <button id="stop-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Stop Sound</button>
-            <button id="copy-text-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Text</button><span id="copy-text-feedback" class="ml-2 text-sm"></span>
-            <button id="copy-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Morse</button><span id="copy-morse-feedback" class="ml-2 text-sm"></span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-                <label for="text-input" class="block text-sm font-medium mb-2">Enter Text:</label>
-                <textarea id="text-input" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Type text here..."></textarea>
-            </div>
-            <div>
-                <label for="morse-output" class="block text-sm font-medium mb-2">Morse Code Output:</label>
-                <textarea id="morse-output" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Or type Morse here (e.g. .... . .-.. .-.. ---)" readonly></textarea>
-            </div>
-        </div>
-
-        <div class="settings mb-6">
-            <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Playback Settings</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                <div>
-                    <label for="wpm-slider" class="block text-sm font-medium">Text Playback Speed (WPM): <span id="wpm-value">20</span></label>
-                    <input type="range" id="wpm-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                </div>
-                <div>
-                    <label for="farnsworth-slider" class="block text-sm font-medium">Text Playback Farnsworth WPM: <span id="farnsworth-value">20</span></label>
-                    <input type="range" id="farnsworth-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                </div>
-                <div>
-                    <label for="freq-slider" class="block text-sm font-medium">Playback Tone Frequency (Hz): <span id="freq-value">600</span></label>
-                    <input type="range" id="freq-slider" min="300" max="1000" value="600" step="50" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                </div>
-            </div>
-        </div>
 
     </div>
         </div>
@@ -694,6 +659,49 @@
                 <div class="flex items-center justify-center p-4">
                     <button id="toggle-theme-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Toggle Dark/Light Mode</button>
                 </div>
+
+                <div class="settings mb-6"> <!-- Moved Morse Playback Settings -->
+                    <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Playback Settings</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                        <div>
+                            <label for="wpm-slider" class="block text-sm font-medium">Text Playback Speed (WPM): <span id="wpm-value">20</span></label>
+                            <input type="range" id="wpm-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="farnsworth-slider" class="block text-sm font-medium">Text Playback Farnsworth WPM: <span id="farnsworth-value">20</span></label>
+                            <input type="range" id="farnsworth-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="freq-slider" class="block text-sm font-medium">Playback Tone Frequency (Hz): <span id="freq-value">600</span></label>
+                            <input type="range" id="freq-slider" min="300" max="1000" value="600" step="50" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div id="morse-io-tab" class="tab-content hidden">
+            <div class="app-container">
+                <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Input/Output</h2>
+                <div class="controls mb-6 text-center">
+                    <button id="play-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Play Morse Code</button>
+                    <button id="stop-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Stop Sound</button>
+                    <button id="copy-text-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Text</button><span id="copy-text-feedback" class="ml-2 text-sm"></span>
+                    <button id="copy-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Morse</button><span id="copy-morse-feedback" class="ml-2 text-sm"></span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="text-input" class="block text-sm font-medium mb-2">Enter Text:</label>
+                        <textarea id="text-input" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Type text here..."></textarea>
+                    </div>
+                    <div>
+                        <label for="morse-output" class="block text-sm font-medium mb-2">Morse Code Output:</label>
+                        <textarea id="morse-output" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Or type Morse here (e.g. .... . .-.. .-.. ---)" readonly></textarea>
+                    </div>
+                </div>
+                 <!-- Morse Playback Settings can remain on Learn & Practice or be moved too. For now, keeping them on L&P. -->
+                 <!-- If they need to be moved, the settings div from L&P tab would go here. -->
             </div>
         </div>
     </div>
