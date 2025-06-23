@@ -482,7 +482,6 @@
         <button id="book-cipher-nav-btn" data-tab="book-cipher-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Book Cipher</button>
         <button id="koch-method-nav-btn" data-tab="koch-method-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Koch Method</button>
         <button id="settings-nav-btn" data-tab="settings-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Settings</button>
-        <button id="morse-io-nav-btn" data-tab="morse-io-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Morse I/O</button>
     </nav>
     <h1 class="text-4xl font-bold mb-8 text-center main-title">Morse Code Learner</h1>
     <div id="tab-content-wrapper">
@@ -529,24 +528,6 @@
                     </div>
                 </div>
                 <!-- NEW TOP CONTAINER ENDS HERE -->
-
-        <div class="settings mb-6">
-            <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Playback Settings</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                <div>
-                    <label for="wpm-slider" class="block text-sm font-medium">Text Playback Speed (WPM): <span id="wpm-value">20</span></label>
-                    <input type="range" id="wpm-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                </div>
-                <div>
-                    <label for="farnsworth-slider" class="block text-sm font-medium">Text Playback Farnsworth WPM: <span id="farnsworth-value">20</span></label>
-                    <input type="range" id="farnsworth-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                </div>
-                <div>
-                    <label for="freq-slider" class="block text-sm font-medium">Playback Tone Frequency (Hz): <span id="freq-value">600</span></label>
-                    <input type="range" id="freq-slider" min="300" max="1000" value="600" step="50" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                </div>
-            </div>
-        </div>
 
     </div>
         </div>
@@ -678,6 +659,25 @@
                 <div class="flex items-center justify-center p-4">
                     <button id="toggle-theme-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Toggle Dark/Light Mode</button>
                 </div>
+
+                <div class="settings mb-6"> <!-- Moved Morse Playback Settings -->
+                    <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Playback Settings</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                        <div>
+                            <label for="wpm-slider" class="block text-sm font-medium">Text Playback Speed (WPM): <span id="wpm-value">20</span></label>
+                            <input type="range" id="wpm-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="farnsworth-slider" class="block text-sm font-medium">Text Playback Farnsworth WPM: <span id="farnsworth-value">20</span></label>
+                            <input type="range" id="farnsworth-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="freq-slider" class="block text-sm font-medium">Playback Tone Frequency (Hz): <span id="freq-value">600</span></label>
+                            <input type="range" id="freq-slider" min="300" max="1000" value="600" step="50" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
         <div id="morse-io-tab" class="tab-content hidden">
