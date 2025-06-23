@@ -118,21 +118,171 @@
             color: #1f2937; /* Tailwind gray-800 */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Lighter shadow */
         }
-        .light-theme .input-output-box, /* Applied if body has .light-theme */
-        .light-theme-container .input-output-box { /* Applied if .app-container has .light-theme-container */
+
+        /* General light theme adjustments for Tailwind classes */
+        .light-theme nav button,
+        .light-theme-container nav button {
+            background-color: #e5e7eb; /* gray-200 */
+            color: #374151; /* gray-700 */
+        }
+        .light-theme nav button:hover,
+        .light-theme-container nav button:hover {
+            background-color: #d1d5db; /* gray-300 */
+        }
+        .light-theme nav button.active-tab-button,
+        .light-theme-container nav button.active-tab-button {
+            background-color: #3b82f6; /* blue-500 */
+            color: #ffffff; /* white */
+        }
+        .light-theme nav button.active-tab-button:hover,
+        .light-theme-container nav button.active-tab-button:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+
+
+        .light-theme .input-output-box,
+        .light-theme-container .input-output-box {
             background-color: #e5e7eb; /* Tailwind gray-200 */
             color: #1f2937; /* Tailwind gray-800 */
             border: 1px solid #d1d5db; /* Tailwind gray-300 */
         }
-        /* Ensure labels are dark in light theme if they have specific color classes */
+
+        .light-theme .text-gray-200,
+        .light-theme-container .text-gray-200,
         .light-theme .text-gray-300,
-        .light-theme-container .text-gray-300 {
-             color: #374151; /* Tailwind gray-700, or choose appropriate dark shade */
+        .light-theme-container .text-gray-300,
+        .light-theme .text-gray-400, /* For placeholders or secondary text */
+        .light-theme-container .text-gray-400 {
+             color: #374151 !important; /* Tailwind gray-700, !important to override Tailwind if needed */
         }
+        .light-theme .text-white, /* For elements that are explicitly text-white in dark mode */
+        .light-theme-container .text-white {
+            color: #1f2937 !important; /* Tailwind gray-800 */
+        }
+
         .light-theme .section-title,
         .light-theme-container .section-title {
             color: #2563eb; /* Tailwind blue-600 for light theme */
         }
+
+        /* Backgrounds that are dark gray in dark mode */
+        .light-theme .bg-gray-600, .light-theme-container .bg-gray-600,
+        .light-theme .bg-gray-700, .light-theme-container .bg-gray-700,
+        .light-theme .bg-gray-800, .light-theme-container .bg-gray-800 {
+            background-color: #e5e7eb !important; /* gray-200 */
+            color: #1f2937 !important; /* Ensure text on these backgrounds is dark */
+        }
+
+        .light-theme .border-gray-600, .light-theme-container .border-gray-600 {
+            border-color: #d1d5db !important; /* gray-300 */
+        }
+        /* Note: .placeholder-gray-400 is handled by the general .text-gray-400 override now */
+        .light-theme .placeholder-gray-500::placeholder,
+        .light-theme-container .placeholder-gray-500::placeholder {
+            color: #6b7280; /* gray-500 */
+        }
+
+        /* Specific text colors that need adjustment */
+        .light-theme .text-yellow-400, .light-theme-container .text-yellow-400 {
+            color: #ca8a04; /* Tailwind yellow-600, better contrast on light */
+        }
+        .light-theme .text-yellow-500, .light-theme-container .text-yellow-500 {
+            color: #b45309; /* Tailwind amber-600, better contrast on light */
+        }
+        .light-theme .text-green-400, .light-theme-container .text-green-400 {
+            color: #15803d; /* Tailwind green-700 */
+        }
+         .light-theme .text-blue-400, .light-theme-container .text-blue-400 {
+            color: #2563eb; /* Tailwind blue-600 */
+        }
+        .light-theme .text-purple-400, .light-theme-container .text-purple-400 {
+            color: #7e22ce; /* Tailwind purple-600 */
+        }
+
+
+        /* Book Cipher Specific */
+        .light-theme .book-cover-item, .light-theme-container .book-cover-item {
+            background-color: #e0e7ff; /* Tailwind indigo-100 */
+            border-color: #c7d2fe; /* Tailwind indigo-200 */
+            color: #3730a3; /* Tailwind indigo-800 */
+        }
+        .light-theme .book-cover-item:hover, .light-theme-container .book-cover-item:hover {
+            background-color: #c7d2fe; /* Tailwind indigo-200 */
+            border-color: #a5b4fc; /* Tailwind indigo-300 */
+        }
+        .light-theme .book-cover-selected, .light-theme-container .book-cover-selected {
+            background-color: #4f46e5; /* Tailwind indigo-600 */
+            border-color: #818cf8; /* Tailwind indigo-400 */
+            color: #ffffff; /* White text on dark indigo */
+        }
+        .light-theme #full-book-morse-display, .light-theme-container #full-book-morse-display {
+            background-color: #f3f4f6; /* gray-100 */
+            border-color: #d1d5db; /* gray-300 */
+            color: #1f2937; /* gray-800 */
+        }
+
+
+        /* Morse Pals Specific */
+        .light-theme .selected-friend, .light-theme-container .selected-friend {
+            background-color: #dbeafe; /* Tailwind blue-100 */
+            border-left-color: #3b82f6; /* Tailwind blue-500 */
+            color: #1e40af; /* Tailwind blue-800 */
+        }
+        /* Message Bubbles in Morse Pals & Global Beacon */
+        /* Received (gray in dark) */
+        .light-theme .bg-gray-600.p-3.rounded-lg, /* More specific selector for message bubbles */
+        .light-theme-container .bg-gray-600.p-3.rounded-lg {
+            background-color: #e5e7eb !important; /* gray-200 */
+            color: #1f2937 !important; /* gray-800 */
+        }
+         /* Sent (blue in dark) - these are often fine, but ensure good contrast of text if bubble color changes */
+        .light-theme .bg-blue-500.text-white.p-3.rounded-lg,
+        .light-theme-container .bg-blue-500.text-white.p-3.rounded-lg {
+            background-color: #3b82f6 !important; /* blue-500 */
+            color: #ffffff !important; /* white */
+        }
+        /* Global Beacon message items */
+        .light-theme .chat-feed .message, .light-theme-container .chat-feed .message {
+             background-color: #f3f4f6 !important; /* gray-100 */
+             border: 1px solid #e5e7eb; /* gray-200 */
+        }
+
+
+        /* Koch Method Input */
+        .light-theme #koch-answer-input, .light-theme-container #koch-answer-input {
+            background-color: #ffffff;
+            border-color: #d1d5db; /* gray-300 */
+            color: #1f2937; /* gray-800 */
+        }
+        .light-theme #koch-answer-input::placeholder, .light-theme-container #koch-answer-input::placeholder {
+            color: #9ca3af; /* gray-400 */
+        }
+
+
+        /* Settings tab specific (if any more needed beyond general) */
+        .light-theme #master-sound-toggle + div, .light-theme-container #master-sound-toggle + div { /* The visual part of the toggle */
+            background-color: #d1d5db; /* gray-300 for off state */
+        }
+        .light-theme #master-sound-toggle:checked + div, .light-theme-container #master-sound-toggle:checked + div {
+            background-color: #3b82f6; /* blue-500 for on state */
+        }
+
+
+        /* Modal */
+        .light-theme #unlocked-text-modal .bg-gray-800,
+        .light-theme-container #unlocked-text-modal .bg-gray-800 {
+            background-color: #ffffff !important; /* White modal background */
+        }
+        .light-theme #unlocked-text-modal .bg-gray-700,
+        .light-theme-container #unlocked-text-modal .bg-gray-700 { /* Modal content area */
+            background-color: #f3f4f6 !important; /* gray-100 for content area */
+            color: #1f2937 !important;
+        }
+        .light-theme #unlocked-text-modal-title,
+        .light-theme-container #unlocked-text-modal-title {
+            color: #1f2937 !important; /* Dark text for title */
+        }
+
 
         /* Theme-specific styles for Tailwind-styled elements */
         .light-theme #unit-time-input,
