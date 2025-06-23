@@ -31,7 +31,8 @@ loadUnlockedCharacters();
 // (Rest of the Koch method logic will be added here in subsequent steps)
 
 // DOM Elements
-let kochStartBtn, kochPlayBtn, kochAnswerInput, kochAccuracyDisplay, kochCharSetDisplay, kochFeedbackMessage, kochLevelsContainer;
+let kochStartBtn, kochPlayBtn, kochAnswerInput, kochAccuracyDisplay, kochCharSetDisplay, kochFeedbackMessage, kochLevelsContainer,
+    kochResetProgressBtn, kochResetModal, kochConfirmResetBtn, kochCancelResetBtn;
 
 // Function to populate Koch Levels display
 function populateKochLevels() {
@@ -140,6 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
     kochCharSetDisplay = document.getElementById('koch-char-set-display');
     kochFeedbackMessage = document.getElementById('koch-feedback-message');
     kochLevelsContainer = document.getElementById('koch-levels-container');
+    kochResetProgressBtn = document.getElementById('koch-reset-progress-btn');
+    kochResetModal = document.getElementById('koch-reset-modal');
+    kochConfirmResetBtn = document.getElementById('koch-confirm-reset-btn');
+    kochCancelResetBtn = document.getElementById('koch-cancel-reset-btn');
 
     // Initial UI setup
     if (kochPlayBtn) kochPlayBtn.classList.add('hidden');
@@ -241,7 +246,71 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Koch Method script loaded and DOM elements initialized.");
     console.log("Initial Unlocked Characters:", unlockedCharacters);
     console.log("Initial Session Stats:", sessionStats);
+
+    // Event listeners for reset functionality
+    if (kochResetProgressBtn) {
+        kochResetProgressBtn.addEventListener('click', () => {
+            if (kochResetModal) kochResetModal.classList.remove('hidden');
+        });
+    }
+
+    if (kochConfirmResetBtn) {
+        kochConfirmResetBtn.addEventListener('click', () => {
+            resetKochProgress();
+        });
+    }
+
+    if (kochCancelResetBtn) {
+        kochCancelResetBtn.addEventListener('click', () => {
+            if (kochResetModal) kochResetModal.classList.add('hidden');
+        });
+    }
+
+    // Optional: Close modal if user clicks outside of it (on the overlay)
+    if (kochResetModal) {
+        kochResetModal.addEventListener('click', (event) => {
+            if (event.target === kochResetModal) { // Check if the click is on the overlay itself
+                kochResetModal.classList.add('hidden');
+            }
+        });
+    }
 });
+
+// Function to reset Koch Method progress
+function resetKochProgress() {
+    localStorage.removeItem('kochUnlockedCharacters');
+    unlockedCharacters = [kochCharacterOrder[0], kochCharacterOrder[1]]; // Reset to first two
+    localStorage.setItem('kochUnlockedCharacters', JSON.stringify(unlockedCharacters));
+
+    sessionStats = { correct: 0, total: 0 }; // Reset session stats
+
+    updateKochDisplays(); // Update all UI elements
+
+    if (kochFeedbackMessage) {
+        kochFeedbackMessage.textContent = "Progress reset successfully!";
+        kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
+        setTimeout(() => {
+            if (kochFeedbackMessage.textContent === "Progress reset successfully!") {
+                kochFeedbackMessage.textContent = ''; // Clear after a few seconds
+                kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium'; // Reset class
+            }
+        }, 3000);
+    }
+
+    if (kochResetModal) {
+        kochResetModal.classList.add('hidden'); // Hide the modal
+    }
+
+    // Ensure the UI state for practice session is reset (e.g., show start button)
+    if (kochStartBtn) kochStartBtn.classList.remove('hidden');
+    if (kochPlayBtn) kochPlayBtn.classList.add('hidden');
+    if (kochAnswerInput) {
+        kochAnswerInput.disabled = true;
+        kochAnswerInput.value = '';
+    }
+    console.log("Koch method progress has been reset.");
+}
+
 
 // Function to handle session completion (to be fully implemented in Step 3)
 function handleSessionCompletion(accuracy) {
