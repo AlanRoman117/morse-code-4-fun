@@ -128,18 +128,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Event Listeners for the Tapper UI
-    tapper.addEventListener('mousedown', (e) => {
+    // Event Listeners for the Tapper UI using Pointer Events
+    tapper.addEventListener('pointerdown', (e) => {
+        // Check if the event is from the primary pointer to avoid multi-touch issues if not desired
+        if (!e.isPrimary) return;
         e.preventDefault(); // Prevent text selection and other default browser actions
         if (isPlayingBack) return; // Placeholder: if some playback mode is active, ignore taps
+
+        // Capture the pointer to ensure subsequent pointer events (like pointerup, pointermove) are received
+        // even if the pointer moves outside the element.
+        tapper.setPointerCapture(e.pointerId);
+
         tapper.classList.add('active');
         playTapSound();
         tapStartTime = Date.now();
         clearTimeout(silenceTimer); // Clear any existing letter/word end timer
     });
 
-    tapper.addEventListener('mouseup', (e) => {
+    tapper.addEventListener('pointerup', (e) => {
+        if (!e.isPrimary) return;
         e.preventDefault();
+
+        // Release pointer capture
+        tapper.releasePointerCapture(e.pointerId);
+
         if (isPlayingBack || tapStartTime === 0) return; // Ensure tap started and not in playback
         tapper.classList.remove('active');
         stopTapSound(); // Sound should stop naturally due to short release
@@ -163,31 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, LETTER_SPACE_SILENCE_MS);
     });
     
-    // Touch events for mobile compatibility
-    tapper.addEventListener('touchstart', (e) => {
-        e.preventDefault(); // Crucial for preventing default touch behaviors like scrolling
-        // Simulate mousedown for DRY principle, or handle touch-specific logic if needed
-        tapper.dispatchEvent(new MouseEvent('mousedown', {bubbles: true, cancelable: true}));
-    });
-
-    tapper.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        // Check if the touch ended on the tapper itself or a child.
-        // This helps prevent misfires if the user's finger slides off.
-        const touch = e.changedTouches[0];
-        const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (targetElement === tapper || tapper.contains(targetElement)) {
-             tapper.dispatchEvent(new MouseEvent('mouseup', {bubbles: true, cancelable: true}));
-        } else {
-            // If touch ends outside, effectively cancel the tap to avoid unintended signals
-            tapper.classList.remove('active');
-            stopTapSound();
-            tapStartTime = 0; // Reset state
-            // currentMorse might or might not be cleared depending on desired behavior for "swipe-out"
-            console.log("Touch ended outside tapper, tap cancelled/reset.");
-        }
-    });
-
     // Listener for the "End Letter" / Space button
     spaceButton.addEventListener('click', () => {
         if (isPlayingBack) return;
@@ -240,18 +227,25 @@ document.addEventListener('DOMContentLoaded', () => {
         checkPractice(); // Dummy call
     }
 
-    // Prevent tapper from staying 'active' if mouse leaves while pressed down
-    tapper.addEventListener('mouseleave', () => {
-        if (tapper.classList.contains('active')) {
+    // Prevent tapper from staying 'active' if pointer leaves while pressed down
+    tapper.addEventListener('pointerleave', (e) => {
+        // Only act if this pointer was the one that activated the tapper
+        // and the tapper is currently active.
+        // This check is important because pointerleave can fire for non-primary pointers
+        // or when the pointer leaves for other reasons.
+        if (tapper.classList.contains('active') && tapper.hasPointerCapture(e.pointerId)) {
             tapper.classList.remove('active');
             stopTapSound();
-            // This behavior is debatable: should it complete the tap or cancel it?
-            // For now, cancel by resetting tapStartTime, consistent with touchend outside.
+
+            // Release pointer capture as the pointer has left the element
+            tapper.releasePointerCapture(e.pointerId);
+
+            // Cancel the tap by resetting tapStartTime
             tapStartTime = 0; 
-            // If a tap was in progress (currentMorse not empty), could optionally decode it here.
-            // However, this might be unexpected. Resetting is safer.
-            // if (currentMorse) { decodeMorse(false); } 
-            console.log("Mouse left tapper while active, tap cancelled/reset.");
+            // currentMorse might or might not be cleared depending on desired behavior.
+            // For consistency with previous mouseleave, reset.
+            // if (currentMorse) { decodeMorse(false); } // Optional: decode what was tapped before leaving
+            console.log("Pointer left tapper while active, tap cancelled/reset.");
         }
     });
 
