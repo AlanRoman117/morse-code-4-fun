@@ -386,7 +386,7 @@ function handleKochAnswer(userAnswer, clickedButtonElement = null) { // Added cl
             const isSessionStillActive = kochStartBtn.classList.contains('hidden'); // CORRECTED: Session is active if start button IS hidden
             console.log(`[Koch] Is session still active (start button hidden)? ${isSessionStillActive}`);
 
-            if (isSessionStillActive) {
+            if (isSessionStillActive) { 
                  console.log("[Koch] Playing next character.");
                  playNextKochCharacter();
             } else {
