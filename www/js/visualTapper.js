@@ -3,6 +3,7 @@
 let UNIT_TIME_MS = 150; 
 let DOT_THRESHOLD_MS = UNIT_TIME_MS * 1.5;
 let LETTER_SPACE_SILENCE_MS = UNIT_TIME_MS * 3;
+let predictiveDisplayTimeout = null; // For managing the hide timer
 
 // State variables for the visual tapper, scoped to be accessible by resetVisualTapperState
 let currentMorse = "";
@@ -404,8 +405,21 @@ function updatePredictiveDisplay(morseString) {
         return;
     }
 
+    // Clear any existing timeout when the function is called
+    if (predictiveDisplayTimeout) {
+        clearTimeout(predictiveDisplayTimeout);
+        predictiveDisplayTimeout = null;
+    }
+
     if (!morseString || morseString.length === 0) {
-        displayElement.innerHTML = ""; // Clear display if morseString is empty
+        // If morseString is empty, fade out and hide
+        displayElement.classList.remove('opacity-100'); // Ensure opacity-100 is removed if present
+        displayElement.classList.add('opacity-0');     // Start fade out
+
+        predictiveDisplayTimeout = setTimeout(() => {
+            displayElement.classList.add('hidden');
+            displayElement.innerHTML = ""; // Clear content after it's hidden
+        }, 500); // Match this to your CSS transition duration (duration-500)
         return;
     }
 
@@ -414,20 +428,54 @@ function updatePredictiveDisplay(morseString) {
     if (typeof morseCode === 'undefined') {
         console.error("morseCode dictionary is not available to updatePredictiveDisplay.");
         displayElement.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
+        displayElement.classList.remove('hidden', 'opacity-0');
+        displayElement.classList.add('opacity-100'); // Show error message
+
+        predictiveDisplayTimeout = setTimeout(() => {
+            displayElement.classList.remove('opacity-100');
+            displayElement.classList.add('opacity-0');
+            setTimeout(() => {
+                displayElement.classList.add('hidden');
+            }, 500); // Transition duration
+        }, 3000); // 3-second display for error
         return;
     }
 
     for (const char in morseCode) {
         if (morseCode[char].startsWith(morseString)) {
-            // Generate HTML for one badge
-            htmlBadges += `<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1">${char} (${morseCode[char]})</span>`;
+            // Added mr-1 mb-1 inline-block for better badge spacing if they wrap
+            htmlBadges += `<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${morseCode[char]})</span>`;
         }
     }
 
     if (htmlBadges.length > 0) {
         displayElement.innerHTML = htmlBadges;
+        displayElement.classList.remove('hidden', 'opacity-0'); // Make sure it's not hidden and opacity is not 0
+        // Force a reflow before adding opacity-100 if classes were just removed, to ensure transition plays
+        void displayElement.offsetWidth;
+        displayElement.classList.add('opacity-100');    // Make it fully visible (triggers transition if opacity was 0)
+
+        predictiveDisplayTimeout = setTimeout(() => {
+            displayElement.classList.remove('opacity-100');
+            displayElement.classList.add('opacity-0');    // Start fade-out
+
+            setTimeout(() => {
+                displayElement.classList.add('hidden');
+            }, 500); // This duration should match your CSS transition-duration
+        }, 3000); // 3 seconds
     } else {
         displayElement.innerHTML = "<span class='text-gray-500'>No match</span>";
+        displayElement.classList.remove('hidden', 'opacity-0');
+        void displayElement.offsetWidth; // Reflow
+        displayElement.classList.add('opacity-100'); // Show "No match"
+
+        predictiveDisplayTimeout = setTimeout(() => {
+            displayElement.classList.remove('opacity-100');
+            displayElement.classList.add('opacity-0');
+            setTimeout(() => {
+                displayElement.classList.add('hidden');
+            }, 500); // Transition duration
+        }, 3000); // 3-second display for "No match"
     }
 }
 
