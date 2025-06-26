@@ -419,7 +419,8 @@ function updatePredictiveDisplay(morseString) {
 
     for (const char in morseCode) {
         if (morseCode[char].startsWith(morseString)) {
-            possibleChars.push(char);
+            // Format as "A (.-)"
+            possibleChars.push(`${char} (${morseCode[char]})`);
         }
     }
 
