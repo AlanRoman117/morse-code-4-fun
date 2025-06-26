@@ -90,6 +90,11 @@
             font-weight: bold;
             color: #e2e8f0; /* Tailwind gray-300 */
             cursor: pointer;
+
+            /* --- ADD THESE LINES --- */
+            touch-action: manipulation; /* Prevents double-tap to zoom */
+            -webkit-user-select: none;
+            -ms-user-select: none;
             user-select: none;
             transition: all 0.1s ease-out;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
