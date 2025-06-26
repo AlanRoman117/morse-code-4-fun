@@ -339,8 +339,8 @@ function handleKochAnswer(userAnswer, clickedButtonElement = null) { // Added cl
 
         setTimeout(() => {
             if (targetElementForFeedback) targetElementForFeedback.classList.remove('glow-green');
-            // Re-enable inputs only if session is still ongoing (Start button is hidden)
-            if (!kochStartBtn.classList.contains('hidden')) {
+            // Re-enable inputs only if session is still ongoing (Start button IS hidden)
+            if (kochStartBtn.classList.contains('hidden')) { // CORRECTED Condition
                 kochAnswerInput.disabled = false;
                 kochButtons.forEach(btn => btn.disabled = false);
             }
@@ -355,8 +355,8 @@ function handleKochAnswer(userAnswer, clickedButtonElement = null) { // Added cl
 
         setTimeout(() => {
             if (targetElementForFeedback) targetElementForFeedback.classList.remove('shake-red');
-            // Re-enable inputs only if session is still ongoing
-            if (!kochStartBtn.classList.contains('hidden')) {
+            // Re-enable inputs only if session is still ongoing (Start button IS hidden)
+            if (kochStartBtn.classList.contains('hidden')) { // CORRECTED Condition
                 kochAnswerInput.disabled = false;
                 kochButtons.forEach(btn => btn.disabled = false);
             }
@@ -371,17 +371,28 @@ function handleKochAnswer(userAnswer, clickedButtonElement = null) { // Added cl
         const accuracy = (sessionStats.correct / sessionStats.total) * 100;
         setTimeout(() => {
             handleSessionCompletion(accuracy);
-        }, Math.max(500, 800) + 50);
+        }, Math.max(500, 800) + 50); // Ensure this timeout is longer than feedback
     } else {
         // After a short delay (that includes animation time), clear feedback and play the next character
+        console.log("[Koch] Scheduling next character...");
         setTimeout(() => {
+            console.log("[Koch] Timeout for next character triggered.");
             if(kochFeedbackMessage && (kochFeedbackMessage.textContent === "Correct!" || kochFeedbackMessage.textContent.startsWith("Incorrect."))) {
                 kochFeedbackMessage.textContent = '';
                 kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium'; // Reset class
             }
             // kochAnswerInput.value was already cleared
-            if (!kochStartBtn.classList.contains('hidden')) { // Only play next if session is still active
+
+            const isSessionStillActive = kochStartBtn.classList.contains('hidden'); // CORRECTED: Session is active if start button IS hidden
+            console.log(`[Koch] Is session still active (start button hidden)? ${isSessionStillActive}`);
+
+            if (isSessionStillActive) { 
+                 console.log("[Koch] Playing next character.");
                  playNextKochCharacter();
+            } else {
+                console.log("[Koch] Session IS NOT active, not playing next character.");
+                // Inputs should already be disabled by handleSessionCompletion or by the shorter feedback timeouts
+                // if session ended there.
             }
         }, 1500); // Existing delay
     }
