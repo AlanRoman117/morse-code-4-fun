@@ -34,6 +34,8 @@
         }
         .main-title {
             color: #4a90e2; /* A bright blue for the title */
+            /* Add this line to push it down from the notch */
+            margin-top: env(safe-area-inset-top, 1rem);
         }
         .input-output-box {
             background-color: #3a3a3a; /* Darker input areas */
@@ -97,6 +99,9 @@
             -webkit-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            /* --- ADD THESE --- */
+            -webkit-tap-highlight-color: transparent; /* Removes the gray highlight on tap in mobile Safari */
+            -webkit-touch-callout: none; /* Disables the menu that appears on long press */
             transition: all 0.1s ease-out;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             flex-shrink: 0; /* Added from original context if tapper was in flex */
@@ -118,9 +123,9 @@
         #spaceButton {
             /* Using Tailwind in HTML for most styling */
             /* Example: width: 70px; height: 70px; border-radius: 50%; */
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            -webkit-user-select: none; /* For Safari */
+            -ms-user-select: none;     /* For IE/Edge */
+            user-select: none;         /* Standard */
         }
         .table-highlight {
             background-color: #f6e05e; /* Tailwind yellow-300 or a similar vibrant color */
