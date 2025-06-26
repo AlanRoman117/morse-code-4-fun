@@ -494,7 +494,8 @@
                 <div class="w-full flex flex-col space-y-4 md:grid md:grid-cols-3 md:gap-4 md:items-start mb-6">
                     <!-- Left column for Morse reference -->
                     <div class="w-full p-2 md:col-span-2">
-                        <div class="morse-reference" id="morse-reference-container">
+                        <button id="toggle-reference-btn" class="md:hidden w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md mb-4">Show Morse Reference</button>
+                        <div class="morse-reference hidden md:block" id="morse-reference-container">
                             <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Code Reference</h2>
                             <div class="">
                                 <table class="reference-table mx-auto">
@@ -713,7 +714,9 @@
     <div id="hiddenTapperStorage" style="display: none;"></div>
     <div id="sharedVisualTapperWrapper" style="display: none;">
         <div class="tapper-section-container text-center my-4">
-            <!-- New flex container for tapper and button -->
+            <!-- Predictive Taps Display -->
+            <div id="predictive-taps-display" class="min-h-[3em] p-2 mb-2 text-center text-lg text-gray-400 border border-gray-600 rounded-md"></div>
+            <!-- Flex container for tapper and button -->
             <div class="flex justify-center items-center gap-4 mb-4">
                 <div id="tapper" class="tapper shadow-lg">Tap!</div> <!-- Removed mx-auto as flex handles centering -->
                 <button id="spaceButton" title="End Letter" class="text-sm bg-blue-500 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-3 rounded-full h-14 w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Word<br>Space</button>
