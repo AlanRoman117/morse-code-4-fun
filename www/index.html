@@ -78,20 +78,18 @@
 
         /* Tapper CSS */
         .tapper {
-            width: 150px;
-            height: 150px;
+            width: 120px; /* Mobile first size */
+            height: 120px; /* Mobile first size */
             border-radius: 50%;
             background-color: #4a5568; /* Tailwind gray-600 */
             border: 4px solid #2d3748; /* Tailwind gray-700 */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.25rem; /* Smaller for mobile */
             font-weight: bold;
             color: #e2e8f0; /* Tailwind gray-300 */
             cursor: pointer;
-
-            /* --- ADD THESE LINES --- */
             touch-action: manipulation; /* Prevents double-tap to zoom */
             -webkit-user-select: none;
             -ms-user-select: none;
@@ -99,6 +97,14 @@
             transition: all 0.1s ease-out;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             flex-shrink: 0; /* Added from original context if tapper was in flex */
+        }
+        /* Add media query for larger screens */
+        @media (min-width: 768px) { /* md breakpoint */
+            .tapper {
+                width: 150px;
+                height: 150px;
+                font-size: 1.5rem; /* Restore original font size for md and up */
+            }
         }
         .tapper:active, .tapper.active {
             background-color: #f6e05e; /* Tailwind yellow-300 */
@@ -491,17 +497,17 @@
         <button id="koch-method-nav-btn" data-tab="koch-method-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Koch Method</button>
         <button id="settings-nav-btn" data-tab="settings-tab" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Settings</button>
     </nav>
-    <h1 class="text-4xl font-bold mb-8 text-center main-title">Morse Code 4 fun</h1>
+    <h1 class="text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-center main-title">Morse Code 4 fun</h1>
     <div id="tab-content-wrapper">
         <div id="learn-practice-tab" class="tab-content">
             <div class="app-container">
                 <!-- NEW TOP CONTAINER STARTS HERE -->
-                <div class="w-full flex flex-col space-y-4 md:grid md:grid-cols-3 md:gap-4 md:items-start mb-6">
+                <div class="w-full flex flex-col space-y-4 md:grid md:grid-cols-3 md:gap-4 md:items-start mb-3 md:mb-4">
                     <!-- Left column for Morse reference -->
                     <div class="w-full p-2 md:col-span-2">
-                        <button id="toggle-reference-btn" class="md:hidden w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md mb-4">Show Morse Reference</button>
+                        <button id="toggle-reference-btn" class="md:hidden w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md mb-2 md:mb-4">Show Morse Reference</button>
                         <div class="morse-reference hidden md:block" id="morse-reference-container">
-                            <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Code Reference</h2>
+                            <h2 class="section-title text-xl md:text-2xl font-semibold mb-2 md:mb-3 text-center">Morse Code Reference</h2>
                             <div class="">
                                 <table class="reference-table mx-auto">
                                     <thead>
@@ -521,18 +527,18 @@
                     </div>
                     <!-- Right column for Tapper -->
                     <div class="w-full p-2">
-                        <div id="learnPracticeTapperArea" class="text-center my-4 flex flex-col items-center">
+                        <div id="learnPracticeTapperArea" class="text-center my-2 md:my-3 flex flex-col items-center">
                             <!-- The shared visual tapper will be inserted here by JavaScript -->
-                             <h2 class="section-title text-2xl font-semibold mb-3 text-center">Practice Tapping Morse</h2>
-                            <p id="practiceText" class="text-3xl font-bold text-yellow-400 min-h-[40px] text-center"></p>
+                             <h2 class="section-title text-xl md:text-2xl font-semibold mb-2 md:mb-3 text-center">Practice Tapping Morse</h2>
+                            <p id="practiceText" class="text-2xl md:text-3xl font-bold text-yellow-400 min-h-[32px] md:min-h-[40px] text-center"></p>
                             <div id="tapper-placeholder"></div> <!-- New placeholder -->
-                            <div id="tapperGameControls" class="mt-4 flex flex-col space-y-2"> <!-- Moved and ID'd button container -->
-                                <button id="newChallengeButton" class="mt-2 w-full bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">New Challenge</button>
-                                <button id="play-tapped-morse-btn" class="mt-2 w-full bg-purple-500 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Play My Tapped Morse</button>
-                                <button id="clearTapperInputButton" class="mt-2 w-full bg-red-500 hover:bg-red-700 active:bg-red-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Clear My Tapping</button>
+                            <div id="tapperGameControls" class="mt-2 md:mt-3 flex flex-col space-y-1 md:space-y-2"> <!-- Moved and ID'd button container -->
+                                <button id="newChallengeButton" class="w-full bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">New Challenge</button>
+                                <button id="play-tapped-morse-btn" class="w-full bg-purple-500 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Play My Tapped Morse</button>
+                                <button id="clearTapperInputButton" class="w-full bg-red-500 hover:bg-red-700 active:bg-red-800 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Clear My Tapping</button>
                             </div>
-                            <p id="tapperDecodedOutput" class="text-2xl min-h-[30px] break-all text-center bg-gray-700 p-2 rounded mt-2"></p>
-                            <p id="practiceMessage" class="text-lg text-center min-h-[24px] mt-2"></p>
+                            <p id="tapperDecodedOutput" class="text-xl md:text-2xl min-h-[24px] md:min-h-[30px] break-all text-center bg-gray-700 p-1 md:p-2 rounded mt-1 md:mt-2"></p>
+                            <p id="practiceMessage" class="text-base md:text-lg text-center min-h-[20px] md:min-h-[24px] mt-1 md:mt-2"></p>
                         </div>
                     </div>
                 </div>
@@ -718,18 +724,18 @@
 
     <div id="hiddenTapperStorage" style="display: none;"></div>
     <div id="sharedVisualTapperWrapper" style="display: none;">
-        <div class="tapper-section-container text-center my-4">
+        <div class="tapper-section-container text-center my-2 md:my-4"> <!-- Adjusted my-4 to my-2 md:my-4 -->
             <!-- Predictive Taps Display -->
-                <div id="predictive-taps-display" class="h-[3em] p-2 mb-2 text-center text-lg text-gray-400 border border-gray-600 rounded-md"></div>
+                <div id="predictive-taps-display" class="h-[2.8em] md:h-[3em] p-1 md:p-2 mb-1 md:mb-2 text-center text-base md:text-lg text-gray-400 border border-gray-600 rounded-md"></div>
             <!-- Flex container for tapper and button -->
-            <div class="flex justify-center items-center gap-4 mb-4">
+            <div class="flex justify-center items-center gap-2 md:gap-4 mb-2 md:mb-3">
                 <div id="tapper" class="tapper shadow-lg">Tap!</div> <!-- Removed mx-auto as flex handles centering -->
-                <button id="spaceButton" title="End Letter" class="text-sm bg-blue-500 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-3 rounded-full h-14 w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Word<br>Space</button>
+                <button id="spaceButton" title="End Letter" class="text-sm bg-blue-500 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Word<br>Space</button>
             </div>
             <!-- Output area remains below -->
-            <div class="output-area mt-2">
-                <h3 class="text-lg font-semibold mb-1">Your Morse:</h3>
-                <p id="tapperMorseOutput" class="text-xl font-mono min-h-[25px] break-all bg-gray-700 p-2 rounded"></p>
+            <div class="output-area mt-1 md:mt-2"> <!-- Adjusted mt-2 to mt-1 md:mt-2 -->
+                <h3 class="text-base md:text-lg font-semibold mb-1">Your Morse:</h3>
+                <p id="tapperMorseOutput" class="text-base md:text-xl font-mono min-h-[20px] md:min-h-[25px] break-all bg-gray-700 p-1 md:p-2 rounded"></p>
             </div>
         </div>
     </div>
