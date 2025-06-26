@@ -690,7 +690,8 @@
                     <button id="play-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Play Morse Code</button>
                     <button id="stop-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Stop Sound</button>
                     <button id="copy-text-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Text</button><span id="copy-text-feedback" class="ml-2 text-sm"></span>
-                    <button id="copy-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Morse</button><span id="copy-morse-feedback" class="ml-2 text-sm"></span>
+                    <button id="copy-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Morse</button><span id="copy-morse-feedback" class="ml-2 text-sm"></span>
+                    <button id="share-btn" class="bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Share</button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -1389,6 +1390,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // VISUAL TAPPER JS HAS BEEN MOVED FROM HERE
+
+        // Capacitor Share Plugin Integration
+        // Ensure Capacitor is available or use dynamic import if necessary
+        // For simplicity, assuming Capacitor and its plugins are globally available
+        // or correctly bundled/imported if using a module system.
+        // If using ES Modules and a build step, you'd typically do:
+        // import { Share } from '@capacitor/share';
+
+        const shareButton = document.getElementById('share-btn');
+        if (shareButton) {
+            shareButton.addEventListener('click', async () => {
+                // Ensure Capacitor's Share plugin is available
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+                    const { Share } = window.Capacitor.Plugins;
+                    const textToShare = document.getElementById('text-input').value;
+
+                    if (textToShare) {
+                        try {
+                            await Share.share({
+                                title: 'Morse Code Practice',
+                                text: `I just tapped this out in the Morse Code Learner: "${textToShare}"`,
+                                dialogTitle: 'Share Your Message'
+                            });
+                        } catch (error) {
+                            // Handle any errors during sharing, e.g., user cancels share dialog
+                            console.error('Error sharing:', error);
+                            // Optionally, display a message to the user if sharing fails,
+                            // but often, cancellation is not treated as an error to be shown.
+                            // alert("Sharing failed or was cancelled.");
+                        }
+                    } else {
+                        alert("Nothing to share!");
+                    }
+                } else {
+                    console.error('Capacitor Share plugin not available. Make sure Capacitor is initialized and the plugin is installed correctly.');
+                    alert('Share functionality is not available on this platform or there was an issue loading it.');
+                }
+            });
+        } else {
+            console.warn("Share button with ID 'share-btn' not found.");
+        }
     </script>
     <script src="js/learnPracticeGame.js" defer></script>
     <script src="js/visualTapper.js" defer></script>
