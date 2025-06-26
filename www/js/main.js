@@ -598,6 +598,16 @@ document.addEventListener('DOMContentLoaded', () => {
             applySavedTheme(); // Apply theme on load
             updateDurations(); // Initialize durations based on default slider values
 
+            // One-time audio initialization on first user interaction
+            const masterAudioInitListener = () => {
+                console.log("First user interaction, initializing master audio context.");
+                initAudio();
+                document.body.removeEventListener('click', masterAudioInitListener);
+                document.body.removeEventListener('touchstart', masterAudioInitListener);
+            };
+            document.body.addEventListener('click', masterAudioInitListener);
+            document.body.addEventListener('touchstart', masterAudioInitListener);
+
             // Set initial values for sliders display
             wpmValue.textContent = wpmSlider.value;
             farnsworthValue.textContent = farnsworthSlider.value;

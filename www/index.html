@@ -14,8 +14,8 @@
         /* Styles moved to www/css/style.css */
     </style>
 </head>
-<body class="pt-5 pb-20 md:pb-5">
-    <nav class="flex justify-around items-center fixed bottom-0 left-0 right-0 z-50 bg-gray-800 py-3 shadow-md md:relative md:top-auto md:left-auto md:right-auto md:bg-transparent md:shadow-none md:mb-4 md:p-0 md:space-x-2">
+<body class="pt-5 pb-24 md:pb-5">
+    <nav class="flex justify-around items-center fixed bottom-0 left-0 right-0 z-50 bg-gray-800 py-4 shadow-md md:relative md:top-auto md:left-auto md:right-auto md:bg-transparent md:shadow-none md:mb-4 md:p-0 md:space-x-2">
         <button id="learn-practice-nav-btn" data-tab="learn-practice-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active-tab-button w-1/5 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
             <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 0A.75.75 0 0 1 3 9.398V8.25c0-.828.75-1.5 1.5-1.5h5.25c.828 0 1.5.672 1.5 1.5v1.148c0 .414-.168.79-.441.983-.149.104-.312.192-.488.254v.702c0 .03.024.058.054.072.09.042.188.072.29.093A60.954 60.954 0 0 1 12 10.5c2.278 0 4.37.61 6.138 1.62.203.102.436.172.682.214.03.006.056.024.078.05s.042.056.058.084c.058.092.102.192.132.298.022.072.03.148.03.222v.702c0 .03-.024.058-.054.072-.09.042-.188.072-.29.093a60.954 60.954 0 0 1-1.328.281 60.438 60.438 0 0 0-.491 0A.75.75 0 0 1 16.5 9.398V8.25c0-.828.75-1.5 1.5-1.5h5.25c.828 0 1.5.672 1.5 1.5v1.148c0 .414-.168.79-.441.983-.149.104-.312.192-.488.254v.702c0 .03.024.058.054.072.09.042.188.072.29.093A60.954 60.954 0 0 1 21 10.5c2.278 0 4.37.61 6.138 1.62.203.102.436.172.682.214.03.006.056.024.078.05s.042.056.058.084c.058.092.102.192.132.298.022.072.03.148.03.222v.702c0 .03-.024.058-.054.072-.09.042-.188.072-.29.093a60.954 60.954 0 0 1-1.328.281 60.438 60.438 0 0 0-.491 0A.75.75 0 0 1 19.5 9.398V8.25c0-.828.75-1.5 1.5-1.5H15V6.75A.75.75 0 0 0 14.25 6h-4.5A.75.75 0 0 0 9 6.75V7.5H4.5A1.5 1.5 0 0 0 3 9v.75c0 .414.336.75.75.75H15v1.148A.75.75 0 0 0 15.75 12h.008a.75.75 0 0 0 .742-.654 60.02 60.02 0 0 0-.491-5.478C15.49 4.09 13.956 3 12 3s-3.49.09-4.001 1.868a60.019 60.019 0 0 0-.49 5.478.75.75 0 0 0 .742.654H8.25A.75.75 0 0 0 9 11.398V9.75a.75.75 0 0 0-.75-.75H3.75A.75.75 0 0 0 3 9.75v1.148A.75.75 0 0 0 3.75 12H12m0 3.75a.75.75 0 0 1 .75.75v2.25h1.5a.75.75 0 0 1 0 1.5h-1.5v2.25a.75.75 0 0 1-1.5 0v-2.25h-1.5a.75.75 0 0 1 0-1.5h1.5v-2.25a.75.75 0 0 1 .75-.75Z" />
@@ -105,7 +105,7 @@
                     <!-- Book Library Container -->
                     <div class="mb-4">
                         <label for="book-library-container" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label>
-                        <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-72 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-[40rem] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             <!-- Book covers will be dynamically added here by JavaScript -->
                         </div>
                     </div>
@@ -153,22 +153,28 @@
                     </p>
                 </div>
 
-                <!-- Level Progression Display Area -->
-                <div id="koch-levels-container" class="flex flex-wrap justify-center gap-2 my-4">
-                    <!-- Dynamically populated level cells will go here -->
+                <!-- Level Progression Display Area - Now Collapsible -->
+                <button id="toggle-koch-levels-btn" class="md:hidden w-full bg-purple-500 hover:bg-purple-700 text-white font-semibold py-2 px-3 rounded-md mb-2">Show/Hide Character Progress</button>
+                <div id="koch-levels-wrapper">
+                    <div id="koch-levels-container" class="flex flex-wrap justify-center gap-2 my-4 hidden md:flex">
+                        <!-- Dynamically populated level cells will go here -->
+                    </div>
                 </div>
 
-                <!-- Status Display Area -->
-                <div class="mb-6 p-4 bg-gray-700 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-2 text-center text-blue-400">Current Status</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-                        <div>
-                            <h4 class="text-lg font-medium text-gray-300">Current Characters:</h4>
-                            <p id="koch-char-set-display" class="text-2xl font-bold text-yellow-400">K, M</p>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-medium text-gray-300">Session Accuracy:</h4>
-                            <p id="koch-accuracy-display" class="text-2xl font-bold text-green-400">--% (Correct: 0, Total: 0)</p>
+                <!-- Status Display Area - Now controlled by its button but visible by default on mobile -->
+                <button id="toggle-koch-status-btn" class="md:hidden w-full bg-indigo-500 hover:bg-indigo-700 text-white font-semibold py-2 px-3 rounded-md mb-2 mt-4">Show/Hide Status</button>
+                <div id="koch-status-wrapper">
+                    <div class="mb-6 p-4 bg-gray-700 rounded-lg"> {/* Removed hidden md:block here */}
+                        <h3 class="text-xl font-semibold mb-2 text-center text-blue-400">Current Status</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                            <div>
+                                <h4 class="text-lg font-medium text-gray-300">Current Characters:</h4>
+                                <p id="koch-char-set-display" class="text-2xl font-bold text-yellow-400">K, M</p>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-medium text-gray-300">Session Accuracy:</h4>
+                                <p id="koch-accuracy-display" class="text-2xl font-bold text-green-400">--% (Correct: 0, Total: 0)</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -183,7 +189,10 @@
                         <button id="koch-play-btn" class="w-full md:w-auto bg-blue-500 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 text-lg hidden">
                             Play Next Character
                         </button>
-                        <input type="text" id="koch-answer-input" maxlength="1" class="text-center text-2xl font-semibold p-3 rounded-md bg-gray-800 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-3/4 md:w-1/2 lg:w-1/4 uppercase placeholder-gray-500" placeholder="Type character here">
+                        <div id="koch-input-buttons-container" class="flex md:hidden justify-center flex-wrap gap-2 my-3">
+                            <!-- Dynamically generated character buttons will go here -->
+                        </div>
+                        <input type="text" id="koch-answer-input" maxlength="1" class="text-center text-2xl font-semibold p-3 rounded-md bg-gray-800 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-3/4 md:w-1/2 lg:w-1/4 uppercase placeholder-gray-500 hidden md:block" placeholder="Type character here">
                         <p id="koch-feedback-message" class="text-lg text-center min-h-[28px] font-medium"></p> <!-- Adjusted min-height -->
                     </div>
                     <!-- Reset Button -->
@@ -249,22 +258,26 @@
         <div id="morse-io-tab" class="tab-content hidden">
             <div class="app-container">
                 <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Input/Output</h2>
-                <div class="controls mb-6 text-center">
-                    <button id="play-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Play Morse Code</button>
-                    <button id="stop-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Stop Sound</button>
-                    <button id="copy-text-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Text</button><span id="copy-text-feedback" class="ml-2 text-sm"></span>
-                    <button id="copy-morse-btn" class="mr-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Morse</button><span id="copy-morse-feedback" class="ml-2 text-sm"></span>
-                    <button id="share-btn" class="bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Share</button>
+                <div class="controls mb-6 text-center space-x-2">
+                    <button id="play-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Play Morse Code</button>
+                    <button id="stop-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Stop Sound</button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="text-input" class="block text-sm font-medium mb-2">Enter Text:</label>
+                    <div class="flex flex-col space-y-2">
+                        <label for="text-input" class="block text-sm font-medium">Enter Text:</label>
                         <textarea id="text-input" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Type text here..."></textarea>
+                        <button id="copy-text-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 self-start">Copy Text</button>
+                        <span id="copy-text-feedback" class="ml-2 text-sm self-start"></span>
                     </div>
-                    <div>
-                        <label for="morse-output" class="block text-sm font-medium mb-2">Morse Code Output:</label>
+                    <div class="flex flex-col space-y-2">
+                        <label for="morse-output" class="block text-sm font-medium">Morse Code Output:</label>
                         <textarea id="morse-output" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Or type Morse here (e.g. .... . .-.. .-.. ---)" readonly></textarea>
+                        <div class="flex items-center space-x-2 self-start">
+                            <button id="copy-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Morse</button>
+                            <button id="share-btn" class="bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Share</button>
+                        </div>
+                        <span id="copy-morse-feedback" class="ml-2 text-sm self-start"></span>
                     </div>
                 </div>
                  <!-- Morse Playback Settings can remain on Learn & Practice or be moved too. For now, keeping them on L&P. -->
