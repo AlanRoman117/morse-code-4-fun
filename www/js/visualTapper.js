@@ -405,29 +405,29 @@ function updatePredictiveDisplay(morseString) {
     }
 
     if (!morseString || morseString.length === 0) {
-        displayElement.textContent = ""; // Clear display if morseString is empty
+        displayElement.innerHTML = ""; // Clear display if morseString is empty
         return;
     }
 
-    const possibleChars = [];
+    let htmlBadges = "";
     // Ensure morseCode is available (it's defined in index.html's script tag)
     if (typeof morseCode === 'undefined') {
         console.error("morseCode dictionary is not available to updatePredictiveDisplay.");
-        displayElement.textContent = "Error: Morse dictionary unavailable.";
+        displayElement.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
         return;
     }
 
     for (const char in morseCode) {
         if (morseCode[char].startsWith(morseString)) {
-            // Format as "A (.-)"
-            possibleChars.push(`${char} (${morseCode[char]})`);
+            // Generate HTML for one badge
+            htmlBadges += `<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1">${char} (${morseCode[char]})</span>`;
         }
     }
 
-    if (possibleChars.length > 0) {
-        displayElement.textContent = `Possible: ${possibleChars.join(', ')}`;
+    if (htmlBadges.length > 0) {
+        displayElement.innerHTML = htmlBadges;
     } else {
-        displayElement.textContent = "No match";
+        displayElement.innerHTML = "<span class='text-gray-500'>No match</span>";
     }
 }
 

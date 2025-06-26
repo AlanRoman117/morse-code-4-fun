@@ -487,3 +487,35 @@ body {
         border-color: #22c55e !important; /* Tailwind green-500, !important to override focus styles */
         color: #14532d; /* Tailwind green-900 for text */
     }
+
+        #predictive-taps-display {
+            height: auto; /* Allow height to adjust for wrapped content */
+            min-height: 3em; /* Keep the min-height to prevent layout shift */
+            display: flex;
+            flex-wrap: wrap; /* This is the key property to allow wrapping */
+            justify-content: center;
+            gap: 0.25rem; /* Adds a small space between badges */
+            align-items: center;
+            /* Assuming other styles like padding, border are handled by Tailwind classes in HTML */
+            /* If not, add them here:
+            /* padding: 0.5rem; */
+            /* border: 1px solid #4A5568; /* Example border */
+            /* border-radius: 0.375rem; /* Example border-radius */
+        }
+
+        .char-badge {
+            /* Tailwind classes: bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 */
+            background-color: #4A5568; /* bg-gray-600 */
+            color: #E2E8F0; /* text-gray-200 */
+            font-size: 0.75rem; /* text-xs */
+            font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* font-mono */
+            border-radius: 0.375rem; /* rounded-md */
+            padding-left: 0.5rem; /* px-2 */
+            padding-right: 0.5rem; /* px-2 */
+            padding-top: 0.25rem; /* py-1 */
+            padding-bottom: 0.25rem; /* py-1 */
+            /* Adding display inline-flex for better alignment if needed, though flex items in a flex container behave well */
+            display: inline-flex;
+            align-items: center;
+            margin: 0.125rem; /* Add a small margin for separation if gap isn't enough or for items that might break lines weirdly */
+        }
