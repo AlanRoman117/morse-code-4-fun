@@ -133,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Event Listeners for the Tapper UI using Pointer Events
+    /*
     tapper.addEventListener('pointerdown', (e) => {
         e.preventDefault(); // This should be one of the first lines
         // Check if the event is from the primary pointer to avoid multi-touch issues if not desired
@@ -187,7 +188,106 @@ document.addEventListener('DOMContentLoaded', () => {
             decodeMorse(false); // Pass false, indicating it's a timeout, not an explicit space
         }, LETTER_SPACE_SILENCE_MS);
     });
-    
+    */
+
+    // --- New Touch Event Listeners ---
+    tapper.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // Critical for preventing mobile browser default actions
+        // if (isPlayingBack) return; // Placeholder: if some playback mode is active, ignore taps
+
+        tapper.classList.add('active');
+        playTapSound();
+        tapStartTime = Date.now();
+        clearTimeout(silenceTimer); // Clear any existing letter/word end timer
+    });
+
+    tapper.addEventListener('touchend', (e) => {
+        e.preventDefault(); // Critical for preventing mobile browser default actions
+
+        // Double-tap zoom prevention (optional, but good for consistency if pointer events had it)
+        // const currentTime = Date.now();
+        // if ((currentTime - lastTapTime) < DOUBLE_TAP_THRESHOLD_MS) {
+        //     console.log("Touch double tap detected, preventing default zoom.");
+        //     // e.preventDefault(); // Already called above
+        // }
+        // lastTapTime = currentTime;
+
+        // if (isPlayingBack || tapStartTime === 0) return; // Ensure tap started and not in playback
+        if (tapStartTime === 0) return; // Simpler check as isPlayingBack is not fully implemented here
+
+        tapper.classList.remove('active');
+        stopTapSound();
+
+        let duration = Date.now() - tapStartTime;
+
+        if (duration < DOT_THRESHOLD_MS) {
+            currentMorse += ".";
+        } else {
+            currentMorse += "-";
+        }
+
+        if (tapperMorseOutput) tapperMorseOutput.textContent = currentMorse;
+        if (typeof window.updateTableHighlight === "function") window.updateTableHighlight(currentMorse);
+        updatePredictiveDisplay(currentMorse);
+        tapStartTime = 0; // Reset for the next tap
+
+        // Start the timer to detect end of a letter
+        clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(() => {
+            decodeMorse(false);
+        }, LETTER_SPACE_SILENCE_MS);
+    });
+
+    // --- New Mouse Event Listeners ---
+    tapper.addEventListener('mousedown', (e) => {
+        // e.preventDefault(); // Usually not needed for mousedown unless preventing text selection, etc.
+                              // The CSS user-select: none should handle text selection.
+        // if (isPlayingBack) return;
+
+        tapper.classList.add('active');
+        playTapSound();
+        tapStartTime = Date.now();
+        clearTimeout(silenceTimer);
+    });
+
+    tapper.addEventListener('mouseup', (e) => {
+        // if (isPlayingBack || tapStartTime === 0) return;
+        if (tapStartTime === 0) return;
+
+
+        tapper.classList.remove('active');
+        stopTapSound();
+
+        let duration = Date.now() - tapStartTime;
+
+        if (duration < DOT_THRESHOLD_MS) {
+            currentMorse += ".";
+        } else {
+            currentMorse += "-";
+        }
+
+        if (tapperMorseOutput) tapperMorseOutput.textContent = currentMorse;
+        if (typeof window.updateTableHighlight === "function") window.updateTableHighlight(currentMorse);
+        updatePredictiveDisplay(currentMorse);
+        tapStartTime = 0;
+
+        clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(() => {
+            decodeMorse(false);
+        }, LETTER_SPACE_SILENCE_MS);
+    });
+
+    tapper.addEventListener('mouseleave', (e) => {
+        if (tapper.classList.contains('active')) { // Only if mouse was down
+            tapper.classList.remove('active');
+            stopTapSound();
+            tapStartTime = 0;
+            // Optional: decode what was tapped if desired, or just cancel.
+            // if (currentMorse) { decodeMorse(false); }
+            console.log("Mouse left tapper while active, tap cancelled/reset.");
+        }
+    });
+
     // Listener for the "End Letter" / Space button
     spaceButton.addEventListener('click', () => {
         if (isPlayingBack) return;
@@ -242,6 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Prevent tapper from staying 'active' if pointer leaves while pressed down
+    /*
     tapper.addEventListener('pointerleave', (e) => {
         // Only act if this pointer was the one that activated the tapper
         // and the tapper is currently active.
@@ -262,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Pointer left tapper while active, tap cancelled/reset.");
         }
     });
-
+    */
     // Add this new listener for touchcancel
     tapper.addEventListener('touchcancel', (e) => {
         // No e.isPrimary check for touchcancel, as it's a cancellation of an existing touch sequence.
