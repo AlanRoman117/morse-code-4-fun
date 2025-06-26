@@ -33,7 +33,8 @@ loadUnlockedCharacters();
 // DOM Elements
 let kochStartBtn, kochPlayBtn, kochAnswerInput, kochAccuracyDisplay, kochCharSetDisplay, kochFeedbackMessage, kochLevelsContainer,
     kochResetProgressBtn, kochResetModal, kochConfirmResetBtn, kochCancelResetBtn,
-    toggleKochStatusBtn, kochStatusWrapper, kochInputButtonsContainer; // Added for collapsible status and input buttons
+    toggleKochStatusBtn, kochStatusWrapper, kochInputButtonsContainer,
+    toggleKochLevelsBtn, kochLevelsWrapper; // Added for levels collapsible section
 
 // Function to populate Koch Levels display
 function populateKochLevels() {
@@ -149,6 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleKochStatusBtn = document.getElementById('toggle-koch-status-btn');
     kochStatusWrapper = document.getElementById('koch-status-wrapper');
     kochInputButtonsContainer = document.getElementById('koch-input-buttons-container');
+    toggleKochLevelsBtn = document.getElementById('toggle-koch-levels-btn');
+    // kochLevelsWrapper = document.getElementById('koch-levels-wrapper'); // Wrapper div
+    // We are toggling koch-levels-container directly as it has the md:flex property
 
     // Initial UI setup
     if (kochPlayBtn) kochPlayBtn.classList.add('hidden');
@@ -244,6 +248,15 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Could not find the content div within koch-status-wrapper to toggle.");
         }
     }
+
+    // Event listener for toggle Koch levels button
+    if (toggleKochLevelsBtn && kochLevelsContainer) {
+        toggleKochLevelsBtn.addEventListener('click', () => {
+            kochLevelsContainer.classList.toggle('hidden');
+            // If you decided to use md:flex on the container, ensure this toggle works as expected.
+            // Toggling 'hidden' should be fine as 'md:flex' only applies at md breakpoint.
+        });
+    }
 });
 
 // Function to reset Koch Method progress
@@ -293,8 +306,8 @@ function renderKochInputButtons() {
             const button = document.createElement('button');
             button.textContent = char;
             button.className = 'py-3 px-5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-400 active:bg-blue-700 text-xl';
-            button.addEventListener('click', () => {
-                handleKochAnswer(char);
+            button.addEventListener('click', function() { // Use function keyword for 'this'
+                handleKochAnswer(char, this); // Pass 'this' (the button element)
             });
             kochInputButtonsContainer.appendChild(button);
         });
@@ -302,42 +315,51 @@ function renderKochInputButtons() {
 }
 
 // Function to handle Koch answer from input field or button
-function handleKochAnswer(userAnswer) {
+function handleKochAnswer(userAnswer, clickedButtonElement = null) { // Added clickedButtonElement parameter
     if (!kochAnswerInput || kochAnswerInput.disabled) { // Check if input is allowed
-        // If input is from a button press but the text field is disabled (e.g. between characters), ignore.
-        // This can happen if a button is spammed.
-        console.log("Koch answer input ignored, input field is disabled.");
+        // This also implicitly checks if a session is active because kochAnswerInput is disabled when not.
+        console.log("Koch answer input ignored, input field is disabled or no session active.");
         return;
     }
 
     sessionStats.total++;
 
-    // Temporarily disable input field and buttons to prevent spamming during animation/feedback
+    // Temporarily disable text input field and all on-screen character buttons
     kochAnswerInput.disabled = true;
-    // Consider disabling character buttons too, or rely on kochAnswerInput.disabled check.
-    // For now, the check at the start of this function should suffice.
+    const kochButtons = kochInputButtonsContainer.querySelectorAll('button');
+    kochButtons.forEach(btn => btn.disabled = true);
 
     if (userAnswer === correctAnswer) {
         sessionStats.correct++;
         if(kochFeedbackMessage) kochFeedbackMessage.textContent = "Correct!";
         if(kochFeedbackMessage) kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400';
 
-        if (kochAnswerInput) kochAnswerInput.classList.add('glow-green');
+        const targetElementForFeedback = clickedButtonElement || kochAnswerInput;
+        if (targetElementForFeedback) targetElementForFeedback.classList.add('glow-green');
 
         setTimeout(() => {
-            if (kochAnswerInput) kochAnswerInput.classList.remove('glow-green');
-            if (kochAnswerInput && !kochStartBtn.classList.contains('hidden')) kochAnswerInput.disabled = false; // Re-enable input if session is ongoing
+            if (targetElementForFeedback) targetElementForFeedback.classList.remove('glow-green');
+            // Re-enable inputs only if session is still ongoing (Start button is hidden)
+            if (!kochStartBtn.classList.contains('hidden')) {
+                kochAnswerInput.disabled = false;
+                kochButtons.forEach(btn => btn.disabled = false);
+            }
         }, 800); // Match glow-green animation duration
 
     } else {
         if(kochFeedbackMessage) kochFeedbackMessage.textContent = `Incorrect. The character was: ${correctAnswer}`;
         if(kochFeedbackMessage) kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-red-400';
 
-        if (kochAnswerInput) kochAnswerInput.classList.add('shake-red');
+        const targetElementForFeedback = clickedButtonElement || kochAnswerInput;
+        if (targetElementForFeedback) targetElementForFeedback.classList.add('shake-red');
 
         setTimeout(() => {
-            if (kochAnswerInput) kochAnswerInput.classList.remove('shake-red');
-            if (kochAnswerInput && !kochStartBtn.classList.contains('hidden')) kochAnswerInput.disabled = false;
+            if (targetElementForFeedback) targetElementForFeedback.classList.remove('shake-red');
+            // Re-enable inputs only if session is still ongoing
+            if (!kochStartBtn.classList.contains('hidden')) {
+                kochAnswerInput.disabled = false;
+                kochButtons.forEach(btn => btn.disabled = false);
+            }
         }, 500); // Match shake animation duration
     }
 

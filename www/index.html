@@ -105,7 +105,7 @@
                     <!-- Book Library Container -->
                     <div class="mb-4">
                         <label for="book-library-container" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label>
-                        <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-96 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-[40rem] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             <!-- Book covers will be dynamically added here by JavaScript -->
                         </div>
                     </div>
@@ -153,15 +153,18 @@
                     </p>
                 </div>
 
-                <!-- Level Progression Display Area -->
-                <div id="koch-levels-container" class="flex flex-wrap justify-center gap-2 my-4">
-                    <!-- Dynamically populated level cells will go here -->
+                <!-- Level Progression Display Area - Now Collapsible -->
+                <button id="toggle-koch-levels-btn" class="md:hidden w-full bg-purple-500 hover:bg-purple-700 text-white font-semibold py-2 px-3 rounded-md mb-2">Show/Hide Character Progress</button>
+                <div id="koch-levels-wrapper">
+                    <div id="koch-levels-container" class="flex flex-wrap justify-center gap-2 my-4 hidden md:flex">
+                        <!-- Dynamically populated level cells will go here -->
+                    </div>
                 </div>
 
-                <!-- Status Display Area -->
-                <button id="toggle-koch-status-btn" class="md:hidden w-full bg-indigo-500 hover:bg-indigo-700 text-white font-semibold py-2 px-3 rounded-md mb-2">Show/Hide Status</button>
+                <!-- Status Display Area - Now controlled by its button but visible by default on mobile -->
+                <button id="toggle-koch-status-btn" class="md:hidden w-full bg-indigo-500 hover:bg-indigo-700 text-white font-semibold py-2 px-3 rounded-md mb-2 mt-4">Show/Hide Status</button>
                 <div id="koch-status-wrapper">
-                    <div class="mb-6 p-4 bg-gray-700 rounded-lg hidden md:block">
+                    <div class="mb-6 p-4 bg-gray-700 rounded-lg"> {/* Removed hidden md:block here */}
                         <h3 class="text-xl font-semibold mb-2 text-center text-blue-400">Current Status</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
                             <div>
@@ -258,7 +261,6 @@
                 <div class="controls mb-6 text-center space-x-2">
                     <button id="play-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Play Morse Code</button>
                     <button id="stop-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Stop Sound</button>
-                    <button id="share-btn" class="bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Share</button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -271,7 +273,10 @@
                     <div class="flex flex-col space-y-2">
                         <label for="morse-output" class="block text-sm font-medium">Morse Code Output:</label>
                         <textarea id="morse-output" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Or type Morse here (e.g. .... . .-.. .-.. ---)" readonly></textarea>
-                        <button id="copy-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 self-start">Copy Morse</button>
+                        <div class="flex items-center space-x-2 self-start">
+                            <button id="copy-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Morse</button>
+                            <button id="share-btn" class="bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Share</button>
+                        </div>
                         <span id="copy-morse-feedback" class="ml-2 text-sm self-start"></span>
                     </div>
                 </div>
