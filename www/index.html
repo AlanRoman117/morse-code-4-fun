@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#000000"/>
     <link rel="manifest" href="manifest.json">
     <title>Morse Code Learner</title>
@@ -21,6 +21,9 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            /* Add padding to the top and bottom that respects the device's safe areas */
+            padding-top: env(safe-area-inset-top, 1.25rem); /* 1.25rem is p-5 fallback */
+            padding-bottom: env(safe-area-inset-bottom, 5rem); /* 5rem is pb-20 fallback */
         }
         .app-container {
             background-color: #2c2c2c; /* Slightly lighter dark shade for the container */
@@ -115,6 +118,9 @@
         #spaceButton {
             /* Using Tailwind in HTML for most styling */
             /* Example: width: 70px; height: 70px; border-radius: 50%; */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         .table-highlight {
             background-color: #f6e05e; /* Tailwind yellow-300 or a similar vibrant color */
@@ -726,7 +732,7 @@
     <div id="sharedVisualTapperWrapper" style="display: none;">
         <div class="tapper-section-container text-center my-2 md:my-4"> <!-- Adjusted my-4 to my-2 md:my-4 -->
             <!-- Predictive Taps Display -->
-                <div id="predictive-taps-display" class="h-[2.8em] md:h-[3em] p-1 md:p-2 mb-1 md:mb-2 text-center text-base md:text-lg text-gray-400 border border-gray-600 rounded-md"></div>
+                <div id="predictive-taps-display" class="h-[2.8em] md:h-[3em] p-1 md:p-2 mb-1 md:mb-2 text-center text-base md:text-lg text-gray-400 border border-gray-600 rounded-md" style="height: 3em;"></div>
             <!-- Flex container for tapper and button -->
             <div class="flex justify-center items-center gap-2 md:gap-4 mb-2 md:mb-3">
                 <div id="tapper" class="tapper shadow-lg">Tap!</div> <!-- Removed mx-auto as flex handles centering -->
