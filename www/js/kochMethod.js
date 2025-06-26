@@ -32,7 +32,8 @@ loadUnlockedCharacters();
 
 // DOM Elements
 let kochStartBtn, kochPlayBtn, kochAnswerInput, kochAccuracyDisplay, kochCharSetDisplay, kochFeedbackMessage, kochLevelsContainer,
-    kochResetProgressBtn, kochResetModal, kochConfirmResetBtn, kochCancelResetBtn;
+    kochResetProgressBtn, kochResetModal, kochConfirmResetBtn, kochCancelResetBtn,
+    toggleKochStatusBtn, kochStatusWrapper, kochInputButtonsContainer; // Added for collapsible status and input buttons
 
 // Function to populate Koch Levels display
 function populateKochLevels() {
@@ -145,12 +146,16 @@ document.addEventListener('DOMContentLoaded', () => {
     kochResetModal = document.getElementById('koch-reset-modal');
     kochConfirmResetBtn = document.getElementById('koch-confirm-reset-btn');
     kochCancelResetBtn = document.getElementById('koch-cancel-reset-btn');
+    toggleKochStatusBtn = document.getElementById('toggle-koch-status-btn');
+    kochStatusWrapper = document.getElementById('koch-status-wrapper');
+    kochInputButtonsContainer = document.getElementById('koch-input-buttons-container');
 
     // Initial UI setup
     if (kochPlayBtn) kochPlayBtn.classList.add('hidden');
     if (kochAnswerInput) kochAnswerInput.disabled = true; // Disable until session starts
 
     updateKochDisplays(); // Update displays with initial values
+    renderKochInputButtons(); // Render buttons on load based on current unlocked chars
 
     if (kochStartBtn) {
         kochStartBtn.addEventListener('click', () => {
@@ -164,9 +169,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (kochAnswerInput) {
                 kochAnswerInput.disabled = false;
                 kochAnswerInput.value = ''; // Clear previous input
-                kochAnswerInput.focus();
+                // On mobile, focus might not be desired if using on-screen buttons.
+                // On desktop, it's good.
+                if (window.matchMedia("(min-width: 768px)").matches) {
+                    kochAnswerInput.focus();
+                }
             }
             if (kochFeedbackMessage) kochFeedbackMessage.textContent = '';
+            renderKochInputButtons(); // Render buttons for the new session
 
 
             // Optionally, automatically play the first character
@@ -174,64 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Add event listener for answer input
+    // Add event listener for answer input (for desktop keyboard)
     if (kochAnswerInput) {
-        kochAnswerInput.addEventListener('input', () => {
-            if (kochAnswerInput.value.length === 1) { // maxlength="1"
-                const userAnswer = kochAnswerInput.value.toUpperCase();
-                sessionStats.total++;
-
-                // Temporarily disable input to prevent spamming during animation
-                kochAnswerInput.disabled = true;
-
-                if (userAnswer === correctAnswer) {
-                    sessionStats.correct++;
-                    if(kochFeedbackMessage) kochFeedbackMessage.textContent = "Correct!";
-                    if(kochFeedbackMessage) kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400';
-
-                    kochAnswerInput.classList.add('glow-green');
-
-                    setTimeout(() => {
-                        kochAnswerInput.classList.remove('glow-green');
-                        kochAnswerInput.disabled = false; // Re-enable input
-                        // Input is cleared before next character or after session
-                    }, 800); // Match glow-green animation duration
-
-                } else {
-                    if(kochFeedbackMessage) kochFeedbackMessage.textContent = `Incorrect. The character was: ${correctAnswer}`;
-                    if(kochFeedbackMessage) kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-red-400';
-
-                    kochAnswerInput.classList.add('shake-red');
-
-                    setTimeout(() => {
-                        kochAnswerInput.classList.remove('shake-red');
-                        kochAnswerInput.disabled = false;
-                        // Input is cleared before next character or after session
-                    }, 500); // Match shake animation duration
-                }
-
-                updateKochDisplays();
-                // DO NOT clear kochAnswerInput.value here. It will be cleared later.
-
-                // Check if session is complete
-                if (sessionStats.total >= SESSION_LENGTH) {
-                    const accuracy = (sessionStats.correct / sessionStats.total) * 100;
-                    // Delay session completion handling slightly to allow animation to mostly finish
-                    setTimeout(() => {
-                        handleSessionCompletion(accuracy);
-                        // If session is complete, input field might be cleared by handleSessionCompletion or remain with last char
-                    }, Math.max(500, 800) + 50); // Wait for the longest animation + a small buffer
-                } else {
-                    // After a short delay (that includes animation time), clear input and play the next character
-                    setTimeout(() => {
-                        if(kochFeedbackMessage && (kochFeedbackMessage.textContent === "Correct!" || kochFeedbackMessage.textContent.startsWith("Incorrect."))) {
-                            kochFeedbackMessage.textContent = '';
-                            kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium'; // Reset class
-                        }
-                        kochAnswerInput.value = ''; // Clear input field BEFORE next char
-                        playNextKochCharacter();
-                    }, 1500); // Existing delay, should be enough for animation + pause
-                }
+        kochAnswerInput.addEventListener('input', function() { // Use function keyword for 'this'
+            if (this.value.length === 1) { // maxlength="1"
+                handleKochAnswer(this.value.toUpperCase());
             }
         });
     }
@@ -274,6 +231,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Event listener for toggle Koch status button
+    if (toggleKochStatusBtn && kochStatusWrapper) {
+        // The actual div to toggle is the first child of kochStatusWrapper
+        const statusContentDiv = kochStatusWrapper.querySelector('div');
+        if (statusContentDiv) {
+            toggleKochStatusBtn.addEventListener('click', () => {
+                statusContentDiv.classList.toggle('hidden');
+            });
+        } else {
+            console.error("Could not find the content div within koch-status-wrapper to toggle.");
+        }
+    }
 });
 
 // Function to reset Koch Method progress
@@ -285,6 +255,7 @@ function resetKochProgress() {
     sessionStats = { correct: 0, total: 0 }; // Reset session stats
 
     updateKochDisplays(); // Update all UI elements
+    renderKochInputButtons(); // Re-render buttons for the reset state
 
     if (kochFeedbackMessage) {
         kochFeedbackMessage.textContent = "Progress reset successfully!";
@@ -311,8 +282,91 @@ function resetKochProgress() {
     console.log("Koch method progress has been reset.");
 }
 
+// Function to render on-screen buttons for Koch method input
+function renderKochInputButtons() {
+    if (!kochInputButtonsContainer) return;
+    kochInputButtonsContainer.innerHTML = ''; // Clear existing buttons
 
-// Function to handle session completion (to be fully implemented in Step 3)
+    // Only show buttons if a session is active (e.g., play button is hidden)
+    if (kochStartBtn && kochStartBtn.classList.contains('hidden')) {
+        unlockedCharacters.forEach(char => {
+            const button = document.createElement('button');
+            button.textContent = char;
+            button.className = 'py-3 px-5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-400 active:bg-blue-700 text-xl';
+            button.addEventListener('click', () => {
+                handleKochAnswer(char);
+            });
+            kochInputButtonsContainer.appendChild(button);
+        });
+    }
+}
+
+// Function to handle Koch answer from input field or button
+function handleKochAnswer(userAnswer) {
+    if (!kochAnswerInput || kochAnswerInput.disabled) { // Check if input is allowed
+        // If input is from a button press but the text field is disabled (e.g. between characters), ignore.
+        // This can happen if a button is spammed.
+        console.log("Koch answer input ignored, input field is disabled.");
+        return;
+    }
+
+    sessionStats.total++;
+
+    // Temporarily disable input field and buttons to prevent spamming during animation/feedback
+    kochAnswerInput.disabled = true;
+    // Consider disabling character buttons too, or rely on kochAnswerInput.disabled check.
+    // For now, the check at the start of this function should suffice.
+
+    if (userAnswer === correctAnswer) {
+        sessionStats.correct++;
+        if(kochFeedbackMessage) kochFeedbackMessage.textContent = "Correct!";
+        if(kochFeedbackMessage) kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400';
+
+        if (kochAnswerInput) kochAnswerInput.classList.add('glow-green');
+
+        setTimeout(() => {
+            if (kochAnswerInput) kochAnswerInput.classList.remove('glow-green');
+            if (kochAnswerInput && !kochStartBtn.classList.contains('hidden')) kochAnswerInput.disabled = false; // Re-enable input if session is ongoing
+        }, 800); // Match glow-green animation duration
+
+    } else {
+        if(kochFeedbackMessage) kochFeedbackMessage.textContent = `Incorrect. The character was: ${correctAnswer}`;
+        if(kochFeedbackMessage) kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-red-400';
+
+        if (kochAnswerInput) kochAnswerInput.classList.add('shake-red');
+
+        setTimeout(() => {
+            if (kochAnswerInput) kochAnswerInput.classList.remove('shake-red');
+            if (kochAnswerInput && !kochStartBtn.classList.contains('hidden')) kochAnswerInput.disabled = false;
+        }, 500); // Match shake animation duration
+    }
+
+    updateKochDisplays();
+    if (kochAnswerInput) kochAnswerInput.value = ''; // Clear physical input field after processing
+
+    // Check if session is complete
+    if (sessionStats.total >= SESSION_LENGTH) {
+        const accuracy = (sessionStats.correct / sessionStats.total) * 100;
+        setTimeout(() => {
+            handleSessionCompletion(accuracy);
+        }, Math.max(500, 800) + 50);
+    } else {
+        // After a short delay (that includes animation time), clear feedback and play the next character
+        setTimeout(() => {
+            if(kochFeedbackMessage && (kochFeedbackMessage.textContent === "Correct!" || kochFeedbackMessage.textContent.startsWith("Incorrect."))) {
+                kochFeedbackMessage.textContent = '';
+                kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium'; // Reset class
+            }
+            // kochAnswerInput.value was already cleared
+            if (!kochStartBtn.classList.contains('hidden')) { // Only play next if session is still active
+                 playNextKochCharacter();
+            }
+        }, 1500); // Existing delay
+    }
+}
+
+
+// Function to handle session completion
 function handleSessionCompletion(accuracy) {
     console.log(`Session complete. Accuracy: ${accuracy.toFixed(2)}%`);
     if (kochFeedbackMessage) {
@@ -331,6 +385,7 @@ function handleSessionCompletion(accuracy) {
                 kochFeedbackMessage.textContent = `Congratulations! You've unlocked a new character: ${nextCharToAdd}`;
                 kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
                 updateKochDisplays(); // Update character set display
+                renderKochInputButtons(); // Re-render buttons with the new character
 
                 // Trigger confetti
                 if (typeof confetti === 'function') {
@@ -385,4 +440,5 @@ function handleSessionCompletion(accuracy) {
     if(document.activeElement === kochAnswerInput) {
         kochStartBtn.focus(); // Or any other appropriate element
     }
+    renderKochInputButtons(); // Clear/update buttons based on new session state
 }
