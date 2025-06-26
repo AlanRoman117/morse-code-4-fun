@@ -134,9 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Event Listeners for the Tapper UI using Pointer Events
     tapper.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); // Prevent text selection and other default browser actions
         // Check if the event is from the primary pointer to avoid multi-touch issues if not desired
         if (!e.isPrimary) return;
-        e.preventDefault(); // Prevent text selection and other default browser actions
         if (isPlayingBack) return; // Placeholder: if some playback mode is active, ignore taps
 
         // Capture the pointer to ensure subsequent pointer events (like pointerup, pointermove) are received
