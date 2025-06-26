@@ -9,6 +9,10 @@ let currentMorse = "";
 let tapStartTime = 0;
 let silenceTimer = null;
 let currentText = ""; // Holds the sequence of decoded characters by the tapper.
+let lastTapTime = 0; // For double-tap zoom prevention
+
+// Constants
+const DOUBLE_TAP_THRESHOLD_MS = 300; // Threshold for detecting a double tap
 
 // Function to update unit time and related variables
 function updateVisualTapperUnitTime(newUnitTime) {
@@ -147,7 +151,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tapper.addEventListener('pointerup', (e) => {
         if (!e.isPrimary) return;
-        e.preventDefault();
+        // e.preventDefault(); // Original position, moved down for conditional prevention
+
+        // Double-tap zoom prevention
+        const currentTime = Date.now();
+        if ((currentTime - lastTapTime) < DOUBLE_TAP_THRESHOLD_MS) {
+            console.log("Double tap detected, preventing default zoom.");
+            e.preventDefault(); // Prevent zoom
+        }
+        lastTapTime = currentTime;
 
         // Release pointer capture
         tapper.releasePointerCapture(e.pointerId);
@@ -155,8 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isPlayingBack || tapStartTime === 0) return; // Ensure tap started and not in playback
         tapper.classList.remove('active');
         stopTapSound(); // Sound should stop naturally due to short release
-        let tapEndTime = Date.now();
-        let duration = tapEndTime - tapStartTime;
+        // let tapEndTime = Date.now(); // currentTime is already tapEndTime
+        let duration = currentTime - tapStartTime;
 
         if (duration < DOT_THRESHOLD_MS) {
             currentMorse += ".";
@@ -248,6 +260,20 @@ document.addEventListener('DOMContentLoaded', () => {
             // For consistency with previous mouseleave, reset.
             // if (currentMorse) { decodeMorse(false); } // Optional: decode what was tapped before leaving
             console.log("Pointer left tapper while active, tap cancelled/reset.");
+        }
+    });
+
+    // Add this new listener for touchcancel
+    tapper.addEventListener('touchcancel', (e) => {
+        // No e.isPrimary check for touchcancel, as it's a cancellation of an existing touch sequence.
+        console.log("Touch cancelled, resetting tapper state."); // For debugging
+        if (tapper.classList.contains('active')) {
+            // This logic should mirror the reset part of the pointerup/pointerleave handlers
+            tapper.classList.remove('active');
+            stopTapSound();
+            tapStartTime = 0; // Reset tapStartTime to prevent miscalculation on next tap
+            // Unlike pointerleave, we don't need to manage pointer capture here,
+            // as touchcancel implies the system has already taken control.
         }
     });
 
