@@ -166,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (tapperMorseOutput) tapperMorseOutput.textContent = currentMorse;
         if (typeof window.updateTableHighlight === "function") window.updateTableHighlight(currentMorse); // Ensure this is active for highlighting
+        updatePredictiveDisplay(currentMorse); // Update predictive display
         tapStartTime = 0; // Reset for the next tap
 
         // Start the timer to detect end of a letter
@@ -224,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentMorse = ""; // Clear Morse buffer for the next character
         if (tapperMorseOutput) tapperMorseOutput.textContent = currentMorse; // Update display
         if (typeof window.updateTableHighlight === "function") window.updateTableHighlight(currentMorse); // Called with "" to clear highlight
+        updatePredictiveDisplay(currentMorse); // Clear predictive display when Morse is cleared
         checkPractice(); // Dummy call
     }
 
@@ -267,6 +269,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Function to update the predictive display
+function updatePredictiveDisplay(morseString) {
+    const displayElement = document.getElementById('predictive-taps-display');
+    if (!displayElement) {
+        // console.warn("Predictive taps display element not found.");
+        return;
+    }
+
+    if (!morseString || morseString.length === 0) {
+        displayElement.textContent = ""; // Clear display if morseString is empty
+        return;
+    }
+
+    const possibleChars = [];
+    // Ensure morseCode is available (it's defined in index.html's script tag)
+    if (typeof morseCode === 'undefined') {
+        console.error("morseCode dictionary is not available to updatePredictiveDisplay.");
+        displayElement.textContent = "Error: Morse dictionary unavailable.";
+        return;
+    }
+
+    for (const char in morseCode) {
+        if (morseCode[char].startsWith(morseString)) {
+            possibleChars.push(char);
+        }
+    }
+
+    if (possibleChars.length > 0) {
+        displayElement.textContent = `Possible: ${possibleChars.join(', ')}`;
+    } else {
+        displayElement.textContent = "No match";
+    }
+}
+
 // Globally accessible reset function for the visual tapper state
 function resetVisualTapperState() {
     currentMorse = "";
@@ -292,4 +328,18 @@ function resetVisualTapperState() {
     // Temporarily commenting out to isolate the "updateTableHighlight is not defined" error
     // if (typeof window.updateTableHighlight === "function") window.updateTableHighlight(""); 
     console.log("VisualTapper state reset. (updateTableHighlight call commented out for testing)");
+    updatePredictiveDisplay(""); // Clear predictive display on reset
+
+    // Event listener for the toggle reference button
+    const toggleReferenceBtn = document.getElementById('toggle-reference-btn');
+    const morseReferenceContainer = document.getElementById('morse-reference-container');
+
+    if (toggleReferenceBtn && morseReferenceContainer) {
+        toggleReferenceBtn.addEventListener('click', () => {
+            const isHidden = morseReferenceContainer.classList.toggle('hidden');
+            toggleReferenceBtn.textContent = isHidden ? 'Show Morse Reference' : 'Hide Morse Reference';
+        });
+    } else {
+        console.warn("Could not find toggle reference button or container for collapsible functionality.");
+    }
 }
