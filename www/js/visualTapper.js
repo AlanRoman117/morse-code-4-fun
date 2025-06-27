@@ -413,7 +413,7 @@ function updatePredictiveDisplay(morseString) {
         }
 
         let htmlBadges = "";
-        if (typeof morseCode === 'undefined') {
+        if (typeof morseCode === 'undefined') { 
             console.error("morseCode dictionary is not available to updatePredictiveDisplay.");
             displayElement.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
             displayElement.classList.remove('hidden', 'opacity-0');
@@ -424,10 +424,10 @@ function updatePredictiveDisplay(morseString) {
                 console.log('6s timeout for error message expired. Hiding.');
                 displayElement.classList.remove('opacity-100');
                 displayElement.classList.add('opacity-0');
-                predictiveDisplayTimeout = null;
+                predictiveDisplayTimeout = null; 
                 setTimeout(() => {
                     displayElement.classList.add('hidden');
-                }, 500);
+                }, 500); 
             }, 6000);
             return;
         }
@@ -449,12 +449,12 @@ function updatePredictiveDisplay(morseString) {
                 console.log('6s timeout for predictions expired. Hiding.');
                 displayElement.classList.remove('opacity-100');
                 displayElement.classList.add('opacity-0');
-                predictiveDisplayTimeout = null;
+                predictiveDisplayTimeout = null; 
                 setTimeout(() => {
                     displayElement.classList.add('hidden');
-                }, 500);
+                }, 500); 
             }, 6000);
-        } else {
+        } else { 
             displayElement.innerHTML = "<span class='text-gray-500'>No match</span>";
             displayElement.classList.remove('hidden', 'opacity-0');
             void displayElement.offsetWidth;
@@ -465,15 +465,15 @@ function updatePredictiveDisplay(morseString) {
                 console.log('6s timeout for "No match" expired. Hiding.');
                 displayElement.classList.remove('opacity-100');
                 displayElement.classList.add('opacity-0');
-                predictiveDisplayTimeout = null;
+                predictiveDisplayTimeout = null; 
                 setTimeout(() => {
                     displayElement.classList.add('hidden');
                 }, 500);
             }, 6000);
         }
-    }
+    } 
     // Scenario 2: morseString is empty (e.g., called from decodeMorse after char completion)
-    else {
+    else { 
         // If morseString is empty, we check if a predictiveDisplayTimeout is ALREADY running.
         // This means predictions were just on screen. We should let that timer continue.
         if (predictiveDisplayTimeout) {
