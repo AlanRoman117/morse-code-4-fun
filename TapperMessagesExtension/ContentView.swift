@@ -12,6 +12,8 @@ struct ContentView: View {
     @State private var currentMorseCharDisplay: String = "" // Displays live dots/dashes for the current letter
     @State private var fullMorseStringDisplay: String = ""    // Displays the sequence of confirmed Morse letters
     @State private var decodedTextDisplay: String = ""      // Displays the decoded English text
+    @State private var morsePreviewImage: UIImage? = nil
+    @State private var debouncedUpdatePreviewTimer: Timer? = nil
 
     // Internal state for logic
     @State private var activeMorseChar: String = "" // Holds the . and - for the letter currently being tapped
@@ -30,6 +32,7 @@ struct ContentView: View {
     @State private var letterTimeoutTimer: Timer? = nil
     @State private var lastTapTimestamp: Date = Date()
     @State private var isLongPressTriggered: Bool = false // To prevent tap after long press
+    @State private var isTapAreaPressed: Bool = false // For visual feedback on tap area
 
     var body: some View {
         VStack(spacing: 15) {
@@ -46,19 +49,20 @@ struct ContentView: View {
 
                 Text("MORSE: \(fullMorseStringDisplay)")
                     .font(.custom("Menlo", size: 16))
+                    .padding(EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10))
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(UIColor.secondarySystemFill))
+                    .cornerRadius(8)
                     .lineLimit(3)
-                    .padding(.vertical, 5)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(5)
+
 
                 Text("TEXT: \(decodedTextDisplay)")
                     .font(.headline)
+                    .padding(EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10))
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(UIColor.secondarySystemFill))
+                    .cornerRadius(8)
                     .lineLimit(3)
-                    .padding(.vertical, 5)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(5)
             }
             .padding(.horizontal)
 
@@ -66,36 +70,40 @@ struct ContentView: View {
 
             // Tap Button
             Button(action: {
-                // This action is primarily for accessibility or if gestures fail.
-                // The main interaction is via gestures.
-                // We can simulate a short tap here if needed for non-gesture interaction.
-                // For now, let it be empty as gestures will handle it.
+                 // Action intentionally empty, gestures handle primary interaction.
+                 // This Button wrapper helps with accessibility.
             }) {
                 Text("Tap!")
                     .fontWeight(.bold)
                     .padding()
                     .frame(maxWidth: .infinity)
                     .frame(height: 80)
-                    .background(Color.blue)
+                    .background(isTapAreaPressed ? Color.blue.opacity(0.7) : Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(10)
+                    .scaleEffect(isTapAreaPressed ? 0.97 : 1.0)
             }
+            .animation(.spring(response: 0.15, dampingFraction: 0.5), value: isTapAreaPressed)
             .simultaneousGesture(LongPressGesture(minimumDuration: shortTapThreshold)
-                .onChanged { _ in
-                    // This onChanged can be used if we want to give feedback during the press
-                }
                 .onEnded { _ in
+                    self.isTapAreaPressed = true
                     self.isLongPressTriggered = true
                     self.handleTapInput(isLong: true)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self.isTapAreaPressed = false
+                    }
                 }
             )
             .simultaneousGesture(TapGesture()
                 .onEnded {
-                    // Only process tap if long press didn't trigger for this interaction
                     if !self.isLongPressTriggered {
+                        self.isTapAreaPressed = true
                         self.handleTapInput(isLong: false)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                           self.isTapAreaPressed = false
+                        }
                     }
-                    // Reset flag after tap processing is done
+                    // Reset long press flag AFTER checking it
                     self.isLongPressTriggered = false
                 }
             )
@@ -136,6 +144,50 @@ struct ContentView: View {
 
             Spacer()
 
+            // Preview Section
+            if !fullMorseStringDisplay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                VStack(alignment: .leading) {
+                    Text("PREVIEW")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        .padding(.leading, 15)
+
+                    HStack(spacing: 0) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(decodedTextDisplay.isEmpty ? "Morse Code Message" : decodedTextDisplay)
+                                .font(.system(size: 15, weight: .regular))
+                                .lineLimit(2)
+                            Text(fullMorseStringDisplay.trimmingCharacters(in: .whitespacesAndNewlines))
+                                .font(.system(size: 12, weight: .light))
+                                .foregroundColor(Color(UIColor.secondaryLabel))
+                                .lineLimit(1)
+                        }
+                        .padding(.vertical, 8)
+                        .padding(.leading, 12)
+                        .padding(.trailing, 8)
+
+                        Spacer(minLength: 8)
+
+                        if let previewImage = morsePreviewImage {
+                            Image(uiImage: previewImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(maxHeight: 30)
+                                .padding(.trailing, 12)
+                        }
+                    }
+                    .frame(minHeight: 46)
+                    .background(Color(UIColor.tertiarySystemBackground))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(UIColor.systemGray3), lineWidth: 0.5)
+                    )
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 10)
+            }
+
             Button("Send Message") {
                 sendMessageAction()
             }
@@ -145,9 +197,29 @@ struct ContentView: View {
             .foregroundColor(.white)
             .cornerRadius(10)
             .padding(.horizontal)
-            .disabled(decodedTextDisplay.isEmpty && fullMorseStringDisplay.isEmpty)
+            .disabled(fullMorseStringDisplay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) // Disable if no Morse
         }
         .padding(.bottom)
+        .onChange(of: fullMorseStringDisplay) { newValue in
+            debouncedUpdatePreviewTimer?.invalidate()
+            debouncedUpdatePreviewTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+                updatePreviewImage(morse: newValue)
+            }
+        }
+    }
+
+    private func updatePreviewImage(morse: String) {
+        let trimmedMorse = morse.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedMorse.isEmpty {
+            morsePreviewImage = nil
+            return
+        }
+        if let mvc = messagesViewController {
+            self.morsePreviewImage = mvc.generateMorseImage(morseCode: trimmedMorse, desiredHeight: 30.0)
+        } else {
+            print("MessagesViewController not available for preview generation.")
+            self.morsePreviewImage = nil
+        }
     }
 
     // MARK: - Tap Input Handling
