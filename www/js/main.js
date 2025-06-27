@@ -294,6 +294,8 @@ function showTab(tabIdToShow) {
         attachTapperToArea('bookCipherTapperArea');
     } else if (tabIdToShow === 'learn-practice-tab') {
         attachTapperToArea('tapper-placeholder');
+    } else if (tabIdToShow === 'introduction-tab') {
+        attachTapperToArea('introTapperArea');
     }
     // No 'else' here, so if it's another tab, tapper remains detached (which is correct)
 }
@@ -309,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set the initial active tab correctly.
     // The learn-practice-nav-btn might already have active-tab-button from HTML.
     // This call ensures consistent state management via JS.
-    showTab('learn-practice-tab'); // Initial tab
+    showTab('introduction-tab'); // Initial tab
     // Explicit detach on DOMContentLoaded after initial showTab is good practice,
     // though current showTab logic handles it.
     // If learn-practice-tab is not supposed to have tapper, this ensures it's gone.

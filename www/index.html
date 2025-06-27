@@ -16,31 +16,37 @@
 </head>
 <body class="pt-5 pb-24 md:pb-5">
     <nav class="flex justify-around items-center fixed bottom-0 left-0 right-0 z-50 bg-gray-800 py-4 shadow-md md:relative md:top-auto md:left-auto md:right-auto md:bg-transparent md:shadow-none md:mb-4 md:p-0 md:space-x-2">
-        <button id="learn-practice-nav-btn" data-tab="learn-practice-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active-tab-button w-1/5 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
+        <button id="introduction-nav-btn" data-tab="introduction-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active-tab-button w-1/6 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
+            <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+            <span class="sr-only md:not-sr-only md:ml-1">Intro</span>
+        </button>
+        <button id="learn-practice-nav-btn" data-tab="learn-practice-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-1/6 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
             <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 0A.75.75 0 0 1 3 9.398V8.25c0-.828.75-1.5 1.5-1.5h5.25c.828 0 1.5.672 1.5 1.5v1.148c0 .414-.168.79-.441.983-.149.104-.312.192-.488.254v.702c0 .03.024.058.054.072.09.042.188.072.29.093A60.954 60.954 0 0 1 12 10.5c2.278 0 4.37.61 6.138 1.62.203.102.436.172.682.214.03.006.056.024.078.05s.042.056.058.084c.058.092.102.192.132.298.022.072.03.148.03.222v.702c0 .03-.024.058-.054.072-.09.042-.188.072-.29.093a60.954 60.954 0 0 1-1.328.281 60.438 60.438 0 0 0-.491 0A.75.75 0 0 1 16.5 9.398V8.25c0-.828.75-1.5 1.5-1.5h5.25c.828 0 1.5.672 1.5 1.5v1.148c0 .414-.168.79-.441.983-.149.104-.312.192-.488.254v.702c0 .03.024.058.054.072.09.042.188.072.29.093A60.954 60.954 0 0 1 21 10.5c2.278 0 4.37.61 6.138 1.62.203.102.436.172.682.214.03.006.056.024.078.05s.042.056.058.084c.058.092.102.192.132.298.022.072.03.148.03.222v.702c0 .03-.024.058-.054.072-.09.042-.188.072-.29.093a60.954 60.954 0 0 1-1.328.281 60.438 60.438 0 0 0-.491 0A.75.75 0 0 1 19.5 9.398V8.25c0-.828.75-1.5 1.5-1.5H15V6.75A.75.75 0 0 0 14.25 6h-4.5A.75.75 0 0 0 9 6.75V7.5H4.5A1.5 1.5 0 0 0 3 9v.75c0 .414.336.75.75.75H15v1.148A.75.75 0 0 0 15.75 12h.008a.75.75 0 0 0 .742-.654 60.02 60.02 0 0 0-.491-5.478C15.49 4.09 13.956 3 12 3s-3.49.09-4.001 1.868a60.019 60.019 0 0 0-.49 5.478.75.75 0 0 0 .742.654H8.25A.75.75 0 0 0 9 11.398V9.75a.75.75 0 0 0-.75-.75H3.75A.75.75 0 0 0 3 9.75v1.148A.75.75 0 0 0 3.75 12H12m0 3.75a.75.75 0 0 1 .75.75v2.25h1.5a.75.75 0 0 1 0 1.5h-1.5v2.25a.75.75 0 0 1-1.5 0v-2.25h-1.5a.75.75 0 0 1 0-1.5h1.5v-2.25a.75.75 0 0 1 .75-.75Z" />
             </svg>
             <span class="sr-only md:not-sr-only md:ml-1">Learn</span>
         </button>
-        <button id="morse-io-nav-btn" data-tab="morse-io-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-1/5 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
-            <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.75A2.25 2.25 0 0 1 10.5 4.5h3A2.25 2.25 0 0 1 15.75 6.75v.75m0 0H8.25m0 0-1.01.402a1.875 1.875 0 0 0-1.294 1.921v4.5A1.875 1.875 0 0 0 7.82 16.5h8.358a1.875 1.875 0 0 0 1.873-1.928v-4.5a1.875 1.875 0 0 0-1.293-1.921L15.75 7.5m0 0V3.375c0-.621-.504-1.125-1.125-1.125H9.375c-.621 0-1.125.504-1.125 1.125V7.5m0 6.75h.008v.008H8.25v-.008Zm0 0H10.5m2.25 0H15.75m0 0h.008v.008h-.008v-.008Zm-2.25 0H10.5" />
-            </svg>
-            <span class="sr-only md:not-sr-only md:ml-1">I/O</span>
-        </button>
-        <button id="book-cipher-nav-btn" data-tab="book-cipher-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-1/5 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
-            <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6-2.292m0 0V3.75m0 16.5V18" />
-            </svg>
-            <span class="sr-only md:not-sr-only md:ml-1">Book</span>
-        </button>
-        <button id="koch-method-nav-btn" data-tab="koch-method-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-1/5 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
+        <button id="koch-method-nav-btn" data-tab="koch-method-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-1/6 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
             <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
             </svg>
             <span class="sr-only md:not-sr-only md:ml-1">Koch</span>
         </button>
-        <button id="settings-nav-btn" data-tab="settings-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-1/5 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
+        <button id="morse-io-nav-btn" data-tab="morse-io-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-1/6 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
+            <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.75A2.25 2.25 0 0 1 10.5 4.5h3A2.25 2.25 0 0 1 15.75 6.75v.75m0 0H8.25m0 0-1.01.402a1.875 1.875 0 0 0-1.294 1.921v4.5A1.875 1.875 0 0 0 7.82 16.5h8.358a1.875 1.875 0 0 0 1.873-1.928v-4.5a1.875 1.875 0 0 0-1.293-1.921L15.75 7.5m0 0V3.375c0-.621-.504-1.125-1.125-1.125H9.375c-.621 0-1.125.504-1.125 1.125V7.5m0 6.75h.008v.008H8.25v-.008Zm0 0H10.5m2.25 0H15.75m0 0h.008v.008h-.008v-.008Zm-2.25 0H10.5" />
+            </svg>
+            <span class="sr-only md:not-sr-only md:ml-1">I/O</span>
+        </button>
+        <button id="book-cipher-nav-btn" data-tab="book-cipher-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-1/6 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
+            <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6-2.292m0 0V3.75m0 16.5V18" />
+            </svg>
+            <span class="sr-only md:not-sr-only md:ml-1">Book</span>
+        </button>
+        <button id="settings-nav-btn" data-tab="settings-tab" class="flex flex-col items-center justify-center p-2 text-xs font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-1/6 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
             <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.646.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.43.992a6.759 6.759 0 0 1 0 1.905c-.008.379.137.75.43.99l1.005.828c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.333.183-.582.495-.646.869l-.213 1.28c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.646-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.759 6.759 0 0 1 0-1.905c.008-.379-.137-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.646-.869l.213-1.28Z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -50,7 +56,21 @@
     </nav>
     <h1 class="text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-center main-title">Morse Code 4 Fun</h1>
     <div id="tab-content-wrapper">
-        <div id="learn-practice-tab" class="tab-content">
+        <div id="introduction-tab" class="tab-content"> <!-- Default to visible, JS will handle -->
+            <div class="app-container text-center">
+                <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-blue-400">Welcome to Morse Code 4 Fun!</h2>
+                <p class="mb-6 text-lg md:text-xl text-gray-300">
+                    This is the Morse tapper. Tap for a dot, hold for a dash. Try tapping out a letter!
+                </p>
+                <div id="introTapperArea" class="max-w-md mx-auto bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <!-- The shared visual tapper will be inserted here by JavaScript -->
+                </div>
+                <p class="mt-6 text-md text-gray-400">
+                    Explore other tabs to learn Morse code, practice with challenges, try the book cipher, or adjust settings.
+                </p>
+            </div>
+        </div>
+        <div id="learn-practice-tab" class="tab-content hidden"> <!-- Hide other tabs initially -->
             <div class="app-container">
                 <!-- NEW TOP CONTAINER STARTS HERE -->
                 <div class="w-full flex flex-col space-y-4 md:grid md:grid-cols-3 md:gap-4 md:items-start mb-3 md:mb-4">
@@ -79,16 +99,16 @@
                     <!-- Right column for Tapper -->
                     <div class="w-full p-2">
                         <div id="learnPracticeTapperArea" class="text-center my-2 md:my-3 flex flex-col items-center">
+                            <h2 class="section-title text-xl md:text-2xl font-semibold mb-2 md:mb-3 text-center">Practice Tapping Morse</h2>
                             <!-- The shared visual tapper will be inserted here by JavaScript -->
-                             <h2 class="section-title text-xl md:text-2xl font-semibold mb-2 md:mb-3 text-center">Practice Tapping Morse</h2>
-                            <div id="tapperGameControls" class="mt-2 md:mt-3 flex flex-col space-y-1 md:space-y-2"> <!-- Moved and ID'd button container -->
+                            <div id="tapperGameControls" class="mt-2 md:mt-3 flex flex-col space-y-1 md:space-y-2 w-full max-w-xs"> <!-- Button container -->
                                 <button id="newChallengeButton" class="w-full bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">New Challenge</button>
                                 <button id="play-tapped-morse-btn" class="w-full bg-purple-500 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Play My Tapped Morse</button>
                                 <button id="clearTapperInputButton" class="w-full bg-red-500 hover:bg-red-700 active:bg-red-800 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Clear My Tapping</button>
                             </div>
+                            <p id="practiceText" class="text-2xl md:text-3xl font-bold text-yellow-400 min-h-[32px] md:min-h-[40px] text-center mt-3 md:mt-4"></p>
                             <p id="tapperDecodedOutput" class="text-xl md:text-2xl min-h-[24px] md:min-h-[30px] break-all text-center bg-gray-700 p-1 md:p-2 rounded mt-1 md:mt-2"></p>
-                            <p id="practiceText" class="text-2xl md:text-3xl font-bold text-yellow-400 min-h-[32px] md:min-h-[40px] text-center"></p>
-                            <div id="tapper-placeholder"></div> <!-- New placeholder -->
+                            <div id="tapper-placeholder" class="w-full mt-2 md:mt-3"></div> <!-- Placeholder for tapper -->
                             <p id="practiceMessage" class="text-base md:text-lg text-center min-h-[20px] md:min-h-[24px] mt-1 md:mt-2"></p>
                         </div>
                     </div>
@@ -122,7 +142,7 @@
 
                         <!-- Right Column: Tapper, Unlocked Text, Current Target -->
                         <div class="md:w-1/3 flex flex-col gap-4">
-                            <div id="bookCipherTapperArea" class="text-center my-4">
+                            <div id="bookCipherTapperArea" class="text-center my-4" data-predictive-display="hidden">
                                 <!-- The shared visual tapper will be inserted here by JavaScript -->
                             </div>
 
@@ -258,22 +278,22 @@
         <div id="morse-io-tab" class="tab-content hidden">
             <div class="app-container">
                 <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Input/Output</h2>
-                <div class="controls mb-6 text-center space-x-2">
-                    <button id="play-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Play Morse Code</button>
-                    <button id="stop-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Stop Sound</button>
-                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="flex flex-col space-y-2">
                         <label for="text-input" class="block text-sm font-medium">Enter Text:</label>
                         <textarea id="text-input" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Type text here..."></textarea>
-                        <button id="copy-text-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 self-start">Copy Text</button>
+                        <button id="copy-text-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 self-start mt-2">Copy Text</button>
                         <span id="copy-text-feedback" class="ml-2 text-sm self-start"></span>
                     </div>
                     <div class="flex flex-col space-y-2">
                         <label for="morse-output" class="block text-sm font-medium">Morse Code Output:</label>
                         <textarea id="morse-output" class="input-output-box w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Or type Morse here (e.g. .... . .-.. .-.. ---)" readonly></textarea>
-                        <div class="flex items-center space-x-2 self-start">
+                        <div class="controls mt-2 space-x-2 self-start"> <!-- Playback buttons moved here -->
+                            <button id="play-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Play Morse Code</button>
+                            <button id="stop-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Stop Sound</button>
+                        </div>
+                        <div class="flex items-center space-x-2 self-start mt-2"> <!-- Copy/Share buttons remain -->
                             <button id="copy-morse-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Copy Morse</button>
                             <button id="share-btn" class="bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Share</button>
                         </div>
