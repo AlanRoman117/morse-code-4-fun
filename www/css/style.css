@@ -503,6 +503,16 @@ body {
             /* border-radius: 0.375rem; /* Example border-radius */
         }
 
+        /* Upsell Modal Styles */
+        /* The modal itself uses Tailwind classes for positioning and basic layout.
+           Specific styling for elements within the modal can be added here if needed,
+           but the current HTML uses Tailwind extensively. */
+
+        /* Example: Style for the list items if Tailwind wasn't sufficient */
+        /* #upsell-modal ul li {
+            color: #333;
+        } */
+
         .char-badge {
             /* Tailwind classes: bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 */
             background-color: #4A5568; /* bg-gray-600 */

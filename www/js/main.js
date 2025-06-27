@@ -1,3 +1,6 @@
+// --- App State ---
+let isProUser = false; // Initialize Pro status
+
 // Morse code dictionary
         const morseCode = {
             'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
@@ -714,3 +717,86 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             console.warn("Share button with ID 'share-btn' not found.");
         }
+
+        // --- Upsell Modal Logic ---
+        const upsellModal = document.getElementById('upsell-modal');
+        const goProBtn = document.getElementById('go-pro-btn');
+        const goProFromLibraryBtn = document.getElementById('go-pro-from-library-btn');
+        const closeUpsellModalBtn = document.getElementById('close-upsell-modal-btn');
+        const upgradeToProBtn = document.getElementById('upgrade-to-pro-btn');
+        const adBannerBottom = document.getElementById('ad-banner-bottom');
+
+        function showUpsellModal() {
+            if (upsellModal) {
+                upsellModal.classList.remove('hidden');
+            }
+        }
+
+        function hideUpsellModal() {
+            if (upsellModal) {
+                upsellModal.classList.add('hidden');
+            }
+        }
+
+        // Function to update visibility of Pro/Free elements based on isProUser
+        function updateUserProStatusUI() {
+            // Ad banner visibility
+            if (adBannerBottom) {
+                if (window.isProUser) {
+                    adBannerBottom.classList.add('hidden');
+                } else {
+                    adBannerBottom.classList.remove('hidden');
+                }
+            }
+
+            // Book library banner and locked states (call populate which now handles this)
+            if (typeof populateBookLibrary === 'function') {
+                 // Check if the book cipher tab is active or if it's okay to populate it
+                 // For simplicity, we can call it. It might re-render the library.
+                 // If performance becomes an issue, this could be optimized.
+                populateBookLibrary();
+            }
+
+            // Koch method restrictions are handled within Koch method logic when user completes a session.
+            // However, if we want to immediately reflect a change in isProUser on the Koch UI (e.g. a message), it would go here.
+            // For now, the existing Koch logic handles the functional restriction.
+
+            // "Go Pro" button in settings - potentially hide if user becomes Pro.
+            // For now, the button remains visible. If it should be hidden:
+            // if (goProBtn) {
+            //     if (window.isProUser) {
+            //         goProBtn.classList.add('hidden'); // Or change text to "You are Pro!"
+            //     } else {
+            //         goProBtn.classList.remove('hidden');
+            //     }
+            // }
+        }
+
+
+        if (goProBtn) {
+            goProBtn.addEventListener('click', showUpsellModal);
+        }
+        if (goProFromLibraryBtn) {
+            goProFromLibraryBtn.addEventListener('click', showUpsellModal);
+        }
+        if (closeUpsellModalBtn) {
+            closeUpsellModalBtn.addEventListener('click', hideUpsellModal);
+        }
+        if (upgradeToProBtn) {
+            upgradeToProBtn.addEventListener('click', () => {
+                // For now, this button doesn't trigger a real purchase.
+                // It could, for example, close the modal or show a "Coming Soon" message.
+                console.log('Upgrade to Pro button clicked - Placeholder action');
+                // For testing: Toggle Pro status and update UI
+                window.isProUser = !window.isProUser;
+                console.log('isProUser toggled to:', window.isProUser);
+                updateUserProStatusUI();
+                hideUpsellModal(); // Hide modal after "purchase"
+            });
+        }
+
+        // Initial UI update based on isProUser status when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... other DOMContentLoaded logic ...
+            updateUserProStatusUI();
+        });
