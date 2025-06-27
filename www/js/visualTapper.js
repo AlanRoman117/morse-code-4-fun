@@ -416,7 +416,7 @@ function updatePredictiveDisplay(morseString) {
         // If morseString is empty, fade out and hide
         displayElement.classList.remove('opacity-100'); // Ensure opacity-100 is removed if present
         displayElement.classList.add('opacity-0');     // Start fade out
-
+        
         predictiveDisplayTimeout = setTimeout(() => {
             displayElement.classList.add('hidden');
             displayElement.innerHTML = ""; // Clear content after it's hidden
@@ -453,7 +453,7 @@ function updatePredictiveDisplay(morseString) {
         displayElement.innerHTML = htmlBadges;
         displayElement.classList.remove('hidden', 'opacity-0'); // Make sure it's not hidden and opacity is not 0
         // Force a reflow before adding opacity-100 if classes were just removed, to ensure transition plays
-        void displayElement.offsetWidth;
+        void displayElement.offsetWidth; 
         displayElement.classList.add('opacity-100');    // Make it fully visible (triggers transition if opacity was 0)
 
         predictiveDisplayTimeout = setTimeout(() => {
