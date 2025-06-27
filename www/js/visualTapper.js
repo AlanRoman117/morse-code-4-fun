@@ -456,6 +456,24 @@ function resetPredictiveDisplayHideTimer() {
 
 // Function to update the predictive display
 function updatePredictiveDisplay(morseString) {
+    const sharedTapperWrapper = document.getElementById('sharedVisualTapperWrapper');
+    const currentTapperParent = sharedTapperWrapper ? sharedTapperWrapper.parentNode : null;
+
+    if (currentTapperParent && currentTapperParent.dataset && currentTapperParent.dataset.predictiveDisplay === 'hidden') {
+        // console.log("Predictive display is hidden for this tapper instance.");
+        const displayElement = document.getElementById('predictive-taps-display');
+        if (displayElement && !displayElement.classList.contains('hidden')) {
+            displayElement.classList.add('hidden');
+            displayElement.classList.remove('opacity-100'); // Ensure it's not trying to be visible
+            displayElement.classList.add('opacity-0');
+            if (predictiveDisplayTimeout) {
+                clearTimeout(predictiveDisplayTimeout);
+                predictiveDisplayTimeout = null;
+            }
+        }
+        return; // Exit early, do not show predictions
+    }
+
     console.log('updatePredictiveDisplay CALLED - Time:', Date.now(), '| Morse:', morseString, '| Current Timeout ID before logic:', predictiveDisplayTimeout);
     const displayElement = document.getElementById('predictive-taps-display');
     if (!displayElement) return;
