@@ -1,15 +1,18 @@
 const bookCipherBooks = {
-    'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-    'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-    'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-    'empty_book': { title: 'Empty Book Test', filePath: 'assets/book_cipher_texts/empty_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-    'short_book': { title: 'Short Book Test', filePath: 'assets/book_cipher_texts/very_short_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-'long_book': { title: 'Long Book Test', filePath: 'assets/book_cipher_texts/long_passage_morse.txt', author: "Placeholder Author", description: "This is a placeholder description for the book. It can be a bit longer to see how it might look in the details view." },
-'pride_and_prejudice': { title: 'Pride and Prejudice Quote', filePath: 'assets/book_cipher_texts/pride_and_prejudice_morse.txt', author: 'Jane Austen', description: 'A truth universally acknowledged, from Pride and Prejudice.' },
-'moby_dick': { title: 'Moby Dick Opening', filePath: 'assets/book_cipher_texts/moby_dick_morse.txt', author: 'Herman Melville', description: 'The famous opening line from Moby Dick.' },
-'dream_within_dream': { title: 'Poe - Dream Within a Dream', filePath: 'assets/book_cipher_texts/dream_within_dream_morse.txt', author: 'Edgar Allan Poe', description: 'A haunting line from an Edgar Allan Poe poem.' },
-'tale_of_two_cities': { title: 'Tale of Two Cities Intro', filePath: 'assets/book_cipher_texts/tale_of_two_cities_morse.txt', author: 'Charles Dickens', description: 'The iconic opening of A Tale of Two Cities.' },
-'hamlet': { title: 'Hamlet - To Be Or Not To Be', filePath: 'assets/book_cipher_texts/hamlet_morse.txt', author: 'William Shakespeare', description: 'The profound question from Shakespeare\'s Hamlet.' }
+    // Free Books (first 3-5)
+    'passage_1': { title: 'Sherlock Holmes Snippet', filePath: 'assets/book_cipher_texts/passage1_morse.txt', author: "Placeholder Author", description: "A short snippet for practice.", isPro: false },
+    'mystery_intro': { title: 'Stormy Night Mystery', filePath: 'assets/book_cipher_texts/mystery_intro_morse.txt', author: "Placeholder Author", description: "The beginning of a thrilling mystery.", isPro: false },
+    'sci_fi_quote': { title: 'Sci-Fi Classic Quote', filePath: 'assets/book_cipher_texts/sci_fi_quote_morse.txt', author: "Placeholder Author", description: "A famous quote from a sci-fi classic.", isPro: false },
+    'short_book': { title: 'Very Short Story', filePath: 'assets/book_cipher_texts/very_short_morse.txt', author: "Placeholder Author", description: "A very brief narrative for quick practice.", isPro: false },
+    'pride_and_prejudice': { title: 'Pride and Prejudice Quote', filePath: 'assets/book_cipher_texts/pride_and_prejudice_morse.txt', author: 'Jane Austen', description: 'A truth universally acknowledged, from Pride and Prejudice.', isPro: false },
+
+    // Pro Books
+    'moby_dick': { title: 'Moby Dick Opening', filePath: 'assets/book_cipher_texts/moby_dick_morse.txt', author: 'Herman Melville', description: 'The famous opening line from Moby Dick.', isPro: true },
+    'dream_within_dream': { title: 'Poe - Dream Within a Dream', filePath: 'assets/book_cipher_texts/dream_within_dream_morse.txt', author: 'Edgar Allan Poe', description: 'A haunting line from an Edgar Allan Poe poem.', isPro: true },
+    'tale_of_two_cities': { title: 'Tale of Two Cities Intro', filePath: 'assets/book_cipher_texts/tale_of_two_cities_morse.txt', author: 'Charles Dickens', description: 'The iconic opening of A Tale of Two Cities.', isPro: true },
+    'hamlet': { title: 'Hamlet - To Be Or Not To Be', filePath: 'assets/book_cipher_texts/hamlet_morse.txt', author: 'William Shakespeare', description: 'The profound question from Shakespeare\'s Hamlet.', isPro: true },
+    'long_book': { title: 'The Grand Adventure (Long)', filePath: 'assets/book_cipher_texts/long_passage_morse.txt', author: "Placeholder Author", description: "A longer passage for extended practice.", isPro: true },
+    'empty_book': { title: 'Dev Test: Empty Book', filePath: 'assets/book_cipher_texts/empty_morse.txt', author: "Dev Team", description: "Test case: An empty book.", isPro: false }, // Keep test books accessible
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -83,22 +86,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!bookCipherBooks || Object.keys(bookCipherBooks).length === 0) {
             console.warn("bookCipherBooks object is empty or not defined. Cannot populate library.");
+            // Make sure the banner placeholder is also cleared or handled if library is empty.
+            // The banner is inside libraryContainer, so clearing innerHTML handles it.
             libraryContainer.textContent = 'No books available.'; // Display a message
             return;
         }
+
+        // The banner is now part of the HTML structure inside libraryContainer.
+        // We will control its visibility after populating books.
+        const unlockBooksBanner = document.getElementById('unlock-books-banner'); // Get banner element
 
         for (const bookKey in bookCipherBooks) {
             if (bookCipherBooks.hasOwnProperty(bookKey)) {
                 const book = bookCipherBooks[bookKey];
                 const bookElement = document.createElement('div');
-                bookElement.textContent = book.title;
+                // bookElement.textContent = book.title; // Title will be inside a sub-element
+
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = book.title;
+                bookElement.appendChild(titleSpan);
+
                 bookElement.classList.add('book-cover-item');
                 bookElement.setAttribute('data-book-id', bookKey);
 
-                bookElement.addEventListener('click', () => {
-                    currentBookId = bookElement.getAttribute('data-book-id');
-                     // Visually mark selected book in library
-                    const allBookItems = libraryContainer.querySelectorAll('.book-cover-item');
+                const isLocked = book.isPro && !window.isProUser;
+
+                if (isLocked) {
+                    bookElement.classList.add('opacity-50', 'cursor-not-allowed', 'relative');
+                    bookElement.title = "Unlock with Pro"; // Tooltip
+
+                    const lockIcon = document.createElement('div');
+                    lockIcon.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute top-1 right-1 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    `;
+                    bookElement.appendChild(lockIcon);
+
+                    const proLabel = document.createElement('span');
+                    proLabel.textContent = "PRO";
+                    proLabel.className = "absolute bottom-1 right-1 bg-purple-600 text-white text-xs font-bold px-1.5 py-0.5 rounded";
+                    bookElement.appendChild(proLabel);
+
+
+                    // Prevent click or show upsell modal
+                    bookElement.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevent any other listeners if needed
+                        if (typeof window.showUpsellModal === 'function') {
+                            window.showUpsellModal();
+                        } else {
+                            alert("This book requires the Pro version.");
+                        }
+                    });
+                } else {
+                    // Add click listener only for non-locked books
+                    bookElement.addEventListener('click', () => {
+                        currentBookId = bookElement.getAttribute('data-book-id');
+                        // Visually mark selected book in library
+                        const allBookItems = libraryContainer.querySelectorAll('.book-cover-item');
                     allBookItems.forEach(item => {
                         item.classList.remove('book-cover-selected');
                     });
@@ -204,10 +249,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     showBookDetailsView();
-                });
-
+                    });
+                }
                 libraryContainer.appendChild(bookElement);
             }
+        }
+        // Show or hide the "Unlock more books" banner based on Pro status
+        if (unlockBooksBanner) {
+            if (!window.isProUser) {
+                unlockBooksBanner.classList.remove('hidden');
+                // Ensure the banner is placed correctly by re-inserting it if necessary,
+                // or by styling it to appear at the end.
+                // If it's already in the HTML, removing 'hidden' is enough.
+                // If it was cleared by innerHTML, it needs to be re-added or handled by initial HTML structure.
+                // The current HTML places it inside, so it should be fine.
+            } else {
+                unlockBooksBanner.classList.add('hidden');
+            }
+        } else {
+            console.warn("#unlock-books-banner element not found in DOM for controlling visibility.");
         }
     }
 

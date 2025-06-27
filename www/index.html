@@ -115,6 +115,10 @@
                 </div>
                 <!-- NEW TOP CONTAINER ENDS HERE -->
 
+                <!-- Ad Placeholder -->
+                <div id="ad-banner-bottom" class="hidden w-full h-16 bg-gray-400 dark:bg-gray-600 flex items-center justify-center text-center text-gray-800 dark:text-gray-200 mt-4 rounded-md">
+                    <p class="font-semibold">Advertisement Placeholder</p>
+                </div>
     </div>
         </div>
         <div id="book-cipher-tab" class="tab-content hidden">
@@ -127,6 +131,9 @@
                         <label for="book-library-container" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label>
                         <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-[40rem] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             <!-- Book covers will be dynamically added here by JavaScript -->
+                             <div id="unlock-books-banner" class="col-span-full bg-yellow-500 text-black p-3 text-center rounded-md my-2 hidden">
+                                Unlock 20+ more books with Pro! <button id="go-pro-from-library-btn" class="font-bold underline hover:text-yellow-800">Go Pro</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -273,6 +280,14 @@
                     </div>
                 </div>
 
+                <!-- Monetization Section -->
+                <h2 class="section-title text-2xl font-semibold mt-6 mb-3 text-center">App Version</h2>
+                <div class="flex items-center justify-center p-4">
+                    <button id="go-pro-btn" class="bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        Unlock All Features (Go Pro!)
+                    </button>
+                </div>
+
             </div>
         </div>
         <div id="morse-io-tab" class="tab-content hidden">
@@ -375,6 +390,39 @@
                     Confirm Reset
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Upsell Modal -->
+    <div id="upsell-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full text-gray-800">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-purple-600">Unlock Morse Code Pro!</h2>
+                <button id="close-upsell-modal-btn" class="text-gray-600 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <p class="text-lg mb-4">Upgrade to Pro and get access to all features:</p>
+            <ul class="list-disc list-inside mb-6 space-y-2 text-left">
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Remove All Ads
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Unlock All Books in the Library
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Unlock All Levels in Koch Method
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Access to All Future Updates & Content
+                </li>
+            </ul>
+            <button id="upgrade-to-pro-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg text-lg">
+                Upgrade to Pro for $X.XX
+            </button>
+            <p class="text-xs text-gray-500 mt-3 text-center">(This is a placeholder and will not process a real payment)</p>
         </div>
     </div>
 </body>

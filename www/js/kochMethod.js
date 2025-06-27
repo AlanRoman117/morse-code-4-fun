@@ -404,23 +404,31 @@ function handleSessionCompletion(accuracy) {
     console.log(`Session complete. Accuracy: ${accuracy.toFixed(2)}%`);
     if (kochFeedbackMessage) {
         if (accuracy >= 90) {
-            let nextCharToAdd = null;
-            for (const char of kochCharacterOrder) {
-                if (!unlockedCharacters.includes(char)) {
-                    nextCharToAdd = char;
-                    break;
+            // Pro User Check
+            if (!window.isProUser && unlockedCharacters.length >= 5) {
+                kochFeedbackMessage.textContent = "You've reached the free limit of 5 characters. Upgrade to Pro to unlock all characters!";
+                kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-yellow-500'; // Pro notice style
+                if (typeof window.showUpsellModal === 'function') {
+                    window.showUpsellModal();
                 }
-            }
+            } else {
+                let nextCharToAdd = null;
+                for (const char of kochCharacterOrder) {
+                    if (!unlockedCharacters.includes(char)) {
+                        nextCharToAdd = char;
+                        break;
+                    }
+                }
 
-            if (nextCharToAdd) {
-                unlockedCharacters.push(nextCharToAdd);
-                localStorage.setItem('kochUnlockedCharacters', JSON.stringify(unlockedCharacters));
-                kochFeedbackMessage.textContent = `Congratulations! You've unlocked a new character: ${nextCharToAdd}`;
-                kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
-                updateKochDisplays(); // Update character set display
-                renderKochInputButtons(); // Re-render buttons with the new character
+                if (nextCharToAdd) {
+                    unlockedCharacters.push(nextCharToAdd);
+                    localStorage.setItem('kochUnlockedCharacters', JSON.stringify(unlockedCharacters));
+                    kochFeedbackMessage.textContent = `Congratulations! You've unlocked a new character: ${nextCharToAdd}`;
+                    kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
+                    updateKochDisplays(); // Update character set display
+                    renderKochInputButtons(); // Re-render buttons with the new character
 
-                // Trigger confetti
+                    // Trigger confetti
                 if (typeof confetti === 'function') {
                     confetti({
                         particleCount: 150,
@@ -432,19 +440,19 @@ function handleSessionCompletion(accuracy) {
                     setTimeout(() => confetti({ particleCount: 100, spread: 150, startVelocity: 30, angle: 90, origin: { y: 0.5 } }), 800);
                 }
 
-            } else {
-                kochFeedbackMessage.textContent = "Congratulations! You've mastered all characters!";
-                kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
-                // Optional: Confetti for mastering all characters too? For now, only on new char.
-                if (typeof confetti === 'function') { // Also celebrate mastering everything!
-                    confetti({
-                        particleCount: 250,
-                        spread: 100,
-                        origin: { y: 0.5 },
-                        gravity: 0.5,
-                        ticks: 400,
-                        colors: ['#4a90e2', '#f6e05e', '#4caf50', '#ffeb3b', '#e91e63']
-                    });
+                } else { // All characters unlocked (Pro or already had them)
+                    kochFeedbackMessage.textContent = "Congratulations! You've mastered all available characters!";
+                    kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
+                    if (typeof confetti === 'function') {
+                        confetti({
+                            particleCount: 250,
+                            spread: 100,
+                            origin: { y: 0.5 },
+                            gravity: 0.5,
+                            ticks: 400,
+                            colors: ['#4a90e2', '#f6e05e', '#4caf50', '#ffeb3b', '#e91e63']
+                        });
+                    }
                 }
             }
         } else {
