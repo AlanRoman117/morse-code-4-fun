@@ -399,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Function to update the predictive display
 function updatePredictiveDisplay(morseString) {
+    console.log('updatePredictiveDisplay CALLED - Time:', Date.now(), '| Morse:', morseString, '| Current Timeout ID:', predictiveDisplayTimeout);
     const displayElement = document.getElementById('predictive-taps-display');
     if (!displayElement) {
         // console.warn("Predictive taps display element not found.");
@@ -415,7 +416,7 @@ function updatePredictiveDisplay(morseString) {
         // If morseString is empty, fade out and hide
         displayElement.classList.remove('opacity-100'); // Ensure opacity-100 is removed if present
         displayElement.classList.add('opacity-0');     // Start fade out
-
+        
         predictiveDisplayTimeout = setTimeout(() => {
             displayElement.classList.add('hidden');
             displayElement.innerHTML = ""; // Clear content after it's hidden
@@ -437,7 +438,7 @@ function updatePredictiveDisplay(morseString) {
             setTimeout(() => {
                 displayElement.classList.add('hidden');
             }, 500); // Transition duration
-        }, 3000); // 3-second display for error
+        }, 6000); // Changed to 6-second display for error
         return;
     }
 
@@ -452,7 +453,7 @@ function updatePredictiveDisplay(morseString) {
         displayElement.innerHTML = htmlBadges;
         displayElement.classList.remove('hidden', 'opacity-0'); // Make sure it's not hidden and opacity is not 0
         // Force a reflow before adding opacity-100 if classes were just removed, to ensure transition plays
-        void displayElement.offsetWidth;
+        void displayElement.offsetWidth; 
         displayElement.classList.add('opacity-100');    // Make it fully visible (triggers transition if opacity was 0)
 
         predictiveDisplayTimeout = setTimeout(() => {
@@ -462,7 +463,7 @@ function updatePredictiveDisplay(morseString) {
             setTimeout(() => {
                 displayElement.classList.add('hidden');
             }, 500); // This duration should match your CSS transition-duration
-        }, 3000); // 3 seconds
+        }, 6000); // Changed to 6 seconds
     } else {
         displayElement.innerHTML = "<span class='text-gray-500'>No match</span>";
         displayElement.classList.remove('hidden', 'opacity-0');
@@ -475,7 +476,7 @@ function updatePredictiveDisplay(morseString) {
             setTimeout(() => {
                 displayElement.classList.add('hidden');
             }, 500); // Transition duration
-        }, 3000); // 3-second display for "No match"
+        }, 6000); // Changed to 6-second display for "No match"
     }
 }
 
