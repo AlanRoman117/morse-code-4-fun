@@ -469,7 +469,9 @@ function updatePredictiveDisplay(morseString) {
             console.log('Cleared existing timeout due to new morseString:', morseString);
         }
 
-        let htmlBadges = "";
+        let exactMatchHtml = "";
+        let partialMatchesHtml = []; // Array to hold HTML strings for partial matches
+
         if (typeof morseCode === 'undefined') { 
             console.error("morseCode dictionary is not available to updatePredictiveDisplay.");
             displayElement.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
@@ -490,13 +492,19 @@ function updatePredictiveDisplay(morseString) {
         }
 
         for (const char in morseCode) {
-            if (morseCode[char].startsWith(morseString)) {
-                htmlBadges += `<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${morseCode[char]})</span>`;
+            const currentMorseValue = morseCode[char];
+            if (currentMorseValue === morseString) { // Exact match
+                console.log('Exact match found for:', char, morseString, 'Applying highlight class.'); // Updated log
+                exactMatchHtml = `<span class="char-badge exact-match-highlight text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${currentMorseValue})</span>`;
+            } else if (currentMorseValue.startsWith(morseString)) { // Partial match
+                partialMatchesHtml.push(`<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${currentMorseValue})</span>`);
             }
         }
 
-        if (htmlBadges.length > 0) {
-            displayElement.innerHTML = htmlBadges;
+        const finalHtml = exactMatchHtml + partialMatchesHtml.join('');
+
+        if (finalHtml.length > 0) {
+            displayElement.innerHTML = finalHtml;
             displayElement.classList.remove('hidden', 'opacity-0');
             void displayElement.offsetWidth;
             displayElement.classList.add('opacity-100');
