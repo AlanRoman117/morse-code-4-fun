@@ -519,3 +519,8 @@ body {
             align-items: center;
             margin: 0.125rem; /* Add a small margin for separation if gap isn't enough or for items that might break lines weirdly */
         }
+
+        .char-badge.exact-match-highlight {
+            background-color: #FBBF24; /* Corresponds to Tailwind's yellow-400 */
+            color: #000000;       /* Corresponds to Tailwind's black */
+        }
