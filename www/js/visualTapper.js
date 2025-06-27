@@ -395,7 +395,64 @@ document.addEventListener('DOMContentLoaded', () => {
         // It also handles saving the default to localStorage if it wasn't there.
         updateVisualTapperUnitTime(UNIT_TIME_MS); // UNIT_TIME_MS here is the initial default (e.g., 150)
     }
+
+    // Add event listeners for predictive display interaction
+    const predictiveDisplayElement = document.getElementById('predictive-taps-display');
+    if (predictiveDisplayElement) {
+        // Using 'wheel' for scroll detection as 'scroll' only fires on the element itself if it has overflow
+        // and is being scrolled, not necessarily its content if the parent scrolls.
+        // 'wheel' captures mouse wheel, 'touchmove' can approximate touch scroll.
+        // For simplicity and broad capture, 'pointerenter' and 'touchstart' might be good starts
+        // if the goal is any interaction *with* the visible box.
+        // Let's use 'touchstart' and 'click' (click for mouse, also often triggered by tap)
+        // and 'wheel' for mouse scroll over the element.
+
+        const interactionHandler = () => {
+            // This function will call the timer reset logic
+            // We'll define resetPredictiveDisplayHideTimer later or incorporate its logic
+            if (predictiveDisplayTimeout && !predictiveDisplayElement.classList.contains('hidden') && !predictiveDisplayElement.classList.contains('opacity-0')) {
+                console.log('User interaction with predictive display detected. Resetting hide timer.');
+                resetPredictiveDisplayHideTimer(); 
+            }
+        };
+
+        predictiveDisplayElement.addEventListener('touchstart', interactionHandler, { passive: true });
+        predictiveDisplayElement.addEventListener('click', interactionHandler);
+        // Adding 'wheel' to detect mouse scrolling over the element
+        predictiveDisplayElement.addEventListener('wheel', interactionHandler, { passive: true });
+
+    } else {
+        console.warn("Predictive taps display element not found for attaching interaction listeners.");
+    }
 });
+
+// Function to reset the predictive display's hide timer
+function resetPredictiveDisplayHideTimer() {
+    const displayElement = document.getElementById('predictive-taps-display');
+    if (!displayElement || displayElement.classList.contains('hidden') || displayElement.classList.contains('opacity-0')) {
+        // If display is already hidden or hiding, or not found, do nothing
+        console.log('resetPredictiveDisplayHideTimer called, but display not in a state to reset timer.');
+        return;
+    }
+
+    console.log('Resetting predictive display hide timer. Current timer ID:', predictiveDisplayTimeout);
+    if (predictiveDisplayTimeout) {
+        clearTimeout(predictiveDisplayTimeout);
+    }
+
+    // Restart the 6-second timer
+    predictiveDisplayTimeout = setTimeout(() => {
+        console.log('6s timeout expired after user interaction. Hiding.');
+        displayElement.classList.remove('opacity-100');
+        displayElement.classList.add('opacity-0');
+        predictiveDisplayTimeout = null; 
+        setTimeout(() => {
+            displayElement.classList.add('hidden');
+        }, 500); // CSS transition duration
+    }, 6000);
+    console.log('New predictive display hide timer set with ID:', predictiveDisplayTimeout);
+}
+
 
 // Function to update the predictive display
 function updatePredictiveDisplay(morseString) {
