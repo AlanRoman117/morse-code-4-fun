@@ -110,6 +110,103 @@ class MessagesViewController: MSMessagesAppViewController {
         }
     }
 
+    // MARK: - Morse Image Generation
+
+    func generateMorseImage(morseCode: String, desiredHeight: CGFloat) -> UIImage? {
+        let dotSize = desiredHeight * 0.7 // Diameter of dot, height of dash
+        let dashWidth = dotSize * 2.5
+        let symbolSpacing: CGFloat = dotSize * 0.5      // Space between ./- in the same letter
+        let letterEndSpacing: CGFloat = dotSize * 1.2   // Space after a letter (before next letter starts)
+        let wordSeparatorCharacter: Character = "/" // Character used for word separation in morse string
+        let wordSeparatorDisplaySpacing: CGFloat = dotSize * 2.0 // Visual space for a word separator
+
+        var xOffset: CGFloat = 0
+        var drawingOperations: [(CGRect, Bool)] = [] // Rect and isDot flag
+
+        // Normalize Morse code: ensure single spaces between letters, and consistent word separator representation
+        let cleanedMorse = morseCode.trimmingCharacters(in: .whitespacesAndNewlines)
+                                   .replacingOccurrences(of: " / ", with: " \(wordSeparatorCharacter) ") // Standardize word separator
+                                   .replacingOccurrences(of: "/", with: " \(wordSeparatorCharacter) ")    // Ensure spaces around standalone slash
+                                   .split(separator: " ") // Split into components (letters or word separator)
+                                   .map(String.init)
+                                   .filter { !$0.isEmpty }
+
+
+        for (i, component) in cleanedMorse.enumerated() {
+            if component == String(wordSeparatorCharacter) {
+                // This component represents a word space. Add its defined width.
+                // The letterEndSpacing from any preceding letter component should have already been added.
+                xOffset += wordSeparatorDisplaySpacing
+            } else { // It's a letter
+                let symbols = Array(component)
+                for (j, symbol) in symbols.enumerated() {
+                    var symbolRect: CGRect
+                    var isDot = false
+                    if symbol == "." {
+                        symbolRect = CGRect(x: xOffset, y: (desiredHeight - dotSize) / 2, width: dotSize, height: dotSize)
+                        xOffset += dotSize
+                        isDot = true
+                    } else if symbol == "-" {
+                        symbolRect = CGRect(x: xOffset, y: (desiredHeight - dotSize) / 2, width: dashWidth, height: dotSize)
+                        xOffset += dashWidth
+                    } else {
+                        continue // Should not happen if Morse string is clean
+                    }
+                    drawingOperations.append((symbolRect, isDot))
+
+                    if j < symbols.count - 1 { // If not the last symbol in this letter component
+                        xOffset += symbolSpacing
+                    }
+                }
+            }
+            if i < cleanedMorse.count - 1 { // If not the last component overall
+                 // Add spacing after a letter component, unless the next is a word separator that handles its own spacing
+                if component != String(wordSeparatorCharacter) && (i + 1 < cleanedMorse.count && cleanedMorse[i+1] != String(wordSeparatorCharacter)) {
+                     xOffset += letterEndSpacing
+                } else if component != String(wordSeparatorCharacter) && (i + 1 < cleanedMorse.count && cleanedMorse[i+1] == String(wordSeparatorCharacter)) {
+                    // If a letter is followed by a word separator, add standard letter end spacing.
+                    // The word separator will then add its specific additional spacing.
+                    xOffset += letterEndSpacing
+                }
+            }
+        }
+
+        let totalWidth = max(xOffset, 1)
+
+        if drawingOperations.isEmpty {
+            // If morse code was just spaces or slashes, or empty.
+            // Return nil if no actual dots/dashes to draw.
+            if !cleanedMorse.joined().contains(".") && !cleanedMorse.joined().contains("-") {
+                 print("No visual elements to draw for Morse: \(morseCode)")
+                 return nil
+            }
+             // If after cleaning, it's empty, still return nil.
+            if cleanedMorse.isEmpty { return nil }
+        }
+
+
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: totalWidth, height: desiredHeight))
+        let image = renderer.image { context in
+            // Use a color that is visible in both light and dark mode message bubbles.
+            // UIColor.label dynamically adapts.
+            UIColor.label.setFill()
+
+            for operation in drawingOperations {
+                let rect = operation.0
+                let isDot = operation.1
+                if isDot {
+                    UIBezierPath(ovalIn: rect).fill()
+                } else {
+                    // For dashes, ensure they are vertically centered if dotSize is less than desiredHeight
+                    let dashRect = CGRect(x: rect.origin.x, y: (desiredHeight - dotSize) / 2, width: rect.width, height: dotSize)
+                    UIBezierPath(rect: dashRect).fill()
+                }
+            }
+        }
+        return image
+    }
+
+
     // MARK: - Message Sending Logic
 
     func sendMessage(morse: String, text: String) {
@@ -120,36 +217,59 @@ class MessagesViewController: MSMessagesAppViewController {
 
         let session = messageSession(for: conversation)
         let message = MSMessage(session: session)
-
         let layout = MSMessageTemplateLayout()
-        layout.caption = text.isEmpty ? "Morse Code Message" : text // Show decoded text as caption
-        layout.subcaption = morse // Show the Morse code itself
-        // Example: layout.image = UIImage(named: "morse_icon.png") // Add an icon if you have one
 
-        // You can provide a summary text for notifications or when the message is not expanded.
-        message.summaryText = "Sent: \(text.isEmpty ? morse : text)"
+        // 1. Generate Morse Code Image
+        // Let's define a typical height for the image, e.g., 30-40 points.
+        let morseImageHeight: CGFloat = 30.0
+        if let morseImage = generateMorseImage(morseCode: morse, desiredHeight: morseImageHeight) {
+            layout.image = morseImage
+        } else {
+            // Fallback if image generation fails or not applicable (e.g. empty morse)
+            // Could use a placeholder or just send text. For now, log and proceed.
+            print("Could not generate Morse image, or Morse string was empty/invalid for image.")
+            // If morse is not empty but image failed, we might still want to show it as text
+            if !morse.isEmpty {
+                 // As a fallback, put morse in subcaption if image is nil
+                 // layout.subcaption = "Morse: \(morse)" // This is now the primary spot for morse text
+            }
+        }
 
-        // For richer interaction, you can construct a URL with components.
-        // This URL can be used by your app extension to reconstruct state if the message is tapped.
+        // 2. Set Caption and Subcaption
+        layout.caption = text.isEmpty ? "Morse Code" : text // Decoded text
+        layout.subcaption = morse // Raw Morse string
+
+        // 3. Set Summary Text (for notifications, etc.)
+        var summaryParts: [String] = []
+        if !text.isEmpty { summaryParts.append("Text: \(text)") }
+        if !morse.isEmpty { summaryParts.append("Morse: \(morse)") }
+        message.summaryText = summaryParts.joined(separator: " - ")
+        if message.summaryText!.isEmpty {
+            message.summaryText = "Morse Code Message"
+        }
+
+
+        // 4. Construct URL with data
         var components = URLComponents()
+        components.scheme = "morsetapper" // Define a custom scheme for your app
+        components.host = "message"
         var queryItems = [URLQueryItem]()
         queryItems.append(URLQueryItem(name: "morse", value: morse))
         queryItems.append(URLQueryItem(name: "text", value: text))
-        // queryItems.append(URLQueryItem(name: "version", value: "1.0"))
+        // queryItems.append(URLQueryItem(name: "version", value: "1.0")) // Optional: for future data versioning
         components.queryItems = queryItems
-        message.url = components.url // This URL is what gets passed to `didReceive` on the other end
+        message.url = components.url
 
         message.layout = layout
 
         conversation.insert(message) { [weak self] error in
             if let error = error {
                 print("Error inserting message into conversation: \(error.localizedDescription)")
-                // Handle error appropriately, maybe show an alert to the user
             } else {
-                print("Message inserted successfully.")
-                // Optionally, after sending, you might want to change the presentation style or clear UI.
+                print("Message with custom layout inserted successfully.")
+                // Optionally, clear UI or change presentation style
                 // self?.requestPresentationStyle(.compact)
-                // self?.dismiss() // Dismisses the modal presentation of the iMessage app.
+                // self?.dismiss()
             }
         }
     }
