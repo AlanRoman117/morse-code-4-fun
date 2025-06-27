@@ -3,6 +3,7 @@
 let UNIT_TIME_MS = 150; 
 let DOT_THRESHOLD_MS = UNIT_TIME_MS * 1.5;
 let LETTER_SPACE_SILENCE_MS = UNIT_TIME_MS * 3;
+let predictiveDisplayTimeout = null; // For managing the hide timer
 
 // State variables for the visual tapper, scoped to be accessible by resetVisualTapperState
 let currentMorse = "";
@@ -398,36 +399,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Function to update the predictive display
 function updatePredictiveDisplay(morseString) {
+    console.log('updatePredictiveDisplay CALLED - Time:', Date.now(), '| Morse:', morseString, '| Current Timeout ID before logic:', predictiveDisplayTimeout);
     const displayElement = document.getElementById('predictive-taps-display');
-    if (!displayElement) {
-        // console.warn("Predictive taps display element not found.");
-        return;
-    }
+    if (!displayElement) return;
 
-    if (!morseString || morseString.length === 0) {
-        displayElement.innerHTML = ""; // Clear display if morseString is empty
-        return;
-    }
+    // Scenario 1: New Morse string input (predictions will be generated)
+    if (morseString && morseString.length > 0) {
+        // If there's an existing timer, clear it because new predictions are coming.
+        if (predictiveDisplayTimeout) {
+            clearTimeout(predictiveDisplayTimeout);
+            predictiveDisplayTimeout = null;
+            console.log('Cleared existing timeout due to new morseString:', morseString);
+        }
 
-    let htmlBadges = "";
-    // Ensure morseCode is available (it's defined in index.html's script tag)
-    if (typeof morseCode === 'undefined') {
-        console.error("morseCode dictionary is not available to updatePredictiveDisplay.");
-        displayElement.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
-        return;
-    }
+        let htmlBadges = "";
+        if (typeof morseCode === 'undefined') {
+            console.error("morseCode dictionary is not available to updatePredictiveDisplay.");
+            displayElement.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
+            displayElement.classList.remove('hidden', 'opacity-0');
+            void displayElement.offsetWidth;
+            displayElement.classList.add('opacity-100');
+            // Set a new timer for the error message
+            predictiveDisplayTimeout = setTimeout(() => {
+                console.log('6s timeout for error message expired. Hiding.');
+                displayElement.classList.remove('opacity-100');
+                displayElement.classList.add('opacity-0');
+                predictiveDisplayTimeout = null;
+                setTimeout(() => {
+                    displayElement.classList.add('hidden');
+                }, 500);
+            }, 6000);
+            return;
+        }
 
-    for (const char in morseCode) {
-        if (morseCode[char].startsWith(morseString)) {
-            // Generate HTML for one badge
-            htmlBadges += `<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1">${char} (${morseCode[char]})</span>`;
+        for (const char in morseCode) {
+            if (morseCode[char].startsWith(morseString)) {
+                htmlBadges += `<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${morseCode[char]})</span>`;
+            }
+        }
+
+        if (htmlBadges.length > 0) {
+            displayElement.innerHTML = htmlBadges;
+            displayElement.classList.remove('hidden', 'opacity-0');
+            void displayElement.offsetWidth;
+            displayElement.classList.add('opacity-100');
+            console.log('Displaying predictions. Setting 6s timeout.');
+
+            predictiveDisplayTimeout = setTimeout(() => {
+                console.log('6s timeout for predictions expired. Hiding.');
+                displayElement.classList.remove('opacity-100');
+                displayElement.classList.add('opacity-0');
+                predictiveDisplayTimeout = null;
+                setTimeout(() => {
+                    displayElement.classList.add('hidden');
+                }, 500);
+            }, 6000);
+        } else {
+            displayElement.innerHTML = "<span class='text-gray-500'>No match</span>";
+            displayElement.classList.remove('hidden', 'opacity-0');
+            void displayElement.offsetWidth;
+            displayElement.classList.add('opacity-100');
+            console.log('Displaying "No match". Setting 6s timeout.');
+
+            predictiveDisplayTimeout = setTimeout(() => {
+                console.log('6s timeout for "No match" expired. Hiding.');
+                displayElement.classList.remove('opacity-100');
+                displayElement.classList.add('opacity-0');
+                predictiveDisplayTimeout = null;
+                setTimeout(() => {
+                    displayElement.classList.add('hidden');
+                }, 500);
+            }, 6000);
         }
     }
-
-    if (htmlBadges.length > 0) {
-        displayElement.innerHTML = htmlBadges;
-    } else {
-        displayElement.innerHTML = "<span class='text-gray-500'>No match</span>";
+    // Scenario 2: morseString is empty (e.g., called from decodeMorse after char completion)
+    else {
+        // If morseString is empty, we check if a predictiveDisplayTimeout is ALREADY running.
+        // This means predictions were just on screen. We should let that timer continue.
+        if (predictiveDisplayTimeout) {
+            console.log('Empty morseString received, but a timeout (ID:', predictiveDisplayTimeout, ') is active. Letting it run.');
+        } else {
+            // Only hide immediately if there's NO active timer (e.g., initial state or explicit clear not from recent prediction)
+            console.log('Empty morseString and NO active timeout. Hiding now.');
+            displayElement.classList.remove('opacity-100');
+            displayElement.classList.add('opacity-0');
+            // No new predictiveDisplayTimeout is set here for the immediate hide.
+            // A short timer is only for the CSS transition to complete.
+            setTimeout(() => {
+                displayElement.classList.add('hidden');
+                displayElement.innerHTML = "";
+            }, 500); // CSS transition duration
+        }
+        // No return here, allow fall-through if needed, though current logic implies this is the end for empty string.
     }
 }
 
