@@ -172,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (kochPlayBtn) kochPlayBtn.classList.remove('hidden');
             if (kochAnswerInput) {
                 kochAnswerInput.disabled = false;
+                kochAnswerInput.classList.remove('hidden'); // Ensure input field is visible
                 kochAnswerInput.value = ''; // Clear previous input
                 // On mobile, focus might not be desired if using on-screen buttons.
                 // On desktop, it's good.
