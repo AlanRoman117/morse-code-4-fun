@@ -24,9 +24,18 @@ class MorseCodeConverter {
         ".--.-.": "@", "...---...": "SOS"
     ]
 
+    private let englishToMorseDictionary: [String: String]
+
     init() {
         // Initialization, if any, can go here.
         // For now, the dictionary is statically defined.
+        var tempEnglishToMorse: [String: String] = [:]
+        for (key, value) in morseCodeDictionary {
+            tempEnglishToMorse[value] = key
+        }
+        // Add space, as it's a common character to look up for backspace logic (though not in morseCodeDictionary)
+        tempEnglishToMorse[" "] = " / " // Representing space as its Morse word separator
+        self.englishToMorseDictionary = tempEnglishToMorse
     }
 
     /// Converts a single Morse code string to its English character equivalent.
@@ -34,6 +43,57 @@ class MorseCodeConverter {
     /// - Returns: The corresponding English character (e.g., "A") or nil if not found.
     func morseToEnglish(morse: String) -> String? {
         return morseCodeDictionary[morse]
+    }
+
+    /// Generates a list of character predictions based on a Morse code prefix.
+    /// - Parameter morsePrefix: The current Morse input from the user (e.g., ".-").
+    /// - Returns: An array of tuples, each containing the character, its full Morse code,
+    ///            and a flag indicating if it's an exact match.
+    ///            Example: [("A", ".-", true), ("R", ".-.", false)]
+    func getPredictions(for morsePrefix: String) -> [(char: String, morse: String, isExactMatch: Bool)] {
+        guard !morsePrefix.isEmpty else {
+            return []
+        }
+
+        var predictions: [(char: String, morse: String, isExactMatch: Bool)] = []
+
+        // To prioritize exact match if found
+        var exactMatchFound: (char: String, morse: String, isExactMatch: Bool)? = nil
+
+        for (morseValue, charValue) in morseCodeDictionary { // Iterate morse:char
+            if morseValue == morsePrefix {
+                exactMatchFound = (char: charValue, morse: morseValue, isExactMatch: true)
+            } else if morseValue.starts(with: morsePrefix) {
+                predictions.append((char: charValue, morse: morseValue, isExactMatch: false))
+            }
+        }
+
+        // Sort partial matches alphabetically by character for consistent ordering
+        predictions.sort { $0.char < $1.char }
+
+        // Prepend exact match if it exists
+        if let exact = exactMatchFound {
+            predictions.insert(exact, at: 0)
+        }
+
+        return predictions
+    }
+
+    /// Converts an English character to its Morse code string equivalent.
+    /// - Parameter char: The English character (e.g., "A").
+    /// - Returns: The corresponding Morse code string (e.g., ".-") or nil if not found.
+    func englishToMorse(char: String) -> String? {
+        // Ensure the input is a single character and uppercase it for dictionary lookup
+        guard char.count == 1 else {
+            // Handle multi-character strings if necessary, or return nil for simplicity
+            // For "SOS", it's a special case in morseCodeDictionary, not single chars.
+            // This function is primarily for single character backspace.
+            if char.uppercased() == "SOS" { // Special case for "SOS" if it was typed as a block
+                return englishToMorseDictionary["SOS"]
+            }
+            return nil
+        }
+        return englishToMorseDictionary[char.uppercased()]
     }
 
     /// Converts a full Morse code sequence to an English string.
