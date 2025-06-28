@@ -19,7 +19,7 @@ private class AudioManager {
         playerNode = AVAudioPlayerNode()
 
         engine.attach(playerNode)
-
+        
         // Get the native audio format of the engine's output node.
         // This ensures compatibility with the hardware.
         let outputNode = engine.outputNode
@@ -43,29 +43,29 @@ private class AudioManager {
             print("AudioManager: Audio format not available.")
             return nil
         }
-
+        
         let sampleRate = Float(format.sampleRate)
         let frameCount = AVAudioFrameCount(sampleRate * duration)
-
+        
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount) else {
             print("AudioManager: Could not create PCM buffer.")
             return nil
         }
         buffer.frameLength = frameCount
-
+        
         guard let channelData = buffer.floatChannelData?[0] else {
             print("AudioManager: Could not get channel data.")
             return nil
         }
-
+        
         let twoPi = 2 * Float.pi
         let angularFrequency = twoPi * frequency / sampleRate
-
+        
         for frame in 0..<Int(frameCount) {
             let value = sin(Float(frame) * angularFrequency) * volume
             channelData[frame] = value
         }
-
+        
         return buffer
     }
 
@@ -83,13 +83,13 @@ private class AudioManager {
             print("AudioManager: Buffer generation failed.")
             return
         }
-
+        
         playerNode.scheduleBuffer(buffer) {
             // print("AudioManager: Buffer playback completed.")
             // This completion handler is called when the buffer finishes playing.
             // Could be used for cleanup or state changes if needed.
         }
-
+        
         if !playerNode.isPlaying {
             playerNode.play()
         }
@@ -107,7 +107,7 @@ private class AudioManager {
     func playButtonFeedbackSound() {
         playSound(frequency: 1200, duration: 0.05, volume: 0.2) // Short, soft click-like sound
     }
-
+    
     func playSendSound() {
         playSound(frequency: 1000, duration: 0.05)
         // Could play a sequence for more distinct feedback
@@ -115,7 +115,7 @@ private class AudioManager {
             self.playSound(frequency: 1300, duration: 0.08)
         }
     }
-
+    
     func playClearSound() {
          playSound(frequency: 600, duration: 0.1, volume: 0.25)
     }
@@ -138,14 +138,14 @@ private struct Theme {
 
     static let lightPrimaryAction = Color(red: 0.0, green: 0.45, blue: 0.85)
     static let darkPrimaryAction = Color(red: 0.2, green: 0.6, blue: 0.95)
-
+    
     static let lightTapArea = Color(red: 0.1, green: 0.5, blue: 0.9)
     static let darkTapArea = Color(red: 0.25, green: 0.55, blue: 0.9)
 
 
     static let lightSecondaryAction = Color(red: 0.5, green: 0.5, blue: 0.55)
     static let darkSecondaryAction = Color(red: 0.45, green: 0.45, blue: 0.5)
-
+    
     static let lightPositiveAction = Color(red: 0.2, green: 0.7, blue: 0.3)
     static let darkPositiveAction = Color(red: 0.3, green: 0.8, blue: 0.4)
 
@@ -177,7 +177,7 @@ private struct Theme {
     static func textPrimary(for scheme: ColorScheme) -> Color { color(light: lightTextPrimary, dark: darkTextPrimary, scheme: scheme) }
     static func textSecondary(for scheme: ColorScheme) -> Color { color(light: lightTextSecondary, dark: darkTextSecondary, scheme: scheme) }
     static func morseText(for scheme: ColorScheme) -> Color { color(light: lightMorseText, dark: darkMorseText, scheme: scheme) }
-
+    
     static let buttonCornerRadius: CGFloat = 10
     static let displayCornerRadius: CGFloat = 8
 }
@@ -225,7 +225,7 @@ struct ContentView: View {
     private let predictiveDisplayDuration: TimeInterval = 6.0
     @State private var predictionUpdateDebounceTimer: Timer? = nil // For debouncing prediction updates
     private let predictionDebounceInterval: TimeInterval = 0.1 // 100ms debounce
-
+    
     private var currentAppBackground: Color { Theme.appBackground(for: colorScheme) }
     private var currentSurfaceBackground: Color { Theme.surfaceBackground(for: colorScheme) }
     private var currentPrimaryAction: Color { Theme.primaryAction(for: colorScheme) }
@@ -263,7 +263,7 @@ struct ContentView: View {
             .padding(.horizontal)
 
             Spacer()
-
+            
             // Predictive Display Area
             if showPredictiveDisplay {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -293,25 +293,25 @@ struct ContentView: View {
             Button(action: {
                  // Action intentionally empty, gestures handle primary interaction.
             }) {
-                Text("TAP")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                Text("TAP") 
+                    .font(.system(size: 24, weight: .bold, design: .rounded)) 
                     .padding()
-                    .frame(width: 110, height: 110)
+                    .frame(width: 110, height: 110) 
                     .background(isTapAreaPressed ? currentTapAreaActive : currentTapArea)
                     .foregroundColor(.white)
-                    .clipShape(Circle())
-                    .scaleEffect(isTapAreaPressed ? 0.95 : 1.0)
-                    .shadow(color: currentTapArea.opacity(0.4), radius: isTapAreaPressed ? 5 : 10, x: 0, y: isTapAreaPressed ? 3 : 6)
+                    .clipShape(Circle()) 
+                    .scaleEffect(isTapAreaPressed ? 0.95 : 1.0) 
+                    .shadow(color: currentTapArea.opacity(0.4), radius: isTapAreaPressed ? 5 : 10, x: 0, y: isTapAreaPressed ? 3 : 6) 
             }
             .animation(.spring(response: 0.15, dampingFraction: 0.5), value: isTapAreaPressed)
             .gesture(
                 LongPressGesture(minimumDuration: shortTapThreshold)
-                    .onEnded { _ in
-                        self.isTapAreaPressed = true
+                    .onEnded { _ in 
+                        self.isTapAreaPressed = true 
                         self.isLongPressTriggered = true
                         audioManager.playDashSound() // Play dash sound
                         self.handleTapInput(isLong: true)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { 
                             self.isTapAreaPressed = false
                         }
                     }
@@ -319,7 +319,7 @@ struct ContentView: View {
             .simultaneousGesture(
                 TapGesture()
                     .onEnded {
-                        if !self.isLongPressTriggered {
+                        if !self.isLongPressTriggered { 
                             self.isTapAreaPressed = true
                             audioManager.playDotSound() // Play dot sound
                             self.handleTapInput(isLong: false)
@@ -340,7 +340,7 @@ struct ContentView: View {
                 actionButton(title: "Word Space", color: currentWarningAction, action: addWordSpaceAction, audioFeedback: audioManager.playButtonFeedbackSound)
             }
             .padding(.horizontal)
-
+            
             HStack(spacing: 12) {
                 actionButton(title: "Clear All", color: currentDestructiveAction, icon: "trash", action: clearAllAction, audioFeedback: audioManager.playClearSound)
                 actionButton(title: "Backspace", color: currentSecondaryAction, icon: "delete.left", action: deleteLastCharAction, audioFeedback: audioManager.playButtonFeedbackSound)
@@ -349,7 +349,7 @@ struct ContentView: View {
 
 
             Spacer()
-
+            
             // Preview Section
             if !fullMorseStringDisplay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
@@ -518,8 +518,8 @@ struct ContentView: View {
             updatePredictions()
         }
 
-        lastTapTimestamp = Date()
-        startLetterTimeoutTimer()
+        lastTapTimestamp = Date() 
+        startLetterTimeoutTimer() 
     }
 
     // MARK: - Predictive Text Logic
@@ -539,13 +539,13 @@ struct ContentView: View {
         } else {
             predictiveChars = morseConverter.getPredictions(for: activeMorseChar)
             // Show predictions if there are any, or if user typed something (to show "No match")
-            if !predictiveChars.isEmpty || !activeMorseChar.isEmpty {
+            if !predictiveChars.isEmpty || !activeMorseChar.isEmpty { 
                 if !showPredictiveDisplay { // Animate in if it was hidden
                     withAnimation(.easeInOut(duration: 0.2)) {
                         showPredictiveDisplay = true
                     }
                 } else { // If already showing, just ensure it's true (no animation needed for content change)
-                    showPredictiveDisplay = true
+                    showPredictiveDisplay = true 
                 }
                 startPredictiveDisplayTimer() // Start/reset the auto-hide timer
             } else { // No predictions and activeMorseChar is somehow empty (should be caught by first if)
@@ -587,12 +587,12 @@ struct ContentView: View {
     // MARK: - UI Actions
 
     private func processCurrentCharAction(isAutoFinalized: Bool = false) {
-        invalidateLetterTimeoutTimer()
+        invalidateLetterTimeoutTimer() 
 
-        guard !activeMorseChar.isEmpty else {
-            activeMorseChar = ""
+        guard !activeMorseChar.isEmpty else { 
+            activeMorseChar = "" 
             clearAndHidePredictions()
-            return
+            return 
         }
 
         fullMorseStringDisplay += activeMorseChar
@@ -600,22 +600,22 @@ struct ContentView: View {
         if let englishChar = morseConverter.morseToEnglish(morse: activeMorseChar) {
             decodedTextDisplay += englishChar
         } else {
-            decodedTextDisplay += "?"
+            decodedTextDisplay += "?" 
         }
 
-        fullMorseStringDisplay += " "
+        fullMorseStringDisplay += " " 
 
         activeMorseChar = ""
         currentMorseCharDisplay = ""
         clearAndHidePredictions() // Clear predictions after processing character
-
+        
         if isAutoFinalized {
             // Optionally, play a subtle haptic or UI feedback for auto-finalization
         }
     }
 
     private func addWordSpaceAction() {
-        invalidateLetterTimeoutTimer()
+        invalidateLetterTimeoutTimer() 
 
         if !activeMorseChar.isEmpty {
             processCurrentCharAction() // This will call clearAndHidePredictions()
@@ -646,11 +646,11 @@ struct ContentView: View {
         let morseToSend = fullMorseStringDisplay.trimmingCharacters(in: .whitespacesAndNewlines)
         let textToSend = decodedTextDisplay.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if !morseToSend.isEmpty {
+        if !morseToSend.isEmpty { 
             messagesViewController?.sendMessage(morse: morseToSend, text: textToSend)
         }
     }
-
+    
     private func clearAndHidePredictions() {
         predictionUpdateDebounceTimer?.invalidate() // Stop any pending debounce
         activeMorseChar = "" // Usually already done by caller, but good to be sure for this func's purpose
@@ -671,7 +671,7 @@ struct ContentView: View {
         decodedTextDisplay = ""
         // Haptic already played by button's action
     }
-
+    
     private func deleteLastCharAction() {
         clearAndHidePredictions() // Handles activeMorseChar, predictions, and timers
 
@@ -682,7 +682,7 @@ struct ContentView: View {
         // Rebuild fullMorseStringDisplay based on the new (shortened) decodedTextDisplay.
         // This is more robust than trying to snip the end of the old morse string,
         // especially with potential '?' characters or past inconsistencies.
-
+        
         var newFullMorseString = ""
         var lastCharWasRealChar = false // To handle spacing before " / "
 
@@ -717,7 +717,7 @@ struct ContentView: View {
             // Else: character not in Morse map and not '?', skip or handle as error.
             // For this simple backspace, if a char is in decodedTextDisplay, it should have come from Morse.
         }
-
+        
         fullMorseStringDisplay = newFullMorseString
     }
 }
@@ -743,7 +743,7 @@ struct PredictiveBadgeView: View {
         }
         return prediction.isExactMatch ? (colorScheme == .dark ? Color.black : Color.white) : Theme.textPrimary(for: colorScheme)
     }
-
+    
     private var morseTextColor: Color {
         if prediction.char == "No match" {
             return Color.clear // Don't show morse for "No match"
