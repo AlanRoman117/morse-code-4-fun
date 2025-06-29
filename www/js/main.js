@@ -799,4 +799,45 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('DOMContentLoaded', () => {
             // ... other DOMContentLoaded logic ...
             updateUserProStatusUI();
+
+            // Initialize and show banner ad
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+                const { AdMob } = window.Capacitor.Plugins;
+                AdMob.initialize({
+                    requestTrackingAuthorization: true, // Optional: if you want to request tracking authorization via AdMob
+                    testingDevices: [], // Add test device IDs if needed: e.g., ["YOUR_TEST_DEVICE_ID"]
+                    initializeForTesting: true, // Set to true for test ads from Google, false for production
+                })
+                .then(() => {
+                    console.log("AdMob initialized successfully.");
+                    // Now show the banner ad
+                    AdMob.showBanner({
+                        adId: "ca-app-pub-xxxxxxxxxxxxxxxxx/yyyyyyyyyy", // Replace with your actual Banner Ad Unit ID
+                        adSize: "BANNER", // or "ADAPTIVE_BANNER", "SMART_BANNER" etc.
+                        position: "BOTTOM_CENTER", // AdMob will handle placing it at bottom. Our CSS container is a fallback or for web.
+                        margin: 0, // Margin in pixels, if needed
+                        isTesting: true, // IMPORTANT: Set to true for development/testing, false for production
+                        // npa: true, // Non-Personalized Ads, if consent requires it
+                    })
+                    .then(() => {
+                        console.log("Banner ad shown successfully.");
+                        // If the ad is loaded into #ad-banner-container by native code, no further JS action needed for placement.
+                        // If native code expects a specific div ID to be passed, adjust the call.
+                        // The current plan implies the native SDK handles placement within the container we made.
+                    })
+                    .catch(error => {
+                        console.error("Error showing banner ad:", error);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error initializing AdMob:", error);
+                });
+            } else {
+                console.warn("AdMob Capacitor plugin not available. Banner ad will not be shown.");
+                // Fallback or hide #ad-banner-container if plugin isn't there
+                const adBannerContainer = document.getElementById('ad-banner-container');
+                if (adBannerContainer) {
+                    // adBannerContainer.style.display = 'none'; // Or add a class to hide it
+                }
+            }
         });

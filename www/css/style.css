@@ -559,3 +559,14 @@ body {
 .ad-placeholder-container::before {
   content: 'Ad Placeholder';
 }
+
+#ad-banner-container {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000; /* Ensure it's on top of other content */
+  /* Optional: Add background color for testing visibility */
+  /* background-color: rgba(255, 0, 0, 0.1); */
+  /* Optional: Add a minimum height if needed, AdMob SDK might handle this */
+  /* min-height: 50px; */
+}
