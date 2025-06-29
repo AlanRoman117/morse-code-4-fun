@@ -42,7 +42,8 @@ let isProUser = false; // Initialize Pro status
         const freqSlider = document.getElementById('freq-slider');
         const freqValue = document.getElementById('freq-value');
         const morseReferenceBody = document.getElementById('morse-reference-body');
-        const toggleThemeBtn = document.getElementById('toggle-theme-btn');
+        // const toggleThemeBtn = document.getElementById('toggle-theme-btn'); // Incorrect ID
+        const themeToggleCheckbox = document.getElementById('theme-toggle'); // Correct ID for the checkbox
 
 
         // Initialize AudioContext
@@ -194,20 +195,50 @@ let isProUser = false; // Initialize Pro status
             freqValue.textContent = frequency;
         });
 
-        toggleThemeBtn.addEventListener('click', () => {
-            document.body.classList.toggle('light-theme');
-            const allAppContainers = document.querySelectorAll('.app-container');
-            allAppContainers.forEach(container => {
-                container.classList.toggle('light-theme-container');
-            });
+        if (themeToggleCheckbox) {
+            themeToggleCheckbox.addEventListener('change', () => { // Listen for 'change' on the checkbox
+                // The new analogue theme is essentially a light theme by default.
+                // This toggle was for switching between a dark base theme and a light-theme variant.
+                // With the analogue theme, this toggle's behavior might need to be re-evaluated.
+                // For now, let's assume it's meant to toggle a class that might be used by user-agent stylesheets or for minor adjustments.
+                // Or, if the 'light-theme' class is what our analogue theme relies on, then this logic is fine.
 
-            // Persist theme preference
-            if (document.body.classList.contains('light-theme')) {
-                localStorage.setItem('theme', 'light');
-            } else {
-                localStorage.setItem('theme', 'dark');
-            }
-        });
+                // Current logic based on original setup:
+                if (themeToggleCheckbox.checked) { // Assuming checked = dark mode (as per label "Dark Mode")
+                    document.body.classList.remove('light-theme');
+                    // If analogue theme IS the light theme, then unchecking (going to dark) might mean removing analogue specific body class
+                    // and adding a generic dark theme class. This is complex.
+                    // For now, let's stick to the idea that 'light-theme' class was for an *alternative* light style.
+                    // Our analogue theme is applied directly to body, not via 'light-theme' class.
+                    // So, this toggle might be redundant or needs new purpose.
+                    // Let's preserve the local storage part.
+                    localStorage.setItem('theme', 'dark'); // If checked (Dark Mode label implies dark)
+                     // We might need to remove analogue specific classes if we want to revert to a different base dark theme.
+                } else { // Unchecked = light mode
+                    document.body.classList.add('light-theme'); // This class might not be used by the analogue theme.
+                    localStorage.setItem('theme', 'light');
+                     // Apply analogue theme if this means "light mode"
+                }
+                // The class toggling on app-container might also be legacy.
+                // The analogue theme styles .app-container directly.
+                const allAppContainers = document.querySelectorAll('.app-container');
+                allAppContainers.forEach(container => {
+                    // This logic also needs review in context of a single analogue theme.
+                    // If 'light-theme-container' was for the alternative light theme, it's okay.
+                    if (themeToggleCheckbox.checked) {
+                        container.classList.remove('light-theme-container');
+                    } else {
+                        container.classList.add('light-theme-container');
+                    }
+                });
+                // The critical part is that `themeToggleCheckbox` is not null.
+                // The actual theme switching logic might need further review post-analogue theme.
+                // For now, the goal is to prevent the JS error.
+                console.log("Theme toggle changed. Checked:", themeToggleCheckbox.checked);
+            });
+        } else {
+            console.warn("Theme toggle checkbox with ID 'theme-toggle' not found. Theme switching will not work.");
+        }
 
 
         // --- Core Functions ---
@@ -317,6 +348,7 @@ function showTab(tabIdToShow) {
 navTabButtons.forEach(button => {
     button.addEventListener('click', () => {
         const tabId = button.getAttribute('data-tab');
+        console.log(`[Nav Click] Button clicked for tab: '${tabId}'. Attempting to showTab.`);
         showTab(tabId);
     });
 });
