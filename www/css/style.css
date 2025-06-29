@@ -171,6 +171,33 @@ button:active, .button:active {
     /* color: #fdfdf5 !important; /* Ensure button text is consistently styled */
 }
 
+/* General Tailwind text color overrides for the new light theme */
+.text-gray-100,
+.text-gray-200,
+.text-gray-300,
+.text-gray-400,
+.text-gray-500 { /* Also include slightly darker grays if they were meant for dark text on light bg */
+    color: #3d3d3d !important; /* Use theme's primary text color */
+}
+/* For any text that was explicitly white for dark mode, make it primary text color */
+.text-white {
+    color: #3d3d3d !important;
+}
+/* However, buttons and other specific components already override text-white for their specific needs (e.g., cream text on brass button) */
+/* So, the .text-white override above should be general. We need to make sure it doesn't break themed components. */
+/* Let's refine: buttons already set their text color. This .text-white should apply to general text content. */
+
+/* Re-evaluating .text-white: many buttons use .text-white. My button CSS already sets text to #fdfdf5.
+   So, a global .text-white override to #3d3d3d might be too broad.
+   Let's remove the global .text-white override and handle specific cases if they arise.
+   The main issue is text-gray-XXX classes on a light background.
+*/
+.text-white {
+    /* Keep this commented for now, rely on component-specific text colors.
+    /* color: #3d3d3d !important; */
+}
+
+
 /* Navigation Tabs */
 nav { /* Assuming nav is the container for tab buttons */
     background-color: transparent !important; /* Overriding Tailwind's bg-gray-800 for the main nav bar */
@@ -261,38 +288,38 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
         /* Remove or comment out the old .tapper styles */
         /*
         .tapper {
-            width: 120px;
-            height: 120px;
+            width: 120px; 
+            height: 120px; 
             border-radius: 50%;
-            background-color: #4a5568;
-            border: 4px solid #2d3748;
+            background-color: #4a5568; 
+            border: 4px solid #2d3748; 
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1.25rem; 
             font-weight: bold;
-            color: #e2e8f0;
+            color: #e2e8f0; 
             cursor: pointer;
-            touch-action: manipulation;
+            touch-action: manipulation; 
             -webkit-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-touch-callout: none; 
             transition: all 0.1s ease-out;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            flex-shrink: 0;
+            flex-shrink: 0; 
         }
-        @media (min-width: 768px) {
+        @media (min-width: 768px) { 
             .tapper {
                 width: 150px;
                 height: 150px;
-                font-size: 1.5rem;
+                font-size: 1.5rem; 
             }
         }
         .tapper:active, .tapper.active {
-            background-color: #f6e05e;
-            color: #1a202c;
+            background-color: #f6e05e; 
+            color: #1a202c; 
             transform: scale(0.95);
             box-shadow: 0 0 20px #f6e05e, 0 0 30px #f6e05e;
         }
@@ -320,7 +347,7 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
             background-color: #8B4513; /* SaddleBrown for wood */
             border: 2px solid #5a2d0c; /* Darker brown for border/shadow */
             border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.2);
+    /* box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.2); */
             position: absolute;
             bottom: 0;
             z-index: 1;
@@ -329,10 +356,11 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
         .tapper-lever {
             width: 20px; /* Width of the lever arm */
             height: 75px; /* Height of the lever arm, extends above base */
-            background: linear-gradient(to right, #a98d6a, #8b7355); /* Brass gradient */
+    /* background: linear-gradient(to right, #a98d6a, #8b7355); */ /* Brass gradient */
+    background-color: #a98d6a; /* Fallback solid brass color */
             border: 1px solid #6b5335; /* Darker brass outline */
             border-radius: 3px 3px 0 0; /* Rounded top */
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+    /* box-shadow: 0 -2px 5px rgba(0,0,0,0.2); */
             position: absolute;
             bottom: 25px; /* Sits slightly into the base */
             left: 50%;
@@ -350,7 +378,7 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
             background-color: #a98d6a; /* Brass color */
             border: 2px solid #8b7355; /* Darker brass */
             border-radius: 50%; /* Circular key */
-            box-shadow: inset 0 -2px 3px rgba(0,0,0,0.3), 0 2px 3px rgba(0,0,0,0.2);
+    /* box-shadow: inset 0 -2px 3px rgba(0,0,0,0.3), 0 2px 3px rgba(0,0,0,0.2); */
             margin-top: 5px; /* Positioned at the top of the lever */
             display: flex;
             align-items: center;
@@ -702,7 +730,7 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
         box-shadow: 5px 5px 10px rgba(0,0,0,0.3), inset 3px 0 5px rgba(0,0,0,0.1); /* Outer shadow and subtle spine shadow */
         border: 1px solid #8b7355; /* Aged brass/darker wood edge */
         color: #3d3d3d; /* Dark sepia text */
-        font-size: 0.9rem;
+        font-size: 0.9rem; 
         font-weight: normal; /* Merriweather will provide the classic feel */
         text-align: center;
         cursor: pointer;
@@ -768,12 +796,12 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
 
     .deciphered-char { /* For text already deciphered in the full Morse display */
        color: #5d4037; /* Darker, rich brown, like ink on old paper */
-       font-weight: bold;
+       font-weight: bold; 
        /* background-color: rgba(240, 234, 222, 0.5); /* Slight parchment highlight */
        /* padding: 0 2px; */
        /* border-radius: 2px; */
     }
-
+    
     /* Styling for locked pro books */
     .book-cover-item.opacity-50 { /* Tailwind class used for locked books */
         background-color: #e0e0e0; /* Lighter gray for locked */
@@ -794,7 +822,7 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
     /* Settings Page Toggles */
 
     /* General styling for toggle switch containers if needed */
-    .setting-item .switch,
+    .setting-item .switch, 
     #master-sound-toggle + div { /* Direct selector for the visual part of master sound toggle */
         /* Reset some defaults if they interfere */
     }
@@ -812,7 +840,7 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
         cursor: pointer;
     }
 
-    .switch input {
+    .switch input { 
       opacity: 0;
       width: 0;
       height: 0;
@@ -834,17 +862,17 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
 
     /* Remove ::before for the old circular knob if it was part of .slider */
     .slider:before {
-      content: none;
+      content: none; 
     }
 
     input:checked + .slider {
       transform: translateX(34px); /* Move lever to the other side */
       background-color: #b99d7a; /* Slightly lighter brass when 'on' */
     }
-
+    
     /* Removing focus style, or can adapt to new theme */
     input:focus + .slider {
-      box-shadow: 0 0 2px #8b7355;
+      box-shadow: 0 0 2px #8b7355; 
     }
 
     /* Remove .slider.round styles as we are not using a round slider */
