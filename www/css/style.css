@@ -327,12 +327,126 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
 
         /* New Telegraph Tapper Styles */
         .tapper-assembly {
-            position: relative;
-            width: 150px; /* Overall width of the tapper assembly */
-            height: 100px; /* Overall height */
+            display: block !important; /* Override flex for now */
+            width: 150px !important;
+            height: 150px !important; /* Increased height to ensure children fit if static */
+            background-color: red !important; /* Highly visible */
+            border: 2px solid orange !important;
+            z-index: 9999 !important;
+            padding: 5px !important; 
+            overflow: visible !important; /* Ensure children aren't clipped */
+            position: relative; /* Keep relative for children if they were to use absolute, but for static children it's less critical */
+            /* cursor: pointer; */ /* Commented out for debugging */
+            /* -webkit-user-select: none; */
+            /* -ms-user-select: none; */
+            /* user-select: none; */
+            /* -webkit-tap-highlight-color: transparent; */
+            /* touch-action: manipulation; */
+        }
+
+        .tapper-base {
+            display: block !important;
+            width: 100px !important; /* Fixed size */
+            height: 20px !important; /* Fixed size */
+            background-color: blue !important; /* Highly visible */
+            position: static !important; /* Override absolute to simplify layout initially */
+            z-index: 10000 !important; 
+            border: 1px solid lightblue !important;
+            margin-bottom: 5px !important;
+            /* Original styles commented out for debug:
+            width: 100%; 
+            height: 30px; 
+            background-color: #8B4513; 
+            border: 2px solid #5a2d0c; 
+            border-radius: 5px;
+            position: absolute;
+            bottom: 0;
+            z-index: 1;
+            */
+        }
+
+        .tapper-lever {
+            display: block !important;
+            width: 80px !important; /* Fixed size */
+            height: 50px !important; /* Fixed size */
+            background-color: green !important; /* Highly visible */
+            position: static !important; /* Override absolute */
+            margin-top: 5px !important;
+            margin-bottom: 5px !important;
+            z-index: 10001 !important;
+            border: 1px solid lightgreen !important;
+            /* Original styles commented out for debug:
+            width: 20px; 
+            height: 75px; 
+            background-color: #a98d6a; 
+            border: 1px solid #6b5335; 
+            border-radius: 3px 3px 0 0; 
+            position: absolute;
+            bottom: 25px; 
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start; 
+            z-index: 2;
+            transition: transform 0.1s ease-out;
+            */
+        }
+
+        .tapper-key-surface {
+            display: block !important;
+            width: 40px !important; /* Fixed size */
+            height: 40px !important; /* Fixed size */
+            background-color: purple !important; /* Highly visible */
+            margin-top: 5px !important;
+            z-index: 10002 !important;
+            border: 1px solid lavender !important;
+            color: white !important; /* Ensure text is visible */
+            text-align: center !important;
+            font-size: 10px !important;
+            line-height: 40px !important; /* Vertically center text if possible */
+            /* Original styles commented out for debug:
+            width: 40px; 
+            height: 40px; 
+            background-color: #a98d6a; 
+            border: 2px solid #8b7355; 
+            border-radius: 50%; 
+            margin-top: 5px; 
+            display: flex;
             align-items: center;
+            justify-content: center;
+            color: #fdfdf5;
+            font-family: 'Special Elite', monospace;
+            font-size: 10px; 
+            */
+        }
+        .tapper-key-surface::before {
+            content: "KEY" !important; 
+            color: white !important;
+            /* Original styles commented out for debug:
+            content: "TAP"; 
+            color: #6b5335; 
+            */
+        }
+
+
+        /* Active state for the new tapper - temporarily disable complex transforms */
+        .tapper-assembly.active .tapper-lever {
+            /* transform: translateX(-50%) translateY(3px) rotateX(5deg); */
+            /* box-shadow: 0 -1px 3px rgba(0,0,0,0.2); */
+            background-color: darkgreen !important; /* Simple active state */
+        }
+        .tapper-assembly.active .tapper-key-surface {
+            /* box-shadow: inset 0 -1px 2px rgba(0,0,0,0.4), 0 1px 1px rgba(0,0,0,0.1); */
+            /* transform: translateY(1px); */
+            background-color: darkmagenta !important; /* Simple active state */
+        }
+
+
+        #spaceButton {
+        .tapper {
+            width: 120px; /* Mobile first size */
+            height: 120px; /* Mobile first size */
             cursor: pointer;
             -webkit-user-select: none;
             -ms-user-select: none;
@@ -1014,8 +1128,8 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
 
         .char-badge {
             /* Tailwind classes: bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 */
-            background-color: #4A5568; /* bg-gray-600 */
-            color: #E2E8F0; /* text-gray-200 */
+            background-color: #6b5335; /* Darker Brass/Brown for default badges */
+            color: #f0eade; /* Parchment text */
             font-size: 0.75rem; /* text-xs */
             font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* font-mono */
             border-radius: 0.375rem; /* rounded-md */
@@ -1030,8 +1144,10 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
         }
 
         .char-badge.exact-match-highlight {
-            background-color: #FBBF24; /* Corresponds to Tailwind's yellow-400 */
-            color: #000000;       /* Corresponds to Tailwind's black */
+            background-color: #b99d7a !important; /* Lighter Brass (from button hover) */
+            color: #fdfdf5 !important;       /* Cream text */
+            border: 1px solid #8b7355 !important; /* Aged brass border for definition */
+            box-shadow: 0 0 5px #b99d7a !important; /* Subtle glow */
         }
 
 @media (min-width: 768px) { /* This is Tailwind's 'md' breakpoint */
