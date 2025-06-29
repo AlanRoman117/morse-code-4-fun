@@ -980,62 +980,105 @@ if (typeof attachTapperToArea === 'function') {
 
     function displayUnlockedBookText(bookId) {
         const bookData = bookCipherBooks[bookId]; // Assumes bookCipherBooks is accessible
-        if (!bookData || !bookData.filePath) {
-            console.error("displayUnlockedBookText: Invalid bookId or missing filePath", bookId);
+        if (!bookData) {
+            console.error("displayUnlockedBookText: Invalid bookId or book data not found", bookId);
             alert("Could not load book text. Data is missing.");
             return;
         }
 
-        fetch(bookData.filePath)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
+        // Use english_markdown directly if available
+        if (bookData.english_markdown) {
+            const markdownText = bookData.english_markdown;
+            let htmlContent = "";
+            if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+                htmlContent = marked.parse(markdownText);
+            } else {
+                console.error("marked.parse function not found. Displaying raw Markdown.");
+                // Fallback: Display raw markdown with <pre> for basic formatting
+                htmlContent = `<pre>${markdownText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+            }
+
+
+            const modal = document.getElementById('unlocked-text-modal');
+            const modalTitle = document.getElementById('unlocked-text-modal-title');
+            const modalContentElement = document.getElementById('unlocked-text-modal-content'); // Renamed for clarity
+            const closeModalBtn = document.getElementById('close-unlocked-text-modal-btn');
+
+            if (modal && modalTitle && modalContentElement && closeModalBtn) {
+                modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
+                modalContentElement.innerHTML = htmlContent; // Set innerHTML with parsed Markdown
+                modal.classList.remove('hidden');
+
+                // Ensure close button listener is attached only once
+                if (!closeModalBtn.dataset.listenerAttached) {
+                    closeModalBtn.addEventListener('click', () => {
+                        modal.classList.add('hidden');
+                    });
+                    closeModalBtn.dataset.listenerAttached = 'true';
                 }
-                return response.text();
-            })
-            .then(morseContent => {
-                morseContent = morseContent.trim();
-                if (morseContent.length === 0) {
-                    alert("This book appears to be empty.");
-                    return;
-                }
-
-                // Convert Morse to English text
-                // reversedMorseCode needs to be accessible here.
-                // If reversedMorseCode is defined globally (e.g. in morseCode.js and included in HTML), this is fine.
-                // Otherwise, it needs to be passed or defined within this scope.
-                // For now, assuming reversedMorseCode is globally available as per typical structure.
-                let fullEnglishText = morseContent.split('/')
-                                          .map(morseWord => {
-                                              return morseWord.trim().split(' ')
-                                                            .map(morseChar => reversedMorseCode[morseChar] || '')
-                                                            .join('');
-                                          }).join(' ');
-
-                const modal = document.getElementById('unlocked-text-modal');
-                const modalTitle = document.getElementById('unlocked-text-modal-title');
-                const modalContent = document.getElementById('unlocked-text-modal-content');
-                const closeModalBtn = document.getElementById('close-unlocked-text-modal-btn');
-
-                if (modal && modalTitle && modalContent && closeModalBtn) {
-                    modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
-                    modalContent.textContent = fullEnglishText.length > 0 ? fullEnglishText : "No text could be deciphered (book might be empty or in an unrecognized format).";
-                    modal.classList.remove('hidden');
-
-                    if (!closeModalBtn.dataset.listenerAttached) {
-                        closeModalBtn.addEventListener('click', () => {
-                            modal.classList.add('hidden');
-                        });
-                        closeModalBtn.dataset.listenerAttached = 'true';
+            } else {
+                console.error("Modal elements not found for displaying unlocked text.");
+                alert("Error: Could not display the unlocked text. UI elements missing.");
+            }
+        } else if (bookData.filePath) { // Fallback to old method if english_markdown is not present
+            console.warn(`displayUnlockedBookText: 'english_markdown' not found for bookId ${bookId}. Falling back to filePath.`);
+            fetch(bookData.filePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
                     }
-                } else {
-                    console.error("Modal elements not found for displaying unlocked text.");
-                    alert("Error: Could not display the unlocked text. UI elements missing.");
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching or processing book content for displayUnlockedBookText:', error);
-                alert(`Error loading book text: ${error.message}`);
-            });
+                    return response.text();
+                })
+                .then(morseContent => {
+                    morseContent = morseContent.trim();
+                    if (morseContent.length === 0) {
+                        alert("This book appears to be empty.");
+                        return;
+                    }
+
+                    let fullEnglishText = "";
+                    if (typeof reversedMorseCode !== 'undefined') {
+                        fullEnglishText = morseContent.split('/')
+                            .map(morseWord => {
+                                return morseWord.trim().split(' ')
+                                    .map(morseChar => reversedMorseCode[morseChar] || '')
+                                    .join('');
+                            }).join(' ');
+                    } else {
+                        console.error("reversedMorseCode is not defined. Cannot translate Morse to English.");
+                        fullEnglishText = "Error: Morse translation library not available.";
+                    }
+
+
+                    const modal = document.getElementById('unlocked-text-modal');
+                    const modalTitle = document.getElementById('unlocked-text-modal-title');
+                    const modalContent = document.getElementById('unlocked-text-modal-content');
+                    const closeModalBtn = document.getElementById('close-unlocked-text-modal-btn');
+
+                    if (modal && modalTitle && modalContent && closeModalBtn) {
+                        modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
+                        // Display as plain text, as it's a fallback from Morse
+                        modalContent.textContent = fullEnglishText.length > 0 ? fullEnglishText : "No text could be deciphered (book might be empty or in an unrecognized format).";
+                        modal.classList.remove('hidden');
+
+                        if (!closeModalBtn.dataset.listenerAttached) {
+                            closeModalBtn.addEventListener('click', () => {
+                                modal.classList.add('hidden');
+                            });
+                            closeModalBtn.dataset.listenerAttached = 'true';
+                        }
+                    } else {
+                        console.error("Modal elements not found for displaying unlocked text (fallback path).");
+                        alert("Error: Could not display the unlocked text. UI elements missing (fallback path).");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching or processing book content for displayUnlockedBookText (fallback path):', error);
+                    alert(`Error loading book text (fallback path): ${error.message}`);
+                });
+        } else {
+            console.error("displayUnlockedBookText: No 'english_markdown' or 'filePath' found for bookId", bookId);
+            alert("Could not load book text. Data is incomplete.");
+        }
     }
 });
