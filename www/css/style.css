@@ -970,17 +970,21 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
     }
 
     .shake-red {
-        animation: shake 0.5s ease-in-out;
-        background-color: #fca5a5; /* Tailwind red-300 */
-        border-color: #ef4444 !important; /* Tailwind red-500, !important to override focus styles if needed */
-        color: #7f1d1d; /* Tailwind red-900 for text */
+        animation: shake 0.5s ease-in-out !important;
+        background-color: #fca5a5 !important; /* Tailwind red-300 */
+        border-color: #ef4444 !important; /* Tailwind red-500 */
+        color: #7f1d1d !important; /* Tailwind red-900 for text */
+        /* Ensure other properties like box-shadow from the theme are temporarily reset if they interfere */
+        box-shadow: none !important; 
     }
 
     .glow-green {
-        animation: glow-green 0.8s ease-out;
-        background-color: #86efac; /* Tailwind green-300 */
-        border-color: #22c55e !important; /* Tailwind green-500, !important to override focus styles */
-        color: #14532d; /* Tailwind green-900 for text */
+        animation: glow-green 0.8s ease-out !important;
+        background-color: #86efac !important; /* Tailwind green-300 */
+        border-color: #22c55e !important; /* Tailwind green-500 */
+        color: #14532d !important; /* Tailwind green-900 for text */
+        /* Ensure other properties like box-shadow from the theme are temporarily reset if they interfere */
+        box-shadow: 0 0 15px 5px rgba(74, 222, 128, 1) !important; /* Explicitly apply the glow shadow from keyframes */
     }
 
         #predictive-taps-display {
@@ -1034,6 +1038,26 @@ nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-butt
   #morse-reference-container.hidden {
     display: block !important; /* Force the table to be visible on desktop */
   }
+  
+  /* === DEBUGGING RULE START === */
+  #morse-reference-container {
+    display: block !important;
+    border: 3px solid red !important;
+    padding: 10px !important;
+    background-color: lightyellow !important;
+  }
+  #morse-reference-container .reference-table {
+    display: table !important; /* Ensure table itself is displayed */
+    width: 100% !important;
+    border: 2px solid blue !important;
+  }
+  #morse-reference-container .reference-table th,
+  #morse-reference-container .reference-table td {
+    visibility: visible !important;
+    border: 1px solid green !important; /* Make cells visible */
+    color: black !important; /* Ensure text is visible */
+  }
+  /* === DEBUGGING RULE END === */
 
   #toggle-reference-btn {
     display: none !important; /* Ensure the toggle button is hidden on desktop */
