@@ -187,9 +187,12 @@ class MessagesViewController: MSMessagesAppViewController {
 
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: totalWidth, height: desiredHeight))
         let image = renderer.image { context in
-            // Use a color that is visible in both light and dark mode message bubbles.
-            // UIColor.label dynamically adapts.
-            UIColor.label.setFill()
+            // Use the new theme's primary text color for the Morse image
+            // Need to convert SwiftUI Color to UIColor.
+            // Theme.textPrimary is Color(hex: "#3d3d3d")
+            // Approx RGB: (0.239, 0.239, 0.239)
+            let morseImageColor = UIColor(red: 0.239, green: 0.239, blue: 0.239, alpha: 1.0)
+            morseImageColor.setFill()
 
             for operation in drawingOperations {
                 let rect = operation.0
