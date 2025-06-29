@@ -42,7 +42,8 @@ let isProUser = false; // Initialize Pro status
         const freqSlider = document.getElementById('freq-slider');
         const freqValue = document.getElementById('freq-value');
         const morseReferenceBody = document.getElementById('morse-reference-body');
-        const toggleThemeBtn = document.getElementById('toggle-theme-btn');
+        // const toggleThemeBtn = document.getElementById('toggle-theme-btn'); // Incorrect ID
+        const themeToggleCheckbox = document.getElementById('theme-toggle'); // Correct ID for the checkbox
 
 
         // Initialize AudioContext
@@ -194,20 +195,50 @@ let isProUser = false; // Initialize Pro status
             freqValue.textContent = frequency;
         });
 
-        toggleThemeBtn.addEventListener('click', () => {
-            document.body.classList.toggle('light-theme');
-            const allAppContainers = document.querySelectorAll('.app-container');
-            allAppContainers.forEach(container => {
-                container.classList.toggle('light-theme-container');
-            });
+        if (themeToggleCheckbox) {
+            themeToggleCheckbox.addEventListener('change', () => { // Listen for 'change' on the checkbox
+                // The new analogue theme is essentially a light theme by default.
+                // This toggle was for switching between a dark base theme and a light-theme variant.
+                // With the analogue theme, this toggle's behavior might need to be re-evaluated.
+                // For now, let's assume it's meant to toggle a class that might be used by user-agent stylesheets or for minor adjustments.
+                // Or, if the 'light-theme' class is what our analogue theme relies on, then this logic is fine.
 
-            // Persist theme preference
-            if (document.body.classList.contains('light-theme')) {
-                localStorage.setItem('theme', 'light');
-            } else {
-                localStorage.setItem('theme', 'dark');
-            }
-        });
+                // Current logic based on original setup:
+                if (themeToggleCheckbox.checked) { // Assuming checked = dark mode (as per label "Dark Mode")
+                    document.body.classList.remove('light-theme');
+                    // If analogue theme IS the light theme, then unchecking (going to dark) might mean removing analogue specific body class
+                    // and adding a generic dark theme class. This is complex.
+                    // For now, let's stick to the idea that 'light-theme' class was for an *alternative* light style.
+                    // Our analogue theme is applied directly to body, not via 'light-theme' class.
+                    // So, this toggle might be redundant or needs new purpose.
+                    // Let's preserve the local storage part.
+                    localStorage.setItem('theme', 'dark'); // If checked (Dark Mode label implies dark)
+                     // We might need to remove analogue specific classes if we want to revert to a different base dark theme.
+                } else { // Unchecked = light mode
+                    document.body.classList.add('light-theme'); // This class might not be used by the analogue theme.
+                    localStorage.setItem('theme', 'light');
+                     // Apply analogue theme if this means "light mode"
+                }
+                // The class toggling on app-container might also be legacy.
+                // The analogue theme styles .app-container directly.
+                const allAppContainers = document.querySelectorAll('.app-container');
+                allAppContainers.forEach(container => {
+                    // This logic also needs review in context of a single analogue theme.
+                    // If 'light-theme-container' was for the alternative light theme, it's okay.
+                    if (themeToggleCheckbox.checked) {
+                        container.classList.remove('light-theme-container');
+                    } else {
+                        container.classList.add('light-theme-container');
+                    }
+                });
+                // The critical part is that `themeToggleCheckbox` is not null.
+                // The actual theme switching logic might need further review post-analogue theme.
+                // For now, the goal is to prevent the JS error.
+                console.log("Theme toggle changed. Checked:", themeToggleCheckbox.checked);
+            });
+        } else {
+            console.warn("Theme toggle checkbox with ID 'theme-toggle' not found. Theme switching will not work.");
+        }
 
 
         // --- Core Functions ---
@@ -219,49 +250,56 @@ const sharedVisualTapperWrapper = document.getElementById('sharedVisualTapperWra
 const hiddenTapperStorage = document.getElementById('hiddenTapperStorage');
 
 function attachTapperToArea(targetAreaId) {
-    console.log("[attachTapperToArea] Received targetAreaId:", targetAreaId); // New log
-
+    console.log(`[Attach Tapper] Attempting for targetAreaId: '${targetAreaId}'`);
     const targetElement = document.getElementById(targetAreaId);
-    console.log("[attachTapperToArea] Found targetElement:", targetElement); // New log
 
-    if (sharedVisualTapperWrapper && targetElement) {
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.style.display (before):", sharedVisualTapperWrapper.style.display); // New log
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.parentNode (before):", sharedVisualTapperWrapper.parentNode); // New log
-
-        targetElement.appendChild(sharedVisualTapperWrapper);
-        sharedVisualTapperWrapper.style.display = 'block'; // Or 'flex' if its internal layout needs it
-
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.style.display (after):", sharedVisualTapperWrapper.style.display); // New log
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.parentNode (after):", sharedVisualTapperWrapper.parentNode); // New log
-        console.log(`[attachTapperToArea] Tapper attached to ${targetAreaId}`); // Existing log, ensure it's still there
-    } else {
-        console.error(`[attachTapperToArea] Failed to attach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper ? 'exists' : 'null/undefined'}) or targetElement (${targetElement ? 'exists' : 'null/undefined'} for ID ${targetAreaId}) not found.`); // Enhanced log
+    if (!sharedVisualTapperWrapper) {
+        console.error("[Attach Tapper] CRITICAL: sharedVisualTapperWrapper element is null or undefined.");
+        return;
     }
+    if (!targetElement) {
+        console.error(`[Attach Tapper] Target area element with ID '${targetAreaId}' NOT FOUND.`);
+        return;
+    }
+
+    console.log(`[Attach Tapper] Before attach - Target: ${targetElement.id}, Tapper parent: ${sharedVisualTapperWrapper.parentNode ? sharedVisualTapperWrapper.parentNode.id : 'null'}, Tapper display: ${sharedVisualTapperWrapper.style.display}`);
+
+    targetElement.appendChild(sharedVisualTapperWrapper);
+    sharedVisualTapperWrapper.style.display = 'block'; // Or 'flex' if its internal layout needs it
+
+    console.log(`[Attach Tapper] After attach - Target: ${targetElement.id}, Tapper parent: ${sharedVisualTapperWrapper.parentNode ? sharedVisualTapperWrapper.parentNode.id : 'null'}, Tapper display: ${sharedVisualTapperWrapper.style.display}`);
 }
 
 function detachSharedTapper() {
-    // Call resetVisualTapperState if it's available
+    console.log("[Detach Tapper] Called.");
     if (typeof resetVisualTapperState === 'function') {
+        console.log("[Detach Tapper] Calling resetVisualTapperState.");
         resetVisualTapperState();
     } else {
-        console.warn("detachSharedTapper: resetVisualTapperState function not found. Tapper state may not be fully reset.");
+        console.warn("[Detach Tapper] resetVisualTapperState function not found.");
     }
 
-    if (sharedVisualTapperWrapper && hiddenTapperStorage) {
-        // Ensure the tapper is moved to hidden storage if it's not already there.
-        if (sharedVisualTapperWrapper.parentNode !== hiddenTapperStorage) {
-            hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
-        }
-        // Always hide it when detaching.
-        sharedVisualTapperWrapper.style.display = 'none';
-        console.log("Tapper detached and hidden. State reset attempted.");
-    } else {
-         console.error(`Failed to detach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper}) or hiddenTapperStorage (${hiddenTapperStorage}) not found. State reset was attempted if function was available.`);
+    if (!sharedVisualTapperWrapper) {
+        console.error("[Detach Tapper] CRITICAL: sharedVisualTapperWrapper element is null or undefined. Cannot detach.");
+        return;
     }
+    if (!hiddenTapperStorage) {
+        console.error("[Detach Tapper] CRITICAL: hiddenTapperStorage element is null or undefined. Cannot detach.");
+        return;
+    }
+
+    console.log(`[Detach Tapper] Before detach - Tapper parent: ${sharedVisualTapperWrapper.parentNode ? sharedVisualTapperWrapper.parentNode.id : 'null'}, Tapper display: ${sharedVisualTapperWrapper.style.display}`);
+
+    if (sharedVisualTapperWrapper.parentNode !== hiddenTapperStorage) {
+        hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
+    }
+    sharedVisualTapperWrapper.style.display = 'none';
+    console.log(`[Detach Tapper] After detach - Tapper parent: ${sharedVisualTapperWrapper.parentNode ? sharedVisualTapperWrapper.parentNode.id : 'null'}, Tapper display: ${sharedVisualTapperWrapper.style.display}`);
 }
 
 
 function showTab(tabIdToShow) {
+    console.log(`[Show Tab] Called for tabId: '${tabIdToShow}'`);
     // Detach tapper from any previous tab BEFORE hiding all tabs
     detachSharedTapper();
 
@@ -271,8 +309,10 @@ function showTab(tabIdToShow) {
 
     navTabButtons.forEach(button => {
         button.classList.remove('active-tab-button');
-        button.classList.add('bg-gray-700', 'text-gray-300');
-        button.classList.remove('bg-blue-600', 'text-white');
+        // JS will no longer try to manage Tailwind color classes for active/inactive states.
+        // CSS will handle this based on the presence of 'active-tab-button'.
+        // button.classList.add('bg-gray-700', 'text-gray-300'); // Keep if these are base styles for all nav buttons
+        // button.classList.remove('bg-blue-600', 'text-white');
     });
 
     const selectedTabContent = document.getElementById(tabIdToShow);
@@ -283,8 +323,10 @@ function showTab(tabIdToShow) {
     const selectedNavButton = document.querySelector(`nav button[data-tab='${tabIdToShow}']`);
     if (selectedNavButton) {
         selectedNavButton.classList.add('active-tab-button');
-        selectedNavButton.classList.remove('bg-gray-700', 'text-gray-300');
-        selectedNavButton.classList.add('bg-blue-600', 'text-white');
+        // JS will no longer try to manage Tailwind color classes for active/inactive states.
+        // CSS will handle this based on the presence of 'active-tab-button'.
+        // selectedNavButton.classList.remove('bg-gray-700', 'text-gray-300');
+        // selectedNavButton.classList.add('bg-blue-600', 'text-white');
     }
 
     // If switching to the Learn & Practice tab, start a new challenge.
@@ -306,6 +348,7 @@ function showTab(tabIdToShow) {
 navTabButtons.forEach(button => {
     button.addEventListener('click', () => {
         const tabId = button.getAttribute('data-tab');
+        console.log(`[Nav Click] Button clicked for tab: '${tabId}'. Attempting to showTab.`);
         showTab(tabId);
     });
 });
