@@ -219,49 +219,56 @@ const sharedVisualTapperWrapper = document.getElementById('sharedVisualTapperWra
 const hiddenTapperStorage = document.getElementById('hiddenTapperStorage');
 
 function attachTapperToArea(targetAreaId) {
-    console.log("[attachTapperToArea] Received targetAreaId:", targetAreaId); // New log
-
+    console.log(`[Attach Tapper] Attempting for targetAreaId: '${targetAreaId}'`);
     const targetElement = document.getElementById(targetAreaId);
-    console.log("[attachTapperToArea] Found targetElement:", targetElement); // New log
 
-    if (sharedVisualTapperWrapper && targetElement) {
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.style.display (before):", sharedVisualTapperWrapper.style.display); // New log
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.parentNode (before):", sharedVisualTapperWrapper.parentNode); // New log
-
-        targetElement.appendChild(sharedVisualTapperWrapper);
-        sharedVisualTapperWrapper.style.display = 'block'; // Or 'flex' if its internal layout needs it
-
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.style.display (after):", sharedVisualTapperWrapper.style.display); // New log
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.parentNode (after):", sharedVisualTapperWrapper.parentNode); // New log
-        console.log(`[attachTapperToArea] Tapper attached to ${targetAreaId}`); // Existing log, ensure it's still there
-    } else {
-        console.error(`[attachTapperToArea] Failed to attach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper ? 'exists' : 'null/undefined'}) or targetElement (${targetElement ? 'exists' : 'null/undefined'} for ID ${targetAreaId}) not found.`); // Enhanced log
+    if (!sharedVisualTapperWrapper) {
+        console.error("[Attach Tapper] CRITICAL: sharedVisualTapperWrapper element is null or undefined.");
+        return;
     }
+    if (!targetElement) {
+        console.error(`[Attach Tapper] Target area element with ID '${targetAreaId}' NOT FOUND.`);
+        return;
+    }
+
+    console.log(`[Attach Tapper] Before attach - Target: ${targetElement.id}, Tapper parent: ${sharedVisualTapperWrapper.parentNode ? sharedVisualTapperWrapper.parentNode.id : 'null'}, Tapper display: ${sharedVisualTapperWrapper.style.display}`);
+
+    targetElement.appendChild(sharedVisualTapperWrapper);
+    sharedVisualTapperWrapper.style.display = 'block'; // Or 'flex' if its internal layout needs it
+
+    console.log(`[Attach Tapper] After attach - Target: ${targetElement.id}, Tapper parent: ${sharedVisualTapperWrapper.parentNode ? sharedVisualTapperWrapper.parentNode.id : 'null'}, Tapper display: ${sharedVisualTapperWrapper.style.display}`);
 }
 
 function detachSharedTapper() {
-    // Call resetVisualTapperState if it's available
+    console.log("[Detach Tapper] Called.");
     if (typeof resetVisualTapperState === 'function') {
+        console.log("[Detach Tapper] Calling resetVisualTapperState.");
         resetVisualTapperState();
     } else {
-        console.warn("detachSharedTapper: resetVisualTapperState function not found. Tapper state may not be fully reset.");
+        console.warn("[Detach Tapper] resetVisualTapperState function not found.");
     }
 
-    if (sharedVisualTapperWrapper && hiddenTapperStorage) {
-        // Ensure the tapper is moved to hidden storage if it's not already there.
-        if (sharedVisualTapperWrapper.parentNode !== hiddenTapperStorage) {
-            hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
-        }
-        // Always hide it when detaching.
-        sharedVisualTapperWrapper.style.display = 'none';
-        console.log("Tapper detached and hidden. State reset attempted.");
-    } else {
-         console.error(`Failed to detach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper}) or hiddenTapperStorage (${hiddenTapperStorage}) not found. State reset was attempted if function was available.`);
+    if (!sharedVisualTapperWrapper) {
+        console.error("[Detach Tapper] CRITICAL: sharedVisualTapperWrapper element is null or undefined. Cannot detach.");
+        return;
     }
+    if (!hiddenTapperStorage) {
+        console.error("[Detach Tapper] CRITICAL: hiddenTapperStorage element is null or undefined. Cannot detach.");
+        return;
+    }
+
+    console.log(`[Detach Tapper] Before detach - Tapper parent: ${sharedVisualTapperWrapper.parentNode ? sharedVisualTapperWrapper.parentNode.id : 'null'}, Tapper display: ${sharedVisualTapperWrapper.style.display}`);
+
+    if (sharedVisualTapperWrapper.parentNode !== hiddenTapperStorage) {
+        hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
+    }
+    sharedVisualTapperWrapper.style.display = 'none';
+    console.log(`[Detach Tapper] After detach - Tapper parent: ${sharedVisualTapperWrapper.parentNode ? sharedVisualTapperWrapper.parentNode.id : 'null'}, Tapper display: ${sharedVisualTapperWrapper.style.display}`);
 }
 
 
 function showTab(tabIdToShow) {
+    console.log(`[Show Tab] Called for tabId: '${tabIdToShow}'`);
     // Detach tapper from any previous tab BEFORE hiding all tabs
     detachSharedTapper();
 
@@ -271,8 +278,10 @@ function showTab(tabIdToShow) {
 
     navTabButtons.forEach(button => {
         button.classList.remove('active-tab-button');
-        button.classList.add('bg-gray-700', 'text-gray-300');
-        button.classList.remove('bg-blue-600', 'text-white');
+        // JS will no longer try to manage Tailwind color classes for active/inactive states.
+        // CSS will handle this based on the presence of 'active-tab-button'.
+        // button.classList.add('bg-gray-700', 'text-gray-300'); // Keep if these are base styles for all nav buttons
+        // button.classList.remove('bg-blue-600', 'text-white');
     });
 
     const selectedTabContent = document.getElementById(tabIdToShow);
@@ -283,8 +292,10 @@ function showTab(tabIdToShow) {
     const selectedNavButton = document.querySelector(`nav button[data-tab='${tabIdToShow}']`);
     if (selectedNavButton) {
         selectedNavButton.classList.add('active-tab-button');
-        selectedNavButton.classList.remove('bg-gray-700', 'text-gray-300');
-        selectedNavButton.classList.add('bg-blue-600', 'text-white');
+        // JS will no longer try to manage Tailwind color classes for active/inactive states.
+        // CSS will handle this based on the presence of 'active-tab-button'.
+        // selectedNavButton.classList.remove('bg-gray-700', 'text-gray-300');
+        // selectedNavButton.classList.add('bg-blue-600', 'text-white');
     }
 
     // If switching to the Learn & Practice tab, start a new challenge.
