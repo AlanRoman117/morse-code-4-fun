@@ -151,4 +151,63 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSettingsUI(newValue);
         });
     }
+
+    // Theme Toggle Logic
+    const themeToggle = document.getElementById('theme-toggle');
+
+    function applyThemePreference(theme) {
+        if (!themeToggle) return; // Should not happen if check below is done
+
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.body.classList.remove('light-mode');
+            themeToggle.checked = true;
+        } else if (theme === 'light') {
+            document.body.classList.add('light-mode');
+            document.body.classList.remove('dark-mode');
+            themeToggle.checked = false;
+        } else { // No theme preference passed, check system and update toggle
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                themeToggle.checked = true;
+                // On initial load without preference, CSS media query handles body class if no .light-mode or .dark-mode is set.
+                // However, if JS runs and there's no stored theme, we might want to explicitly set .dark-mode
+                // to ensure consistency if the media query logic in CSS is complex or has specificities.
+                // For now, let's assume CSS :root:not(.light-mode):not(.dark-mode) under prefers-color-scheme:dark is sufficient.
+                // Or, to be more explicit:
+                // document.body.classList.add('dark-mode');
+                // document.body.classList.remove('light-mode');
+            } else {
+                themeToggle.checked = false;
+                // document.body.classList.add('light-mode');
+                // document.body.classList.remove('dark-mode');
+            }
+        }
+    }
+
+    if (themeToggle) {
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme) {
+            applyThemePreference(storedTheme);
+        } else {
+            applyThemePreference(); // Set toggle based on system, CSS applies theme initially
+            // If after checking system, we want to be explicit:
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.body.classList.contains('light-mode')) {
+                 document.body.classList.add('dark-mode'); // Explicitly add if system is dark and no manual override
+            } else if (!document.body.classList.contains('dark-mode')) {
+                 document.body.classList.add('light-mode'); // Explicitly add if system is light and no manual override
+            }
+        }
+
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                applyThemePreference('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                applyThemePreference('light');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    } else {
+        console.error("Theme toggle element #theme-toggle not found. Theme switching will not work.");
+    }
 });

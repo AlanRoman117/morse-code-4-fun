@@ -263,10 +263,16 @@
                     </div>
                 </div>
 
-                <!-- Theme Toggle Button Moved Here -->
+                <!-- Theme Toggle Switch -->
                 <h2 class="section-title text-2xl font-semibold mt-6 mb-3 text-center">Appearance</h2>
-                <div class="flex items-center justify-center p-4">
-                    <button id="toggle-theme-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Toggle Dark/Light Mode</button>
+                <div class="p-4 flex justify-center"> <!-- Centering container -->
+                    <div class="setting-item w-full max-w-xs sm:max-w-sm md:max-w-md"> <!-- Control width of the item -->
+                      <label for="theme-toggle" class="text-sm font-medium text-gray-300">Dark Mode</label>
+                      <label class="switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider round"></span>
+                      </label>
+                    </div>
                 </div>
 
                 <div class="settings mb-6"> <!-- Moved Morse Playback Settings -->
