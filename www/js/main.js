@@ -271,8 +271,10 @@ function showTab(tabIdToShow) {
 
     navTabButtons.forEach(button => {
         button.classList.remove('active-tab-button');
-        button.classList.add('bg-gray-700', 'text-gray-300');
-        button.classList.remove('bg-blue-600', 'text-white');
+        // JS will no longer try to manage Tailwind color classes for active/inactive states.
+        // CSS will handle this based on the presence of 'active-tab-button'.
+        // button.classList.add('bg-gray-700', 'text-gray-300'); // Keep if these are base styles for all nav buttons
+        // button.classList.remove('bg-blue-600', 'text-white');
     });
 
     const selectedTabContent = document.getElementById(tabIdToShow);
@@ -283,8 +285,10 @@ function showTab(tabIdToShow) {
     const selectedNavButton = document.querySelector(`nav button[data-tab='${tabIdToShow}']`);
     if (selectedNavButton) {
         selectedNavButton.classList.add('active-tab-button');
-        selectedNavButton.classList.remove('bg-gray-700', 'text-gray-300');
-        selectedNavButton.classList.add('bg-blue-600', 'text-white');
+        // JS will no longer try to manage Tailwind color classes for active/inactive states.
+        // CSS will handle this based on the presence of 'active-tab-button'.
+        // selectedNavButton.classList.remove('bg-gray-700', 'text-gray-300');
+        // selectedNavButton.classList.add('bg-blue-600', 'text-white');
     }
 
     // If switching to the Learn & Practice tab, start a new challenge.

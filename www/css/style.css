@@ -1,44 +1,260 @@
+/* Fondational Elements */
 body {
-            font-family: 'Arial', sans-serif;
-            background-color: #1a1a1a; /* Dark background */
-            color: #f0f0f0; /* Light text */
-            margin: 0;
-            /* padding: 20px; Adjusted by Tailwind classes now for responsive nav */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            /* Add padding to the top and bottom that respects the device's safe areas */
-            padding-top: env(safe-area-inset-top, 1.25rem); /* 1.25rem is p-5 fallback */
-            padding-bottom: env(safe-area-inset-bottom, 6rem); /* 6rem is pb-24 fallback */
-        }
-        .app-container {
-            background-color: #2c2c2c; /* Slightly lighter dark shade for the container */
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            width: 100%;
-        }
-        .main-title {
-            color: #4a90e2; /* A bright blue for the title */
-            /* Add this line to push it down from the notch */
-            margin-top: env(safe-area-inset-top, 1rem);
-        }
-        .input-output-box {
-            background-color: #3a3a3a; /* Darker input areas */
-            color: #f0f0f0;
-            border: 1px solid #555; /* Subtle border */
-            border-radius: 4px;
-            min-height: 100px;
-            padding: 10px;
-            white-space: pre-wrap; /* Ensures spaces and newlines are preserved */
-            word-wrap: break-word; /* Prevents overflow */
-        }
-        .section-title {
-            color: #4a90e2; /* Blue for section titles */
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
+    font-family: 'Merriweather', serif;
+    background-color: #fdfdf5; /* Off-white/cream */
+    color: #3d3d3d; /* Dark sepia/charcoal */
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: env(safe-area-inset-top, 1.25rem);
+    padding-bottom: env(safe-area-inset-bottom, 6rem);
+    background-image: url('../images/aged-paper-texture.png');
+    background-repeat: repeat;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Special Elite', monospace;
+}
+
+/* Monospaced text for Morse code display */
+.morse-code, /* Add this class to elements displaying Morse code */
+#tapperMorseOutput,
+#morse-output,
+#current-decoded-char,
+#full-book-morse-display { /* Apply to existing Morse display elements */
+    font-family: 'Courier Prime', monospace;
+}
+
+.app-container {
+    background-color: rgba(253, 253, 245, 0.8); /* Slightly transparent off-white to show texture */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Softer shadow for vintage feel */
+    width: 100%;
+}
+
+.main-title {
+    color: #3d3d3d; /* Dark sepia/charcoal */
+    margin-top: env(safe-area-inset-top, 1rem);
+}
+
+.input-output-box {
+    background-color: #f0eade; /* Lighter parchment for inputs */
+    color: #3d3d3d;
+    border: 1px solid #8b7355; /* Aged brass border */
+    border-radius: 4px;
+    min-height: 100px;
+    padding: 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Courier Prime', monospace; /* Consistent monospaced for these areas */
+}
+
+.section-title {
+    color: #3d3d3d; /* Dark sepia/charcoal for section titles */
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Book Cipher Tab background texture */
+#book-cipher-tab .app-container {
+    background-image: url('../images/dark-leather-texture.png');
+    background-color: #4b3832; /* Dark brown fallback if leather texture fails */
+    background-size: cover;
+    background-position: center;
+    color: #f0eade; /* Lighter parchment text color on dark leather */
+    border: 2px solid #8b7355; /* Aged brass border for the container itself */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(0,0,0,0.5); /* Outer shadow and inner shadow for depth */
+}
+
+/* Ensure text and elements within book cipher tab are readable on dark leather */
+#book-cipher-tab .app-container h1,
+#book-cipher-tab .app-container h2,
+#book-cipher-tab .app-container h3,
+#book-cipher-tab .app-container h4,
+#book-cipher-tab .app-container p,
+#book-cipher-tab .app-container label,
+#book-cipher-tab .app-container .section-title { /* Ensure section titles also adapt */
+    color: #f0eade !important; /* Parchment color for text */
+}
+
+#book-cipher-tab .app-container button,
+#book-cipher-tab .app-container .button {
+    background-color: #a98d6a !important; /* Brass for buttons */
+    color: #3d3d3d !important; /* Darker text on brass buttons for contrast */
+    border-color: #8b7355 !important;
+}
+#book-cipher-tab .app-container button:hover,
+#book-cipher-tab .app-container .button:hover {
+    background-color: #b99d7a !important;
+    color: #302010 !important;
+}
+
+#book-cipher-tab .app-container .input-output-box,
+#book-cipher-tab .app-container #unlocked-text-display, /* Target specific elements */
+#book-cipher-tab .app-container #full-book-morse-display,
+#book-cipher-tab .app-container #current-decoded-char {
+    background-color: rgba(240, 234, 222, 0.15); /* Very transparent parchment on leather */
+    color: #fdfdf5 !important; /* Cream text for readability */
+    border: 1px solid #a98d6a; /* Brass accent for borders */
+}
+#book-cipher-tab .app-container #current-decoded-char { /* Specific styling for target char display */
+    background-color: rgba(169, 141, 106, 0.5) !important; /* Semi-transparent brass */
+    border: 2px solid #8b7355 !important;
+}
+
+#book-cipher-tab .app-container ::placeholder {
+    color: rgba(240, 234, 222, 0.6) !important;
+}
+#book-cipher-tab .app-container .book-cover-item {
+    background-color: rgba(210, 180, 140, 0.7) !important; /* More transparent tan for book covers on leather */
+    color: #3d3d3d !important;
+    border-color: rgba(139, 115, 85, 0.8) !important;
+}
+#book-cipher-tab .app-container .book-cover-selected {
+    background-color: rgba(185, 157, 122, 0.85) !important; /* More transparent brass for selected book */
+    color: #fdfdf5 !important;
+}
+
+
+/* Core Interactive Elements */
+button, .button { /* Apply .button class for non-button elements styled as buttons */
+    font-family: 'Special Elite', monospace;
+    background-color: #a98d6a; /* Brass accent */
+    color: #fdfdf5; /* Off-white/cream text for contrast */
+    border: 2px solid #8b7355; /* Darker, aged brass border */
+    padding: 10px 15px;
+    border-radius: 4px; /* Slightly rounded corners */
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 2px 3px rgba(0,0,0,0.2); /* Inset shadow for depth, subtle outer shadow */
+    text-transform: uppercase; /* Common for vintage plaques */
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-out, box-shadow 0.2s ease-out, transform 0.1s ease-out;
+}
+
+button:hover, .button:hover {
+    background-color: #b99d7a; /* Slightly lighter brass on hover */
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.4), 0 3px 4px rgba(0,0,0,0.3);
+}
+
+button:active, .button:active {
+    background-color: #8b7355; /* Darker brass when pressed */
+    transform: translateY(1px);
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+}
+
+/* Styling for Tailwind-based buttons to align with the new theme */
+/* This will require careful overriding or replacing Tailwind classes in HTML */
+.bg-blue-500, .bg-blue-600, .bg-green-500, .bg-purple-500, .bg-red-500, .bg-red-600, .bg-gray-600, .bg-gray-700 {
+    /* Override Tailwind background colors for buttons */
+    background-color: #a98d6a !important; /* Important to override Tailwind */
+    color: #fdfdf5 !important;
+    border: 2px solid #8b7355 !important;
+    font-family: 'Special Elite', monospace !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 2px 3px rgba(0,0,0,0.2) !important;
+}
+.hover\:bg-blue-700:hover, .hover\:bg-green-700:hover, .hover\:bg-purple-700:hover, .hover\:bg-red-700:hover, .hover\:bg-gray-700:hover {
+    background-color: #b99d7a !important;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.4), 0 3px 4px rgba(0,0,0,0.3) !important;
+}
+.active\:bg-blue-800:active, .active\:bg-green-800:active, .active\:bg-purple-800:active, .active\:bg-red-800:active, .active\:bg-gray-800:active {
+    background-color: #8b7355 !important;
+    transform: translateY(1px) !important;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5) !important;
+}
+/* Remove Tailwind text colors if they conflict, or ensure they are #fdfdf5 */
+.text-white {
+    /* color: #fdfdf5 !important; /* Ensure button text is consistently styled */
+}
+
+/* General Tailwind text color overrides for the new light theme */
+.text-gray-100,
+.text-gray-200,
+.text-gray-300,
+.text-gray-400,
+.text-gray-500 { /* Also include slightly darker grays if they were meant for dark text on light bg */
+    color: #3d3d3d !important; /* Use theme's primary text color */
+}
+/* For any text that was explicitly white for dark mode, make it primary text color */
+.text-white {
+    color: #3d3d3d !important;
+}
+/* However, buttons and other specific components already override text-white for their specific needs (e.g., cream text on brass button) */
+/* So, the .text-white override above should be general. We need to make sure it doesn't break themed components. */
+/* Let's refine: buttons already set their text color. This .text-white should apply to general text content. */
+
+/* Re-evaluating .text-white: many buttons use .text-white. My button CSS already sets text to #fdfdf5.
+   So, a global .text-white override to #3d3d3d might be too broad.
+   Let's remove the global .text-white override and handle specific cases if they arise.
+   The main issue is text-gray-XXX classes on a light background.
+*/
+.text-white {
+    /* Keep this commented for now, rely on component-specific text colors.
+    /* color: #3d3d3d !important; */
+}
+
+
+/* Navigation Tabs */
+nav { /* Assuming nav is the container for tab buttons */
+    background-color: transparent !important; /* Overriding Tailwind's bg-gray-800 for the main nav bar */
+}
+
+nav button { /* General style for tab buttons */
+    font-family: 'Special Elite', monospace;
+    background-color: #a98d6a; /* Brass accent */
+    color: #fdfdf5;
+    border: 2px solid #8b7355; /* Aged brass border */
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 2px 3px rgba(0,0,0,0.2);
+    margin: 0 2px; /* Small margin between tabs */
+    padding: 8px 12px; /* Adjust padding as needed */
+    border-bottom: none; /* Remove bottom border for a more integrated look with potential underline */
+    transition: background-color 0.2s ease-out, box-shadow 0.2s ease-out, border-bottom 0.2s ease-out;
+    position: relative; /* For pseudo-element underline */
+}
+
+nav button:hover {
+    background-color: #b99d7a;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.4), 0 3px 4px rgba(0,0,0,0.3);
+}
+
+nav button.active-tab-button {
+    background-color: #8b7355; /* Darker, "pressed" brass */
+    color: #fdfdf5;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    /* Engraved line effect */
+    border-bottom: 2px solid #6b5335; /* Darker line for engraving effect */
+    /* Alternative: pseudo-element for more control over the line */
+}
+
+/* Overriding Tailwind for nav buttons specifically if they have those classes */
+/* This is similar to the general button overrides but targeted at nav context if needed */
+nav .bg-blue-600, nav .bg-gray-700 {
+    background-color: #a98d6a !important;
+    color: #fdfdf5 !important;
+    border: 2px solid #8b7355 !important;
+    font-family: 'Special Elite', monospace !important;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 2px 3px rgba(0,0,0,0.2) !important;
+}
+nav .hover\:bg-blue-700:hover, nav .hover\:bg-gray-600:hover {
+    background-color: #b99d7a !important;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.4), 0 3px 4px rgba(0,0,0,0.3) !important;
+}
+nav .active-tab-button.bg-blue-600, nav .active-tab-button.bg-gray-800 /* Tailwind active might be different */ {
+    background-color: #8b7355 !important; /* "Pressed" look */
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5) !important;
+    border-bottom: 2px solid #6b5335 !important; /* Engraved line */
+}
+/* Ensure text color on active tab is correct */
+nav .active-tab-button, nav .active-tab-button .text-white, nav .active-tab-button .text-gray-300 {
+    color: #fdfdf5 !important;
+}
+
+
+/* Original styles below, will be reviewed and updated in subsequent steps */
         .reference-table {
             width: 100%;
             border-collapse: collapse;
@@ -55,9 +271,9 @@ body {
         .hidden {
             display: none;
         }
-        .active-tab-button {
-            font-weight: 600; /* Tailwind semibold */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        .active-tab-button { /* This class is used in HTML for active tab styling */
+            /* font-weight: 600; /* Tailwind semibold */ /* Replaced by new active style */
+            /* box-shadow: 0 2px 4px rgba(0,0,0,0.2); */ /* Replaced by new active style */
         }
         .tab-content {
             width: 100%; /* Ensure it spans the full width available */
@@ -69,6 +285,128 @@ body {
         }
 
         /* Tapper CSS */
+        /* Remove or comment out the old .tapper styles */
+        /*
+        .tapper {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #4a5568;
+            border: 4px solid #2d3748;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #e2e8f0;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            transition: all 0.1s ease-out;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        @media (min-width: 768px) {
+            .tapper {
+                width: 150px;
+                height: 150px;
+                font-size: 1.5rem;
+            }
+        }
+        .tapper:active, .tapper.active {
+            background-color: #f6e05e;
+            color: #1a202c;
+            transform: scale(0.95);
+            box-shadow: 0 0 20px #f6e05e, 0 0 30px #f6e05e;
+        }
+        */
+
+        /* New Telegraph Tapper Styles */
+        .tapper-assembly {
+            position: relative;
+            width: 150px; /* Overall width of the tapper assembly */
+            height: 100px; /* Overall height */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation; /* Prevents double-tap to zoom */
+        }
+
+        .tapper-base {
+            width: 100%; /* Full width of assembly */
+            height: 30px; /* Height of the base */
+            background-color: #8B4513; /* SaddleBrown for wood */
+            border: 2px solid #5a2d0c; /* Darker brown for border/shadow */
+            border-radius: 5px;
+    /* box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.2); */
+            position: absolute;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .tapper-lever {
+            width: 20px; /* Width of the lever arm */
+            height: 75px; /* Height of the lever arm, extends above base */
+    /* background: linear-gradient(to right, #a98d6a, #8b7355); */ /* Brass gradient */
+    background-color: #a98d6a; /* Fallback solid brass color */
+            border: 1px solid #6b5335; /* Darker brass outline */
+            border-radius: 3px 3px 0 0; /* Rounded top */
+    /* box-shadow: 0 -2px 5px rgba(0,0,0,0.2); */
+            position: absolute;
+            bottom: 25px; /* Sits slightly into the base */
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align key to the top of the lever */
+            z-index: 2;
+            transition: transform 0.1s ease-out;
+        }
+
+        .tapper-key-surface {
+            width: 40px; /* Width of the key knob */
+            height: 40px; /* Height of the key knob */
+            background-color: #a98d6a; /* Brass color */
+            border: 2px solid #8b7355; /* Darker brass */
+            border-radius: 50%; /* Circular key */
+    /* box-shadow: inset 0 -2px 3px rgba(0,0,0,0.3), 0 2px 3px rgba(0,0,0,0.2); */
+            margin-top: 5px; /* Positioned at the top of the lever */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fdfdf5;
+            font-family: 'Special Elite', monospace;
+            font-size: 10px; /* Small text if any, or remove */
+            /* The content "TAP!" can be added via ::before or ::after if desired, or removed */
+        }
+        .tapper-key-surface::before {
+            content: "TAP"; /* Optional: text on the key */
+            color: #6b5335; /* Darker text */
+        }
+
+
+        /* Active state for the new tapper */
+        /* The JS adds '.active' to 'tapper-assembly' (which is the div with id="tapper") */
+        .tapper-assembly.active .tapper-lever {
+            transform: translateX(-50%) translateY(3px) rotateX(5deg); /* Move lever down slightly and tilt */
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.2);
+        }
+        .tapper-assembly.active .tapper-key-surface {
+            box-shadow: inset 0 -1px 2px rgba(0,0,0,0.4), 0 1px 1px rgba(0,0,0,0.1);
+            transform: translateY(1px); /* Slight press down effect on the key itself */
+        }
+
+
+        #spaceButton {
         .tapper {
             width: 120px; /* Mobile first size */
             height: 120px; /* Mobile first size */
@@ -386,49 +724,206 @@ body {
 
     /* Book Library Styles */
     .book-cover-item {
-        background-color: #2D3748; /* Tailwind gray-800 */
-        padding: 0.5rem; /* p-2 */
-        border-radius: 0.375rem; /* rounded-md */
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
-        border: 1px solid #4A5568; /* border-gray-600 */
-        color: white;
-        font-size: 0.875rem; /* text-sm */
-        font-weight: 500; /* font-medium */
+        background-color: #d2b48c; /* Tan / light wood color for the cover */
+        padding: 10px;
+        border-radius: 3px 5px 5px 3px; /* Simulate book spine curve on one side */
+        box-shadow: 5px 5px 10px rgba(0,0,0,0.3), inset 3px 0 5px rgba(0,0,0,0.1); /* Outer shadow and subtle spine shadow */
+        border: 1px solid #8b7355; /* Aged brass/darker wood edge */
+        color: #3d3d3d; /* Dark sepia text */
+        font-size: 0.9rem;
+        font-weight: normal; /* Merriweather will provide the classic feel */
         text-align: center;
         cursor: pointer;
         transition: all 0.15s ease-in-out;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: space-around; /* Better spacing for title and potential author */
         word-break: break-word; /* Ensure text wraps */
-        height: 8rem; /* h-32 Tailwind equiv. */
-        /* width-full is implied by grid behavior */
+        min-height: 9rem; /* Adjusted height */
+        position: relative; /* For pseudo-elements like spine gradient */
+        background-image: linear-gradient(to right, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 5%, transparent 20%); /* Subtle spine shadow */
     }
+
+    .book-cover-item span { /* Style for the title span inside */
+        font-family: 'Special Elite', monospace;
+        font-size: 1em; /* Relative to parent's font-size */
+        display: block;
+        margin-bottom: 5px;
+    }
+    /* Optional: Add a small author line if design allows */
+    .book-cover-item .author {
+        font-family: 'Merriweather', serif;
+        font-size: 0.7em;
+        color: #5a4a3a; /* Darker sepia for author */
+    }
+
 
     .book-cover-item:hover {
-        background-color: #4A5568; /* Tailwind gray-600 */
-        border-color: #718096; /* Tailwind gray-500 */
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+        background-color: #c8a97e; /* Slightly darker tan on hover */
+        border-color: #6b5335; /* Darker brass hover border */
+        box-shadow: 7px 7px 12px rgba(0,0,0,0.35), inset 3px 0 5px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
     }
 
     .book-cover-selected {
-        background-color: #3182CE; /* Tailwind blue-600 (adjusted from #4299E1 for better match) */
-        border-color: #63B3ED; /* Tailwind blue-400 */
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
-        /* Using a border to simulate ring effect for simplicity and control */
-        border-width: 2px;
-        /* ring-2 ring-blue-300 - Tailwind's ring is often an outline/box-shadow.
-           A border is simpler here if not using @apply.
-           If you want true ring, it's box-shadow: 0 0 0 2px theme('colors.blue.300');
-           but this can conflict with existing shadow. For now, thicker border of a highlight color.
-        */
-        transform: scale(1.05); /* Optional: slight scale */
+        background-color: #b99d7a; /* Brass accent for selected */
+        border-color: #8b7355; /* Darker aged brass */
+        color: #fdfdf5; /* Cream text on brass */
+        box-shadow: 0 0 10px #a98d6a, inset 0 0 5px rgba(0,0,0,0.2); /* Glow and inset */
+        transform: scale(1.03);
     }
-    /* Ensure selected text remains readable if bg changes significantly */
-    .book-cover-selected {
-        color: white; /* Ensure text is white on blue background */
+    .book-cover-selected span { /* Title on selected book */
+        color: #fdfdf5;
     }
+    .book-cover-selected .author { /* Author on selected book */
+        color: #f0eade; /* Lighter sepia for author */
+    }
+
+    /* Progress Indication for Book Cipher */
+    #current-decoded-char { /* Target Morse Letter Display */
+        background-color: #a98d6a; /* Brass accent */
+        color: #fdfdf5; /* Cream text */
+        border: 2px solid #8b7355; /* Aged brass border */
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-family: 'Courier Prime', monospace; /* Already set globally, but ensures it */
+        font-size: 1.5rem; /* Larger for prominence */
+        min-width: 80px; /* Ensure it has some width */
+        text-align: center;
+        box-shadow: inset 0 0 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .deciphered-char { /* For text already deciphered in the full Morse display */
+       color: #5d4037; /* Darker, rich brown, like ink on old paper */
+       font-weight: bold;
+       /* background-color: rgba(240, 234, 222, 0.5); /* Slight parchment highlight */
+       /* padding: 0 2px; */
+       /* border-radius: 2px; */
+    }
+
+    /* Styling for locked pro books */
+    .book-cover-item.opacity-50 { /* Tailwind class used for locked books */
+        background-color: #e0e0e0; /* Lighter gray for locked */
+        background-image: none; /* Remove spine gradient */
+        box-shadow: 3px 3px 7px rgba(0,0,0,0.2);
+        border-color: #b0b0b0;
+        color: #757575;
+    }
+    .book-cover-item.opacity-50 span {
+        color: #757575;
+    }
+     .book-cover-item.opacity-50:hover {
+        background-color: #d0d0d0;
+        border-color: #a0a0a0;
+        transform: none; /* No hover transform for locked items */
+     }
+
+    /* Settings Page Toggles */
+
+    /* General styling for toggle switch containers if needed */
+    .setting-item .switch,
+    #master-sound-toggle + div { /* Direct selector for the visual part of master sound toggle */
+        /* Reset some defaults if they interfere */
+    }
+
+    /* Vintage Toggle Switch for Theme Toggle */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 70px;  /* Wider for a more substantial switch */
+        height: 30px; /* Bakelite-style height */
+        background-color: #504030; /* Dark brown Bakelite color */
+        border-radius: 3px; /* Sharp edges for Bakelite */
+        border: 1px solid #302010; /* Darker border */
+        box-shadow: 0 2px 3px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1);
+        cursor: pointer;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider { /* This is the moving part (lever) of the theme toggle */
+      position: absolute;
+      cursor: pointer;
+      top: 2px;    /* Position within the switch body */
+      left: 3px;
+      height: 24px; /* Lever height */
+      width: 30px;  /* Lever width */
+      background-color: #a98d6a; /* Brass color for the lever */
+      border: 1px solid #8b7355; /* Darker brass edge */
+      border-radius: 2px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      transition: .3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy transition */
+    }
+
+    /* Remove ::before for the old circular knob if it was part of .slider */
+    .slider:before {
+      content: none;
+    }
+
+    input:checked + .slider {
+      transform: translateX(34px); /* Move lever to the other side */
+      background-color: #b99d7a; /* Slightly lighter brass when 'on' */
+    }
+
+    /* Removing focus style, or can adapt to new theme */
+    input:focus + .slider {
+      box-shadow: 0 0 2px #8b7355;
+    }
+
+    /* Remove .slider.round styles as we are not using a round slider */
+    .slider.round { border-radius: 2px; }
+    .slider.round:before { content: none; }
+
+
+    /* Vintage Toggle for Master Sound */
+    /* The master sound toggle is a div sibling to a 'peer' input */
+    #master-sound-toggle + div {
+        width: 70px !important; /* Override Tailwind w-11 */
+        height: 30px !important; /* Override Tailwind h-6 */
+        background-color: #504030 !important; /* Dark brown Bakelite */
+        border-radius: 3px !important; /* Sharp edges */
+        border: 1px solid #302010 !important;
+        box-shadow: 0 2px 3px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1) !important;
+        position: relative; /* For the lever */
+        transition: background-color 0.3s ease !important;
+    }
+
+    #master-sound-toggle + div::after { /* This is the lever */
+        content: '' !important;
+        position: absolute !important;
+        top: 2px !important;
+        left: 3px !important;
+        width: 30px !important; /* Lever width */
+        height: 24px !important; /* Lever height */
+        background-color: #a98d6a !important; /* Brass color */
+        border: 1px solid #8b7355 !important;
+        border-radius: 2px !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    }
+
+    #master-sound-toggle:checked + div { /* 'On' state for Bakelite body */
+        background-color: #605040 !important; /* Slightly lighter/different Bakelite when on */
+    }
+
+    #master-sound-toggle:checked + div::after { /* 'On' state for lever */
+        transform: translateX(34px) !important; /* Move lever */
+        background-color: #b99d7a !important; /* Lighter brass for lever when 'on' */
+    }
+
+    /* Remove Tailwind focus rings if they don't fit */
+    #master-sound-toggle.peer:focus + div {
+        outline: none !important;
+        /* box-shadow: 0 0 0 2px #8b7355 !important; /* Custom focus ring */
+        box-shadow: 0 2px 3px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1), 0 0 0 2px #8b7355 !important; /* Keep original shadow + focus ring */
+
+    }
+
 
     /* For Book Cipher Highlighting */
     .current-morse-target {
