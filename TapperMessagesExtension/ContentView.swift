@@ -272,42 +272,81 @@ struct ContentView: View {
                 Spacer().frame(height: 40)
             }
 
-            Button(action: {}) {
-                Text("TAP") 
-                    .font(.custom("SpecialElite-Regular", size: 22)) // Updated Font
-                    .padding()
-                    .frame(width: 110, height: 110) 
-                    .background(isTapAreaPressed ? Theme.tapAreaActiveBackground : Theme.tapAreaBackground) // Updated Color
-                    .foregroundColor(Theme.tapAreaText) // Updated Color
-                    .clipShape(Circle()) 
-                    .scaleEffect(isTapAreaPressed ? 0.95 : 1.0)
-                    .shadow(color: Theme.tapAreaBackground.opacity(0.5), radius: isTapAreaPressed ? 3 : 6, x: 0, y: isTapAreaPressed ? 2 : 4) // Adjusted shadow
+            // --- Antique Morse Key Tapper ---
+            ZStack {
+                // Base
+                RoundedRectangle(cornerRadius: Theme.buttonCornerRadius * 2)
+                    .fill(LinearGradient(gradient: Gradient(colors: [Color(hex: "#8B4513"), Color(hex: "#7A3D0F")]), startPoint: .top, endPoint: .bottom)) // Wood gradient
+                    .frame(width: 160, height: 50)
+                    .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 5)
+
+                // Lever
+                Rectangle()
+                    .fill(LinearGradient(gradient: Gradient(colors: [Color(hex: "#c0c0c0"), Color(hex: "#a9a9a9")]), startPoint: .leading, endPoint: .trailing)) // Metal gradient
+                    .frame(width: 15, height: 70)
+                    .cornerRadius(3)
+                    .offset(y: -35) // Position lever on top of the base
+                    .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 2)
+                    .rotation3DEffect(
+                        .degrees(isTapAreaPressed ? 5 : 0),
+                        axis: (x: 1, y: 0, z: 0),
+                        anchor: .bottom
+                    )
+
+                // Knob
+                Circle()
+                    .fill(Color(hex: "#333333")) // Bakelite/dark color
+                    .frame(width: 55, height: 55)
+                    .overlay(
+                        Circle().stroke(Color(hex: "#1a1a1a"), lineWidth: 2)
+                    )
+                    .shadow(color: Color.black.opacity(0.4), radius: 3, x: 0, y: isTapAreaPressed ? 1 : 3)
+                    .offset(y: isTapAreaPressed ? -68 : -75) // Position knob on lever, moves down when pressed
+                    .overlay(
+                         Text("TAP")
+                            .font(.custom("SpecialElite-Regular", size: 14))
+                            .foregroundColor(Color(hex: "#a0a0a0"))
+                    )
+
             }
-            .animation(.spring(response: 0.15, dampingFraction: 0.5), value: isTapAreaPressed)
+            .frame(width: 180, height: 120) // Overall frame for the tapper assembly
+            .contentShape(Rectangle()) // Make the whole ZStack tappable
             .gesture(
                 LongPressGesture(minimumDuration: shortTapThreshold)
-                    .onEnded { _ in 
-                        self.isTapAreaPressed = true 
+                    .onChanged { pressing in // Use onChanged to set isTapAreaPressed for visual feedback during press
+                        if pressing {
+                            self.isTapAreaPressed = true
+                            // No sound or input handling here yet, only onEnded
+                        } else {
+                            // This case might not be reliably hit for LongPressGesture's end if TapGesture interferes.
+                            // isTapAreaPressed is reset in .onEnded of both gestures.
+                        }
+                    }
+                    .onEnded { _ in
+                        self.isTapAreaPressed = true // Ensure it's true for the action
                         self.isLongPressTriggered = true
                         audioManager.playDashSound()
                         self.handleTapInput(isLong: true)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { self.isTapAreaPressed = false }
+                        // Short delay to allow visual feedback before resetting
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.isTapAreaPressed = false }
                     }
             )
             .simultaneousGesture(
                 TapGesture()
                     .onEnded {
-                        if !self.isLongPressTriggered { 
-                            self.isTapAreaPressed = true
+                        if !self.isLongPressTriggered {
+                            self.isTapAreaPressed = true // Visual feedback for tap
                             audioManager.playDotSound()
                             self.handleTapInput(isLong: false)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { self.isTapAreaPressed = false }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.isTapAreaPressed = false }
                         }
+                        // Reset long press trigger flag after any tap ends,
+                        // ensuring it's fresh for the next interaction sequence.
                         self.isLongPressTriggered = false
                     }
             )
-            .padding(.horizontal)
-            .padding(.vertical, 5)
+            .animation(.spring(response: 0.1, dampingFraction: 0.6), value: isTapAreaPressed) // Apply animation to overall ZStack
+            .padding(.vertical, 15) // Give some vertical space
 
             HStack(spacing: 12) {
                 actionButton(title: "Next Letter", baseColor: Theme.positiveAction, action: processCurrentCharAction, audioFeedback: audioManager.playButtonFeedbackSound)
