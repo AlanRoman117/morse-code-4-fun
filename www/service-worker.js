@@ -1,3 +1,4 @@
+// MORSE_APP_SW_VERSION_JULES_002_DELETE_AND_RECREATE
 const CACHE_NAME = 'morseapp-shell-v1';
 const urlsToCache = [
   './', // Represents the root of the service worker's scope (e.g., www/)
@@ -21,7 +22,7 @@ const urlsToCache = [
 
 // Install event: open cache and add app shell files
 self.addEventListener('install', event => {
-  console.log('[Service Worker] Install event triggered.');
+  console.log('[Service Worker] Install event triggered. Version: MORSE_APP_SW_VERSION_JULES_002_DELETE_AND_RECREATE');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -39,7 +40,7 @@ self.addEventListener('install', event => {
 
 // Activate event: clean up old caches if any
 self.addEventListener('activate', event => {
-  console.log('[Service Worker] Activate event triggered.');
+  console.log('[Service Worker] Activate event triggered. Version: MORSE_APP_SW_VERSION_JULES_002_DELETE_AND_RECREATE');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -62,15 +63,15 @@ self.addEventListener('fetch', event => {
       .then(response => {
         if (response) {
           // Cache hit - return response
-          console.log('[Service Worker] Serving from cache:', event.request.url);
+          // console.log('[Service Worker] Serving from cache:', event.request.url); // Too noisy for regular fetch
           return response;
         }
         // Not in cache - fetch from network
-        console.log('[Service Worker] Fetching from network:', event.request.url);
+        // console.log('[Service Worker] Fetching from network:', event.request.url); // Too noisy
         return fetch(event.request);
       })
       .catch(error => {
-        console.error('[Service Worker] Error in fetch handler:', error);
+        console.error('[Service Worker] Error in fetch handler for:', event.request.url, error);
         // Optionally, you could return a custom offline page here if the fetch fails
         // and it's a navigation request. For now, just logging the error.
       })
