@@ -324,6 +324,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Let's assume 'learn-practice-tab' does not use the tapper initially.
     // The `showTab` function already calls `detachSharedTapper`, so this is not strictly needed here.
     // detachSharedTapper();
+
+    // Check for a targetTab in localStorage
+    try {
+        const targetTabFromStorage = localStorage.getItem('targetTab');
+        if (targetTabFromStorage) {
+            // console.log(`[main.js] Found targetTab '${targetTabFromStorage}' in localStorage. Switching to it.`);
+            showTab(targetTabFromStorage);
+            localStorage.removeItem('targetTab'); // Clean up
+        }
+        // If not found, the default tab ('introduction-tab') shown earlier remains active.
+    } catch (e) {
+        console.error("[main.js] Error accessing targetTab from localStorage:", e);
+        // Fallback or default behavior will proceed.
+    }
 });
 // --- End Tab Navigation ---
 
