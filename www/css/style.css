@@ -707,3 +707,36 @@ body.privacy-page.dark-theme {
 .privacy-page.dark-theme #privacyPolicyContent li {
     color: #f0f0f0; /* Global light text */
 }
+
+/* --- BEGIN DEBUG TOGGLE CIRCLE --- */
+/* Using a selector that targets the div acting as the track for the master-sound-toggle's ::after pseudo-element */
+/* The input is #master-sound-toggle, its direct parent is a div, and the track is a sibling div to the input.
+   The label for="master-sound-toggle" wraps [text span, [input, track_div]].
+   So, label[for="master-sound-toggle"] div > input#master-sound-toggle + div::after
+   Or more simply, find the track div by its unique classes if possible, or by relation to the input.
+   The track div has "w-11 h-6 bg-gray-600 peer-focus:outline-none..."
+   Let's be very specific based on the known HTML structure.
+   The input #master-sound-toggle is a peer to the track div.
+   The track div is the one with w-11 h-6.
+*/
+#master-sound-toggle + .w-11.h-6::after {
+    content: "" !important;
+    display: block !important;
+    position: absolute !important;
+    width: 20px !important;   /* Corresponds to h-5/w-5 */
+    height: 20px !important;  /* Corresponds to h-5/w-5 */
+    background-color: red !important; /* Bright color for visibility */
+    border: 1px solid black !important;
+    border-radius: 9999px !important; /* Corresponds to rounded-full */
+    top: 2px !important; /* Corresponds to top-[2px] */
+    left: 2px !important; /* Corresponds to left-[2px] */
+    z-index: 100 !important; /* Ensure it's on top */
+    transition: transform 0.2s ease-in-out !important; /* Basic transition for movement */
+}
+
+/* Style for the checked state using CSS for debugging */
+#master-sound-toggle:checked + .w-11.h-6::after {
+    transform: translateX(20px) !important; /* Approx translate-x-full for w-11 (44px) track and w-5 (20px) circle. 44px track - 20px circle - 2px left padding - 2px right space = 20px. */
+    background-color: lime !important; /* Different color when checked */
+}
+/* --- END DEBUG TOGGLE CIRCLE --- */
