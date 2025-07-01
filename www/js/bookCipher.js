@@ -123,6 +123,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 } else {
                     // Add click listener only for non-locked books
+                    // Check for completion status
+                    const savedProgressStringForLibrary = localStorage.getItem(`bookCipherProgress_${bookKey}`);
+                    let isBookMarkedCompletedInLibrary = false;
+                    if (savedProgressStringForLibrary) {
+                        try {
+                            const savedProgress = JSON.parse(savedProgressStringForLibrary);
+                            if (savedProgress.bookId === bookKey) {
+                                isBookMarkedCompletedInLibrary = savedProgress.isCompleted || false;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing progress for library display:', e);
+                        }
+                    }
+
+                    if (isBookMarkedCompletedInLibrary) {
+                        const checkIcon = document.createElement('div');
+                        checkIcon.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute top-1 left-1 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        `;
+                        checkIcon.title = "Completed"; // Tooltip for the checkmark
+                        bookElement.appendChild(checkIcon);
+                        bookElement.classList.add('border-2', 'border-green-400'); // Optional: add a border as well
+                    }
+
                     bookElement.addEventListener('click', () => {
                         currentBookId = bookElement.getAttribute('data-book-id');
                         // Visually mark selected book in library
