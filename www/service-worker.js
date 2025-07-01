@@ -1,18 +1,23 @@
 const CACHE_NAME = 'morseapp-shell-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/main.js',
-  '/js/bookCipher.js',
-  '/js/kochMethod.js',
-  '/js/learnPracticeGame.js',
-  '/js/settings.js',
-  '/js/visualTapper.js',
-  '/assets/icons/icon-192x192.png',
-  '/assets/icons/icon-512x512.png'
+  './', // Represents the root of the service worker's scope (e.g., www/)
+  'index.html',
+  'css/style.css',
+  'js/main.js',
+  'js/data/bookData.js', // Added missing script
+  'js/bookCipher.js',
+  'js/kochMethod.js',
+  'js/learnPracticeGame.js',
+  'js/settings.js',
+  'js/visualTapper.js',
+  'js/privacy.js', // Added missing script
+  'assets/icons/icon-192x192.png',
+  'assets/icons/icon-512x512.png',
+  // 'assets/logo.png', // Removed for now due to path ambiguity relative to SW scope
+  'manifest.json' // Added manifest
   // Note: If there are other essential assets like fonts or critical images directly part of the app shell,
   // they should be added here as well. For now, focusing on the core files.
+  // CDN resources (Tone.js, Tailwind, confetti, marked) are not cached by default by this SW.
 ];
 
 // Install event: open cache and add app shell files
