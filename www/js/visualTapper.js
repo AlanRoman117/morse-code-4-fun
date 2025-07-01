@@ -105,20 +105,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             // Ensure Tone.js audio context is running (often requires user gesture)
-            // console.log("Tone.context.state before Tone.start():", Tone.context.state);
-            if (Tone.context.state !== 'running') {
-                Tone.start().then(() => {
-                    // console.log("Tone.start() successful, context state:", Tone.context.state);
-                    if (tapperTone && typeof tapperTone.triggerAttack === 'function') { // CHANGED
-                         // console.log("Attempting to triggerAttack on tapperTone.");
-                         tapperTone.triggerAttack(TAP_SOUND_FREQ); // CHANGED to triggerAttack
-                    }
-                }).catch(e => console.warn("Tone.js audio context couldn't start on tap: ", e));
-            } else {
-                 if (tapperTone && typeof tapperTone.triggerAttack === 'function') { // CHANGED
-                     // console.log("AudioContext already running. Attempting to triggerAttack on tapperTone.");
-                     tapperTone.triggerAttack(TAP_SOUND_FREQ); // CHANGED to triggerAttack
+            const playNote = () => {
+                if (tapperTone && typeof tapperTone.triggerAttack === 'function') {
+                    // Explicitly release any previous note before attacking a new one.
+                    // This helps prevent errors if the previous note's release was interrupted
+                    // or if taps are extremely rapid.
+                    tapperTone.triggerRelease(); // Release the tail of the previous note.
+                    tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now()); // Attack the new note.
+                    // console.log("triggerAttack called at Tone.now():", Tone.now());
                 }
+            };
+
+            if (Tone.context.state !== 'running') {
+                // This path should ideally be less common if main.js's masterAudioInitListener works.
+                Tone.start().then(() => {
+                    // console.log("Tone.start() successful from playTapSound, context state:", Tone.context.state);
+                    playNote();
+                }).catch(e => {
+                    // This catch is for Tone.start() failing.
+                    // The original error "Start time must be strictly greater..." was caught here,
+                    // implying it might have originated from within playNote() called after a problematic Tone.start().
+                    console.warn("Tone.js audio context couldn't start via playTapSound's Tone.start(): ", e);
+                });
+            } else {
+                playNote();
             }
         } else {
             // console.warn("Tone.js not available for tap sound.");
@@ -126,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function stopTapSound() {
-        // console.log("stopTapSound called."); // For debugging
+        // console.log("stopTapSound called at Tone.now():", Tone.now()); // For debugging
         if (tapperTone && typeof tapperTone.triggerRelease === 'function') {
             // console.log("Attempting to triggerRelease on tapperTone.");
             tapperTone.triggerRelease(); // This stops the sound based on the envelope's release phase
