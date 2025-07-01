@@ -228,23 +228,14 @@ const sharedVisualTapperWrapper = document.getElementById('sharedVisualTapperWra
 const hiddenTapperStorage = document.getElementById('hiddenTapperStorage');
 
 function attachTapperToArea(targetAreaId) {
-    console.log("[attachTapperToArea] Received targetAreaId:", targetAreaId); // New log
-
     const targetElement = document.getElementById(targetAreaId);
-    console.log("[attachTapperToArea] Found targetElement:", targetElement); // New log
 
     if (sharedVisualTapperWrapper && targetElement) {
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.style.display (before):", sharedVisualTapperWrapper.style.display); // New log
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.parentNode (before):", sharedVisualTapperWrapper.parentNode); // New log
-
         targetElement.appendChild(sharedVisualTapperWrapper);
         sharedVisualTapperWrapper.style.display = 'block'; // Or 'flex' if its internal layout needs it
-
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.style.display (after):", sharedVisualTapperWrapper.style.display); // New log
-        console.log("[attachTapperToArea] sharedVisualTapperWrapper.parentNode (after):", sharedVisualTapperWrapper.parentNode); // New log
-        console.log(`[attachTapperToArea] Tapper attached to ${targetAreaId}`); // Existing log, ensure it's still there
+        // console.log(`[attachTapperToArea] Tapper attached to ${targetAreaId}`); // Kept for now, can be removed if too verbose
     } else {
-        console.error(`[attachTapperToArea] Failed to attach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper ? 'exists' : 'null/undefined'}) or targetElement (${targetElement ? 'exists' : 'null/undefined'} for ID ${targetAreaId}) not found.`); // Enhanced log
+        console.error(`[attachTapperToArea] Failed to attach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper ? 'exists' : 'null/undefined'}) or targetElement (${targetElement ? 'exists' : 'null/undefined'} for ID ${targetAreaId}) not found.`);
     }
 }
 
@@ -263,7 +254,7 @@ function detachSharedTapper() {
         }
         // Always hide it when detaching.
         sharedVisualTapperWrapper.style.display = 'none';
-        console.log("Tapper detached and hidden. State reset attempted.");
+        // console.log("Tapper detached and hidden. State reset attempted.");
     } else {
          console.error(`Failed to detach tapper: sharedVisualTapperWrapper (${sharedVisualTapperWrapper}) or hiddenTapperStorage (${hiddenTapperStorage}) not found. State reset was attempted if function was available.`);
     }
@@ -614,12 +605,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // One-time audio initialization on first user interaction
             const masterAudioInitListener = () => {
-                console.log("First user interaction, initializing master audio context.");
+                // console.log("First user interaction, initializing master audio context.");
                 initAudio();
                 // Attempt to start Tone.js AudioContext
                 if (typeof Tone !== 'undefined' && Tone.start) {
                     Tone.start().then(() => {
-                        console.log("Tone.js audio context started successfully via masterAudioInitListener.");
+                        // console.log("Tone.js audio context started successfully via masterAudioInitListener.");
                     }).catch(e => {
                         console.warn("Tone.start() failed in masterAudioInitListener:", e);
                     });
@@ -642,21 +633,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (playTappedMorseBtn && tapperDecodedOutputEl) {
                 playTappedMorseBtn.addEventListener('click', async () => {
                     if (isPlaying) {
-                        console.log("Audio is currently playing. Please wait.");
+                        // console.log("Audio is currently playing. Please wait.");
                         return;
                     }
                     initAudio(); // Ensure AudioContext is ready
 
                     const textToPlay = tapperDecodedOutputEl.textContent;
                     if (!textToPlay || textToPlay.trim() === '') {
-                        console.log("No tapped text to play.");
+                        // console.log("No tapped text to play.");
                         // Optionally, provide user feedback e.g., alert("No tapped text to play.");
                         return;
                     }
 
                     const morseToPlay = textToMorse(textToPlay.toUpperCase());
                     if (!morseToPlay || morseToPlay.trim() === '') {
-                        console.log("Could not convert tapped text to Morse.");
+                        // console.log("Could not convert tapped text to Morse.");
                         // Optionally, provide user feedback
                         return;
                     }
@@ -854,10 +845,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (upgradeToProBtn) {
             upgradeToProBtn.addEventListener('click', () => {
-                console.log('Upgrade to Pro button clicked');
+                // console.log('Upgrade to Pro button clicked');
                 window.isProUser = true;
                 localStorage.setItem('isProUser', 'true');
-                console.log('isProUser set to true and saved to localStorage');
+                // console.log('isProUser set to true and saved to localStorage');
                 updateUserProStatusUI();
                 if (typeof populateBookLibrary === 'function') {
                     populateBookLibrary();
@@ -880,7 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // One-time audio initialization on first user interaction
             const masterAudioInitListener = () => {
-                console.log("First user interaction, initializing master audio context.");
+                // console.log("First user interaction, initializing master audio context.");
                 initAudio();
                 document.body.removeEventListener('click', masterAudioInitListener);
                 document.body.removeEventListener('touchstart', masterAudioInitListener);
@@ -900,21 +891,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (playTappedMorseBtn && tapperDecodedOutputEl) {
                 playTappedMorseBtn.addEventListener('click', async () => {
                     if (isPlaying) {
-                        console.log("Audio is currently playing. Please wait.");
+                        // console.log("Audio is currently playing. Please wait.");
                         return;
                     }
                     initAudio(); // Ensure AudioContext is ready
 
                     const textToPlay = tapperDecodedOutputEl.textContent;
                     if (!textToPlay || textToPlay.trim() === '') {
-                        console.log("No tapped text to play.");
+                        // console.log("No tapped text to play.");
                         // Optionally, provide user feedback e.g., alert("No tapped text to play.");
                         return;
                     }
 
                     const morseToPlay = textToMorse(textToPlay.toUpperCase());
                     if (!morseToPlay || morseToPlay.trim() === '') {
-                        console.log("Could not convert tapped text to Morse.");
+                        // console.log("Could not convert tapped text to Morse.");
                         // Optionally, provide user feedback
                         return;
                     }
@@ -953,7 +944,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     initializeForTesting: true, // Set to true for test ads from Google, false for production
                 })
                 .then(() => {
-                    console.log("AdMob initialized successfully.");
+                    // console.log("AdMob initialized successfully.");
                     // Now show the banner ad
                     AdMob.showBanner({
                         adId: "ca-app-pub-xxxxxxxxxxxxxxxxx/yyyyyyyyyy", // Replace with your actual Banner Ad Unit ID
@@ -964,7 +955,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         // npa: true, // Non-Personalized Ads, if consent requires it
                     })
                     .then(() => {
-                        console.log("Banner ad shown successfully.");
+                        // console.log("Banner ad shown successfully.");
                         // If the ad is loaded into #ad-banner-container by native code, no further JS action needed for placement.
                         // If native code expects a specific div ID to be passed, adjust the call.
                         // The current plan implies the native SDK handles placement within the container we made.
