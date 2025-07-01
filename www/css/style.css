@@ -722,5 +722,11 @@ body.privacy-page.dark-theme {
     top: 2px; /* Equivalent to top-[2px] */
     left: 2px; /* Equivalent to left-[2px] */
     border: 1px solid #d1d5db; /* Default border, Tailwind's border-gray-300 */
+    transform: translateX(0); /* Initial position */
     transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out; /* Specific transitions */
+}
+
+#master-sound-toggle:checked + .w-11.h-6::after {
+    transform: translateX(20px); /* Move circle to the right */
+    /* border-color will be handled by peer-checked:after:border-white in HTML or light theme override */
 }
