@@ -1,4 +1,26 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // --- Theme application logic ---
+    // Applies theme based on localStorage. Assumes 'body.privacy-page' handles light theme by default via CSS,
+    // and 'body.privacy-page.dark-theme' provides dark theme overrides.
+    try {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+        } else if (savedTheme === 'light') {
+            // Light theme is default via .privacy-page CSS, so ensure .dark-theme is not present.
+            document.body.classList.remove('dark-theme');
+        } else {
+            // Default: if no theme is set in localStorage, or it's an unexpected value,
+            // match main app's default behavior (which is dark).
+            document.body.classList.add('dark-theme');
+        }
+    } catch (e) {
+        console.error("Error applying theme from localStorage to privacy page:", e);
+        // Fallback to dark theme in case of error (e.g., localStorage access denied)
+        document.body.classList.add('dark-theme');
+    }
+    // --- End Theme application logic ---
+
     const privacyPolicyContentDiv = document.getElementById('privacyPolicyContent');
     if (!privacyPolicyContentDiv) {
         console.error('Privacy policy content div not found.');
