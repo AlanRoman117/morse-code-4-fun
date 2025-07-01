@@ -781,7 +781,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // If AdMob plugin is used, try to hide its banner
                 if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
                     const { AdMob } = window.Capacitor.Plugins;
-                    AdMob.hideBanner().catch(err => console.warn('AdMob hideBanner error:', err));
+                    AdMob.hideBanner()
+                        .then(() => resetBodyPaddingForAd()) // Reset padding when ad is hidden
+                        .catch(err => console.warn('AdMob hideBanner error:', err));
                 }
 
                 // --- Update "Go Pro" button in Settings ---
@@ -817,6 +819,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     // The AdMob logic in DOMContentLoaded initializes and shows the banner.
                     // So, if not pro, we rely on that initial load or a page refresh to show it.
                     // A more robust solution might be to have a dedicated showAd/hideAd function.
+                    // Attempt to show banner if it was previously hidden and user is no longer Pro
+                    // This will trigger the .Loaded or .SizeChanged listeners to adjust padding.
+                    const adOptions = {
+                        adId: "ca-app-pub-6940502431077467/3842216044",
+                        adSize: "ADAPTIVE_BANNER",
+                        position: "BOTTOM_CENTER",
+                        margin: 0,
+                        isTesting: true,
+                         // testingDevices: ["YOUR_TEST_DEVICE_ID"] // Consider adding if needed for specific device testing
+                    };
+                    AdMob.showBanner(adOptions).catch(err => console.warn('Error re-showing banner for non-pro user:', err));
                 }
 
                 // --- Update "Go Pro" button in Settings ---
@@ -952,42 +965,96 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!window.isProUser) {
                 if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
                 const { AdMob } = window.Capacitor.Plugins;
+                const { AdMob, BannerAdPluginEvents, AdMobBannerSize } = window.Capacitor.Plugins;
+
+                // Function to adjust body padding
+                const adjustBodyPaddingForAd = (adHeight) => {
+                    document.body.style.paddingBottom = `${adHeight}px`;
+                    // Adjust fixed bottom nav if it's not already handled by body padding
+                    const mainNav = document.querySelector('nav.fixed.bottom-0');
+                    if (mainNav) {
+                        // mainNav.style.bottom = `${adHeight}px`; // This might be needed if body padding doesn't affect fixed elements as expected
+                    }
+                };
+
+                const resetBodyPaddingForAd = () => {
+                    document.body.style.paddingBottom = ''; // Reset to original or CSS defined value
+                     const mainNav = document.querySelector('nav.fixed.bottom-0');
+                    if (mainNav) {
+                        // mainNav.style.bottom = '';
+                    }
+                };
+
+                // Add Event Listeners for Banner
+                AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
+                    console.log('AdMob banner loaded.');
+                    // AdMobBannerSize might not be available directly here,
+                    // The SizeChanged event is more reliable for dimensions.
+                    // For standard banner, height is usually 50px, adaptive can vary.
+                    // We will rely on SizeChanged, but can set a default initial padding if needed.
+                    // adjustBodyPaddingForAd(50); // Default for BANNER size, but SizeChanged is better.
+                });
+
+                AdMob.addListener(BannerAdPluginEvents.SizeChanged, (sizeInfo) => { // AdMobBannerSize type might be AdMobBannerSize from plugin
+                    console.log('AdMob banner size changed:', sizeInfo);
+                    if (sizeInfo && sizeInfo.height > 0) {
+                        // The height from the plugin might be in native pixels.
+                        // We might need to convert it to CSS pixels if it's too large.
+                        // However, for standard banners (50dp), it often maps well enough.
+                        // For adaptive banners, this height is crucial.
+                        // Let's assume the height is directly usable as CSS pixels for now.
+                        // A common banner height is 50px. If adaptive, it could be more.
+                        // The plugin should provide height in device-independent pixels (dp/pt).
+                        adjustBodyPaddingForAd(sizeInfo.height);
+                    }
+                });
+
+                AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (error) => {
+                    console.error('AdMob banner failed to load:', error);
+                    resetBodyPaddingForAd();
+                });
+
+                AdMob.addListener(BannerAdPluginEvents.Closed, () => {
+                    console.log('AdMob banner closed.');
+                    resetBodyPaddingForAd();
+                });
+
+
                 AdMob.initialize({
-                    requestTrackingAuthorization: true, // Optional: if you want to request tracking authorization via AdMob
-                    testingDevices: [], // Add test device IDs if needed: e.g., ["YOUR_TEST_DEVICE_ID"]
-                    initializeForTesting: true, // Set to true for test ads from Google, false for production
+                    requestTrackingAuthorization: true,
+                    testingDevices: ["d360b0d4dcfcb2776b7ee3f11c51b788"], // Added user's test device ID from logs
+                    initializeForTesting: true,
                 })
                 .then(() => {
-                    // console.log("AdMob initialized successfully.");
-                    // Now show the banner ad
-                    AdMob.showBanner({
-                        adId: "ca-app-pub-6940502431077467/3842216044", // Replace with your actual Banner Ad Unit ID
-                        adSize: "BANNER", // or "ADAPTIVE_BANNER", "SMART_BANNER" etc.
-                        position: "BOTTOM_CENTER", // AdMob will handle placing it at bottom. Our CSS container is a fallback or for web.
-                        margin: 0, // Margin in pixels, if needed
-                        isTesting: true, // IMPORTANT: Set to true for development/testing, false for production
-                        // npa: true, // Non-Personalized Ads, if consent requires it
-                    })
-                    .then(() => {
-                        // console.log("Banner ad shown successfully.");
-                        // If the ad is loaded into #ad-banner-container by native code, no further JS action needed for placement.
-                        // If native code expects a specific div ID to be passed, adjust the call.
-                        // The current plan implies the native SDK handles placement within the container we made.
-                    })
-                    .catch(error => {
-                        console.error("Error showing banner ad:", error);
-                    });
+                    console.log("AdMob initialized successfully for non-pro user.");
+                    const adOptions = {
+                        adId: "ca-app-pub-6940502431077467/3842216044",
+                        adSize: "ADAPTIVE_BANNER", // Changed to ADAPTIVE_BANNER for better fit
+                        position: "BOTTOM_CENTER",
+                        margin: 0,
+                        isTesting: true,
+                    };
+                    AdMob.showBanner(adOptions)
+                        .then(() => {
+                            console.log("AdMob showBanner called.");
+                            // At this point, the banner is requested.
+                            // The SizeChanged event will handle padding.
+                        })
+                        .catch(err => {
+                            console.error("Error calling showBanner:", err);
+                            resetBodyPaddingForAd();
+                        });
                 })
                 .catch(error => {
                     console.error("Error initializing AdMob:", error);
+                    resetBodyPaddingForAd();
                 });
             } else {
-                console.warn("AdMob Capacitor plugin not available. Banner ad will not be shown.");
-                // Fallback or hide #ad-banner-container if plugin isn't there
-                const adBannerContainer = document.getElementById('ad-banner-container');
-                if (adBannerContainer) {
-                    // adBannerContainer.style.display = 'none'; // Or add a class to hide it
-                }
+                console.warn("AdMob Capacitor plugin not available or user is Pro. Banner ad will not be shown or will be hidden.");
+                // Ensure padding is reset if plugin becomes unavailable after being available
+                resetBodyPaddingForAd();
             }
         } // Closing brace for if (!window.isProUser)
+        // Ensure updateUserProStatusUI also calls resetBodyPaddingForAd when user becomes Pro
+        // and potentially re-shows ad (which would trigger listeners) if user becomes non-Pro.
         });
