@@ -172,28 +172,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (kochPlayBtn) kochPlayBtn.classList.remove('hidden');
             if (kochAnswerInput) {
                 kochAnswerInput.disabled = false;
-                // kochAnswerInput.classList.remove('hidden'); // Visibility handled below
+                kochAnswerInput.classList.remove('hidden'); // Ensure input field is visible
                 kochAnswerInput.value = ''; // Clear previous input
-            }
-            if (kochFeedbackMessage) kochFeedbackMessage.textContent = '';
-
-            renderKochInputButtons(); // Render buttons for the new session
-
-            // Adjust kochAnswerInput visibility based on screen size and if buttons are present
-            if (kochAnswerInput && kochInputButtonsContainer) { // Ensure both containers exist
-                if (kochInputButtonsContainer.hasChildNodes() && !window.matchMedia("(min-width: 768px)").matches) {
-                    // If buttons ARE present AND it's a mobile/smaller screen
-                    kochAnswerInput.classList.add('hidden');
-                    console.log("[Koch Method] Mobile view: Hiding text input, character buttons are primary.");
-                } else {
-                    // Desktop view, or mobile view if no character buttons rendered (e.g. no unlocked chars yet)
-                    kochAnswerInput.classList.remove('hidden');
-                    if (window.matchMedia("(min-width: 768px)").matches) {
-                        kochAnswerInput.focus(); // Focus only on desktop
-                    }
-                    console.log("[Koch Method] Desktop/Fallback: Ensuring text input is visible.");
+                // On mobile, focus might not be desired if using on-screen buttons.
+                // On desktop, it's good.
+                if (window.matchMedia("(min-width: 768px)").matches) {
+                    kochAnswerInput.focus();
                 }
             }
+            if (kochFeedbackMessage) kochFeedbackMessage.textContent = '';
+            renderKochInputButtons(); // Render buttons for the new session
+
 
             // Optionally, automatically play the first character
             playNextKochCharacter();

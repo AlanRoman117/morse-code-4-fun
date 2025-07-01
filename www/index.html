@@ -6,9 +6,6 @@
     <meta name="theme-color" content="#000000"/>
     <link rel="manifest" href="manifest.json">
     <title>Morse Code Learner</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&family=Merriweather&family=Special+Elite&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
@@ -266,16 +263,10 @@
                     </div>
                 </div>
 
-                <!-- Theme Toggle Switch -->
+                <!-- Theme Toggle Button Moved Here -->
                 <h2 class="section-title text-2xl font-semibold mt-6 mb-3 text-center">Appearance</h2>
-                <div class="p-4 flex justify-center"> <!-- Centering container -->
-                    <div class="setting-item w-full max-w-xs sm:max-w-sm md:max-w-md"> <!-- Control width of the item -->
-                      <label for="theme-toggle" class="text-sm font-medium text-gray-300">Dark Mode</label>
-                      <label class="switch">
-                        <input type="checkbox" id="theme-toggle">
-                        <span class="slider round"></span>
-                      </label>
-                    </div>
+                <div class="flex items-center justify-center p-4">
+                    <button id="toggle-theme-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Toggle Dark/Light Mode</button>
                 </div>
 
                 <div class="settings mb-6"> <!-- Moved Morse Playback Settings -->
@@ -356,12 +347,7 @@
             </div>
             <!-- Flex container for tapper and button -->
             <div class="flex justify-center items-center gap-2 md:gap-4 mb-2 md:mb-3">
-                <div id="tapper" class="tapper-assembly">
-                    <div class="tapper-base"></div>
-                    <div class="tapper-lever">
-                        <div class="tapper-key-surface"></div> <!-- This will be the main visual and interactive part of the key -->
-                    </div>
-                </div>
+                <div id="tapper" class="tapper shadow-lg">Tap!</div> <!-- Removed mx-auto as flex handles centering -->
                 <button id="spaceButton" title="End Letter" class="text-sm bg-blue-500 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Word<br>Space</button>
             </div>
             <!-- Output area remains below -->

@@ -122,71 +122,64 @@ private class AudioManager {
 }
 
 
-// MARK: - Color Palette (Analogue Theme)
+// MARK: - Color Palette (Simplified)
+// In a real app, these would be in Assets.xcassets for full light/dark mode support.
 private struct Theme {
-    // Analogue Theme Colors - Assuming a single theme for now, not adapting to light/dark system mode.
-    // If light/dark mode adaptation of this analogue theme is needed, that's a further step.
-    static let appBackground = Color(hex: "#fdfdf5") // Off-white/cream
-    static let textPrimary = Color(hex: "#3d3d3d")   // Dark sepia/charcoal
-    static let textSecondary = Color(hex: "#5a4a3a") // Darker sepia for less emphasis
-
-    static let morseText = Color(hex: "#3d3d3d") // Dark sepia for Morse code text
-    static let liveMorseText = Color(hex: "#8b7355") // Aged brass for live input display
-
-    static let accentBrass = Color(hex: "#a98d6a")
-    static let accentBrassDarker = Color(hex: "#8b7355") // Aged brass
-
-    static let surfaceBackground = Color(hex: "#f0eade") // Lighter parchment for input boxes, display boxes
-    static let surfaceBorder = Color(hex: "#8b7355")     // Aged brass border for surfaces
-
-    // Button specific variations
-    static let buttonBackground = accentBrass
-    static let buttonText = appBackground // Cream text on brass buttons
-    static let buttonBorder = accentBrassDarker
-    
-    static let buttonHoverBackground = Color(hex: "#b99d7a") // Slightly lighter brass
-    static let buttonActiveBackground = accentBrassDarker // Darker brass when pressed
-
-    static let tapAreaBackground = accentBrass
-    static let tapAreaActiveBackground = buttonActiveBackground
-    static let tapAreaText = appBackground
-
-    // For other specific actions if needed (positive, warning, destructive)
-    // These can retain some color indication but muted to fit the theme, or use brass variations.
-    // For now, let's make them variations of brass or a neutral sepia.
-    static let positiveAction = Color(hex: "#7a8b6a") // Muted green/brass
-    static let warningAction = Color(hex: "#c0a060")  // Old gold / darker yellow brass
-    static let destructiveAction = Color(hex: "#8b5a5a") // Muted red/brown
-
-    static let buttonCornerRadius: CGFloat = 4 // More squared-off for vintage feel
-    static let displayCornerRadius: CGFloat = 3
-}
-
-// Helper extension to initialize Color from HEX (useful for SwiftUI)
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (255, 0, 0, 0) // Default to black if hex is invalid
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue:  Double(b) / 255,
-            opacity: Double(a) / 255
-        )
+    static func color(light: Color, dark: Color, scheme: ColorScheme) -> Color {
+        return scheme == .dark ? dark : light
     }
+
+    // Define base colors for light and dark mode
+    static let lightAppBackground = Color(red: 0.96, green: 0.96, blue: 0.98)
+    static let darkAppBackground = Color(red: 0.12, green: 0.12, blue: 0.18)
+
+    static let lightSurfaceBackground = Color.white
+    static let darkSurfaceBackground = Color(red: 0.18, green: 0.18, blue: 0.24)
+
+    static let lightPrimaryAction = Color(red: 0.0, green: 0.45, blue: 0.85)
+    static let darkPrimaryAction = Color(red: 0.2, green: 0.6, blue: 0.95)
+    
+    static let lightTapArea = Color(red: 0.1, green: 0.5, blue: 0.9)
+    static let darkTapArea = Color(red: 0.25, green: 0.55, blue: 0.9)
+
+
+    static let lightSecondaryAction = Color(red: 0.5, green: 0.5, blue: 0.55)
+    static let darkSecondaryAction = Color(red: 0.45, green: 0.45, blue: 0.5)
+    
+    static let lightPositiveAction = Color(red: 0.2, green: 0.7, blue: 0.3)
+    static let darkPositiveAction = Color(red: 0.3, green: 0.8, blue: 0.4)
+
+    static let lightWarningAction = Color(red: 0.9, green: 0.6, blue: 0.0)
+    static let darkWarningAction = Color(red: 1.0, green: 0.7, blue: 0.1)
+
+    static let lightDestructiveAction = Color(red: 0.85, green: 0.25, blue: 0.25)
+    static let darkDestructiveAction = Color(red: 0.9, green: 0.3, blue: 0.3)
+
+    static let lightTextPrimary = Color.black
+    static let darkTextPrimary = Color.white
+
+    static let lightTextSecondary = Color(white: 0.4)
+    static let darkTextSecondary = Color(white: 0.75)
+
+    static let lightMorseText = Color(red: 0.05, green: 0.05, blue: 0.4) // Darker blue for Morse on light
+    static let darkMorseText = Color(red: 0.9, green: 0.85, blue: 0.5) // Yellowish for Morse
+
+    // Dynamic Colors
+    static func appBackground(for scheme: ColorScheme) -> Color { color(light: lightAppBackground, dark: darkAppBackground, scheme: scheme) }
+    static func surfaceBackground(for scheme: ColorScheme) -> Color { color(light: lightSurfaceBackground, dark: darkSurfaceBackground, scheme: scheme) }
+    static func primaryAction(for scheme: ColorScheme) -> Color { color(light: lightPrimaryAction, dark: darkPrimaryAction, scheme: scheme) }
+    static func tapArea(for scheme: ColorScheme) -> Color { color(light: lightTapArea, dark: darkTapArea, scheme: scheme) }
+    static func tapAreaActive(for scheme: ColorScheme) -> Color { color(light: lightPrimaryAction.opacity(0.7), dark: darkPrimaryAction.opacity(0.7), scheme: scheme) }
+    static func secondaryAction(for scheme: ColorScheme) -> Color { color(light: lightSecondaryAction, dark: darkSecondaryAction, scheme: scheme) }
+    static func positiveAction(for scheme: ColorScheme) -> Color { color(light: lightPositiveAction, dark: darkPositiveAction, scheme: scheme) }
+    static func warningAction(for scheme: ColorScheme) -> Color { color(light: lightWarningAction, dark: darkWarningAction, scheme: scheme) }
+    static func destructiveAction(for scheme: ColorScheme) -> Color { color(light: lightDestructiveAction, dark: darkDestructiveAction, scheme: scheme) }
+    static func textPrimary(for scheme: ColorScheme) -> Color { color(light: lightTextPrimary, dark: darkTextPrimary, scheme: scheme) }
+    static func textSecondary(for scheme: ColorScheme) -> Color { color(light: lightTextSecondary, dark: darkTextSecondary, scheme: scheme) }
+    static func morseText(for scheme: ColorScheme) -> Color { color(light: lightMorseText, dark: darkMorseText, scheme: scheme) }
+    
+    static let buttonCornerRadius: CGFloat = 10
+    static let displayCornerRadius: CGFloat = 8
 }
 
 // MARK: - Haptic Manager (Simplified) - REMOVED
@@ -194,190 +187,186 @@ extension Color {
 
 
 struct ContentView: View {
-    // @Environment(\.colorScheme) var colorScheme // Removed, theme is now fixed
-    @StateObject private var audioManager = AudioManager()
+    @Environment(\.colorScheme) var colorScheme
+    @StateObject private var audioManager = AudioManager() // Instantiate AudioManager
 
+    // @GestureState private var isLongPressingForDash = false // REMOVED - Was for haptics
+
+    // State variables for the UI
     @State private var currentMorseCharDisplay: String = ""
     @State private var fullMorseStringDisplay: String = ""
     @State private var decodedTextDisplay: String = ""
     @State private var morsePreviewImage: UIImage? = nil
     @State private var debouncedUpdatePreviewTimer: Timer? = nil
 
+    // Internal state for logic
     @State private var activeMorseChar: String = ""
+
+    // Morse code converter instance
     private let morseConverter = MorseCodeConverter()
+
+    // Reference to the MessagesViewController to send messages
     var messagesViewController: MessagesViewController?
 
+    // Constants for tap detection
     private let shortTapThreshold: TimeInterval = 0.25
     private let letterTimeoutDuration: TimeInterval = 1.0
 
+    // Timer and tap state
     @State private var letterTimeoutTimer: Timer? = nil
     @State private var lastTapTimestamp: Date = Date()
     @State private var isLongPressTriggered: Bool = false
     @State private var isTapAreaPressed: Bool = false
 
+    // Predictive Text State
     @State private var predictiveChars: [(char: String, morse: String, isExactMatch: Bool)] = []
     @State private var showPredictiveDisplay: Bool = false
     @State private var predictiveDisplayTimer: Timer? = nil
     private let predictiveDisplayDuration: TimeInterval = 6.0
-    @State private var predictionUpdateDebounceTimer: Timer? = nil
-    private let predictionDebounceInterval: TimeInterval = 0.1
+    @State private var predictionUpdateDebounceTimer: Timer? = nil // For debouncing prediction updates
+    private let predictionDebounceInterval: TimeInterval = 0.1 // 100ms debounce
     
-    // Removed computed color properties, will use Theme statics directly.
+    private var currentAppBackground: Color { Theme.appBackground(for: colorScheme) }
+    private var currentSurfaceBackground: Color { Theme.surfaceBackground(for: colorScheme) }
+    private var currentPrimaryAction: Color { Theme.primaryAction(for: colorScheme) }
+    private var currentTapArea: Color { Theme.tapArea(for: colorScheme) }
+    private var currentTapAreaActive: Color { Theme.tapAreaActive(for: colorScheme) }
+    private var currentSecondaryAction: Color { Theme.secondaryAction(for: colorScheme) }
+    private var currentPositiveAction: Color { Theme.positiveAction(for: colorScheme) }
+    private var currentWarningAction: Color { Theme.warningAction(for: colorScheme) }
+    private var currentDestructiveAction: Color { Theme.destructiveAction(for: colorScheme) }
+    private var currentTextPrimary: Color { Theme.textPrimary(for: colorScheme) }
+    private var currentTextSecondary: Color { Theme.textSecondary(for: colorScheme) }
+    private var currentMorseText: Color { Theme.morseText(for: colorScheme) }
+
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 16) { // Consistent spacing
             Text("Morse Code Tapper")
-                .font(.custom("SpecialElite-Regular", size: 26)) // Updated Font
-                .foregroundColor(Theme.textPrimary)
+                .font(.title2).bold()
+                .foregroundColor(currentTextPrimary)
                 .padding(.top)
 
+            // Display Areas
             VStack(alignment: .leading, spacing: 10) {
                 Text("LIVE: \(currentMorseCharDisplay.isEmpty ? "-" : currentMorseCharDisplay)")
-                    .font(.custom("CourierPrime-Bold", size: 20)) // Updated Font
-                    .foregroundColor(Theme.liveMorseText) // Updated Color
+                    .font(.custom("Menlo-Bold", size: 18))
+                    .foregroundColor(currentPrimaryAction)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .lineLimit(1)
                     .padding(.horizontal, 5)
 
-                DisplayBox(title: "MORSE", content: $fullMorseStringDisplay,
-                           font: .custom("CourierPrime-Regular", size: 16), // Updated Font
-                           textColor: Theme.morseText,
-                           backgroundColor: Theme.surfaceBackground)
-                DisplayBox(title: "TEXT", content: $decodedTextDisplay,
-                           font: .custom("Merriweather-Regular", size: 17), // Updated Font
-                           textColor: Theme.textPrimary,
-                           backgroundColor: Theme.surfaceBackground)
+
+                DisplayBox(title: "MORSE", content: $fullMorseStringDisplay, font: .custom("Menlo", size: 16), textColor: currentMorseText, backgroundColor: currentSurfaceBackground)
+                DisplayBox(title: "TEXT", content: $decodedTextDisplay, font: .headline, textColor: currentTextPrimary, backgroundColor: currentSurfaceBackground)
             }
             .padding(.horizontal)
 
             Spacer()
             
+            // Predictive Display Area
             if showPredictiveDisplay {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         if predictiveChars.isEmpty && !activeMorseChar.isEmpty {
-                             PredictiveBadgeView(prediction: (char: "No match", morse: "", isExactMatch: false))
+                             PredictiveBadgeView(prediction: (char: "No match", morse: "", isExactMatch: false), charColor: currentTextSecondary, bgColor: currentSurfaceBackground.opacity(0.7))
                         } else {
                             ForEach(predictiveChars, id: \.char) { prediction in
-                                PredictiveBadgeView(prediction: prediction)
+                                PredictiveBadgeView(prediction: prediction, charColor: currentTextPrimary, bgColor: currentSurfaceBackground)
                             }
                         }
                     }
                     .padding(.horizontal)
                 }
-                .frame(height: 40)
+                .frame(height: 40) // Adjust height as needed
                 .transition(.opacity.combined(with: .move(edge: .bottom)))
-                .onTapGesture { startPredictiveDisplayTimer() }
+                .onTapGesture { // Allow user to tap display to reset timer (optional)
+                    startPredictiveDisplayTimer()
+                }
             } else {
+                // Placeholder to maintain layout stability when predictive display is hidden
                 Spacer().frame(height: 40)
             }
 
-            // --- Antique Morse Key Tapper ---
-            ZStack {
-                // Base
-                RoundedRectangle(cornerRadius: Theme.buttonCornerRadius * 2)
-                    .fill(LinearGradient(gradient: Gradient(colors: [Color(hex: "#8B4513"), Color(hex: "#7A3D0F")]), startPoint: .top, endPoint: .bottom)) // Wood gradient
-                    .frame(width: 160, height: 50)
-                    .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 5)
 
-                // Lever
-                Rectangle()
-                    .fill(LinearGradient(gradient: Gradient(colors: [Color(hex: "#c0c0c0"), Color(hex: "#a9a9a9")]), startPoint: .leading, endPoint: .trailing)) // Metal gradient
-                    .frame(width: 15, height: 70)
-                    .cornerRadius(3)
-                    .offset(y: -35) // Position lever on top of the base
-                    .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 2)
-                    .rotation3DEffect(
-                        .degrees(isTapAreaPressed ? 5 : 0),
-                        axis: (x: 1, y: 0, z: 0),
-                        anchor: .bottom
-                    )
-
-                // Knob
-                Circle()
-                    .fill(Color(hex: "#333333")) // Bakelite/dark color
-                    .frame(width: 55, height: 55)
-                    .overlay(
-                        Circle().stroke(Color(hex: "#1a1a1a"), lineWidth: 2)
-                    )
-                    .shadow(color: Color.black.opacity(0.4), radius: 3, x: 0, y: isTapAreaPressed ? 1 : 3)
-                    .offset(y: isTapAreaPressed ? -68 : -75) // Position knob on lever, moves down when pressed
-                    .overlay(
-                         Text("TAP")
-                            .font(.custom("SpecialElite-Regular", size: 14))
-                            .foregroundColor(Color(hex: "#a0a0a0"))
-                    )
-
+            // Tap Button - Circular
+            Button(action: {
+                 // Action intentionally empty, gestures handle primary interaction.
+            }) {
+                Text("TAP") 
+                    .font(.system(size: 24, weight: .bold, design: .rounded)) 
+                    .padding()
+                    .frame(width: 110, height: 110) 
+                    .background(isTapAreaPressed ? currentTapAreaActive : currentTapArea)
+                    .foregroundColor(.white)
+                    .clipShape(Circle()) 
+                    .scaleEffect(isTapAreaPressed ? 0.95 : 1.0) 
+                    .shadow(color: currentTapArea.opacity(0.4), radius: isTapAreaPressed ? 5 : 10, x: 0, y: isTapAreaPressed ? 3 : 6) 
             }
-            .frame(width: 180, height: 120) // Overall frame for the tapper assembly
-            .contentShape(Rectangle()) // Make the whole ZStack tappable
+            .animation(.spring(response: 0.15, dampingFraction: 0.5), value: isTapAreaPressed)
             .gesture(
                 LongPressGesture(minimumDuration: shortTapThreshold)
-                    .onChanged { pressing in // Use onChanged to set isTapAreaPressed for visual feedback during press
-                        if pressing {
-                            self.isTapAreaPressed = true
-                            // No sound or input handling here yet, only onEnded
-                        } else {
-                            // This case might not be reliably hit for LongPressGesture's end if TapGesture interferes.
-                            // isTapAreaPressed is reset in .onEnded of both gestures.
-                        }
-                    }
-                    .onEnded { _ in
-                        self.isTapAreaPressed = true // Ensure it's true for the action
+                    .onEnded { _ in 
+                        self.isTapAreaPressed = true 
                         self.isLongPressTriggered = true
-                        audioManager.playDashSound()
+                        audioManager.playDashSound() // Play dash sound
                         self.handleTapInput(isLong: true)
-                        // Short delay to allow visual feedback before resetting
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.isTapAreaPressed = false }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { 
+                            self.isTapAreaPressed = false
+                        }
                     }
             )
             .simultaneousGesture(
                 TapGesture()
                     .onEnded {
-                        if !self.isLongPressTriggered {
-                            self.isTapAreaPressed = true // Visual feedback for tap
-                            audioManager.playDotSound()
+                        if !self.isLongPressTriggered { 
+                            self.isTapAreaPressed = true
+                            audioManager.playDotSound() // Play dot sound
                             self.handleTapInput(isLong: false)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.isTapAreaPressed = false }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                               self.isTapAreaPressed = false
+                            }
                         }
-                        // Reset long press trigger flag after any tap ends,
-                        // ensuring it's fresh for the next interaction sequence.
                         self.isLongPressTriggered = false
                     }
             )
-            .animation(.spring(response: 0.1, dampingFraction: 0.6), value: isTapAreaPressed) // Apply animation to overall ZStack
-            .padding(.vertical, 15) // Give some vertical space
+            .padding(.horizontal)
+            .padding(.vertical, 5)
 
+
+            // Control Buttons
             HStack(spacing: 12) {
-                actionButton(title: "Next Letter", baseColor: Theme.positiveAction, action: processCurrentCharAction, audioFeedback: audioManager.playButtonFeedbackSound)
-                actionButton(title: "Word Space", baseColor: Theme.warningAction, action: addWordSpaceAction, audioFeedback: audioManager.playButtonFeedbackSound)
+                actionButton(title: "Next Letter", color: currentPositiveAction, action: processCurrentCharAction, audioFeedback: audioManager.playButtonFeedbackSound)
+                actionButton(title: "Word Space", color: currentWarningAction, action: addWordSpaceAction, audioFeedback: audioManager.playButtonFeedbackSound)
             }
             .padding(.horizontal)
             
             HStack(spacing: 12) {
-                actionButton(title: "Clear All", baseColor: Theme.destructiveAction, icon: "trash", action: clearAllAction, audioFeedback: audioManager.playClearSound)
-                actionButton(title: "Backspace", baseColor: Theme.accentBrassDarker, icon: "delete.left", action: deleteLastCharAction, audioFeedback: audioManager.playButtonFeedbackSound)
+                actionButton(title: "Clear All", color: currentDestructiveAction, icon: "trash", action: clearAllAction, audioFeedback: audioManager.playClearSound)
+                actionButton(title: "Backspace", color: currentSecondaryAction, icon: "delete.left", action: deleteLastCharAction, audioFeedback: audioManager.playButtonFeedbackSound)
             }
             .padding(.horizontal)
+
 
             Spacer()
             
+            // Preview Section
             if !fullMorseStringDisplay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("MESSAGE PREVIEW")
-                        .font(.custom("SpecialElite-Regular", size: 12)) // Updated Font
-                        .foregroundColor(Theme.textSecondary) // Updated Color
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(currentTextSecondary)
                         .padding(.leading, 15)
 
                     HStack(spacing: 0) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(decodedTextDisplay.isEmpty ? "Morse Code Message" : decodedTextDisplay)
-                                .font(.custom("Merriweather-Regular", size: 15)) // Updated Font
-                                .foregroundColor(Theme.textPrimary)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(currentTextPrimary) // Use themed text color
                                 .lineLimit(2)
                             Text(fullMorseStringDisplay.trimmingCharacters(in: .whitespacesAndNewlines))
-                                .font(.custom("CourierPrime-Regular", size: 12)) // Updated Font
-                                .foregroundColor(Theme.textSecondary)
+                                .font(.system(size: 12, weight: .regular))
+                                .foregroundColor(currentTextSecondary) // Use themed text color
                                 .lineLimit(1)
                         }
                         .padding(.vertical, 10)
@@ -390,47 +379,47 @@ struct ContentView: View {
                             Image(uiImage: previewImage)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(maxHeight: 30)
+                                .frame(maxHeight: 30) // Ensure this is appropriate for the image generator
                                 .padding(.trailing, 12)
                         }
                     }
-                    .frame(minHeight: 50)
-                    .background(Theme.surfaceBackground.opacity(0.5)) // Slightly transparent surface
-                    .cornerRadius(Theme.displayCornerRadius) // Updated CornerRadius
+                    .frame(minHeight: 50) // Ensure min height
+                    .background(Theme.surfaceBackground(for: colorScheme == .dark ? .light : .dark).opacity(0.1)) // Slightly contrasting background for preview
+                    .cornerRadius(12)
                     .overlay(
-                        RoundedRectangle(cornerRadius: Theme.displayCornerRadius) // Updated CornerRadius
-                            .stroke(Theme.surfaceBorder, lineWidth: 1) // Updated Border
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Theme.color(light: Color.gray.opacity(0.3), dark: Color.gray.opacity(0.4), scheme: colorScheme), lineWidth: 1)
                     )
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 10)
             }
 
+
             Button {
-                audioManager.playSendSound()
+                audioManager.playSendSound() // Play send sound
                 sendMessageAction()
             } label: {
                 Label("Send Message", systemImage: "paperplane.fill")
-                    .font(.custom("SpecialElite-Regular", size: 18)) // Updated Font
+                    .fontWeight(.semibold)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(Theme.accentBrass) // Updated Color
-                    .foregroundColor(Theme.buttonText) // Updated Color
-                    .cornerRadius(Theme.buttonCornerRadius) // Updated CornerRadius
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.buttonCornerRadius)
-                            .stroke(Theme.buttonBorder, lineWidth: 1.5) // Added border
-                    )
+                    .background(currentPrimaryAction)
+                    .foregroundColor(.white)
+                    .cornerRadius(Theme.buttonCornerRadius)
             }
             .disabled(fullMorseStringDisplay.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .padding(.horizontal)
         }
         .padding(.bottom)
-        .background(Theme.appBackground.edgesIgnoringSafeArea(.all)) // Updated Color
+        .background(currentAppBackground.edgesIgnoringSafeArea(.all)) // Apply background to whole view
         .onAppear {
-            // AudioManager init starts the engine
+            // The AudioManager's init now starts the engine.
+            // We could add a specific "prime" or "warmup" call here if first sound has latency.
+            // For now, relying on init.
+            // Example: audioManager.primeEngine()
         }
-        .onChange(of: fullMorseStringDisplay) { oldValue, newValue in
+        .onChange(of: fullMorseStringDisplay) { oldValue, newValue in // Updated to modern onChange
             debouncedUpdatePreviewTimer?.invalidate()
             debouncedUpdatePreviewTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
                 updatePreviewImage(morse: newValue)
@@ -438,10 +427,11 @@ struct ContentView: View {
         }
     }
 
+    // Reusable Action Button
     @ViewBuilder
-    private func actionButton(title: String, baseColor: Color, icon: String? = nil, action: @escaping () -> Void, audioFeedback: (() -> Void)? = nil) -> some View {
+    private func actionButton(title: String, color: Color, icon: String? = nil, action: @escaping () -> Void, audioFeedback: (() -> Void)? = nil) -> some View {
         Button {
-            audioFeedback?()
+            audioFeedback?() // Call audio feedback if provided
             action()
         } label: {
             HStack {
@@ -450,52 +440,45 @@ struct ContentView: View {
                 }
                 Text(title)
             }
-            .font(.custom("SpecialElite-Regular", size: 16)) // Updated Font
-            .padding(.vertical, 10) // Adjusted padding
+            .fontWeight(.medium)
+            .padding(.vertical, 12)
             .padding(.horizontal)
             .frame(maxWidth: .infinity)
-            .background(baseColor) // Use baseColor directly, or Theme.buttonBackground
-            .foregroundColor(Theme.buttonText) // Updated Color
-            .cornerRadius(Theme.buttonCornerRadius) // Updated CornerRadius
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.buttonCornerRadius)
-                    .stroke(Theme.buttonBorder, lineWidth: 1.5) // Added border
-            )
-            .shadow(color: baseColor.opacity(0.3), radius: 2, x: 1, y: 2) // Subtle shadow
+            .background(color)
+            .foregroundColor(.white)
+            .cornerRadius(Theme.buttonCornerRadius)
         }
     }
 
+    // Reusable Display Box for Morse/Text
     private struct DisplayBox: View {
         let title: String
         @Binding var content: String
         let font: Font
         let textColor: Color
         let backgroundColor: Color
-        // @Environment(\.colorScheme) var colorScheme // Removed
+        @Environment(\.colorScheme) var colorScheme
 
         var body: some View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.custom("SpecialElite-Regular", size: 12)) // Updated Font
-                    .foregroundColor(Theme.textSecondary) // Updated Color
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(Theme.textSecondary(for: colorScheme))
                 ScrollView(.vertical, showsIndicators: true) {
                     Text(content.isEmpty ? "-" : content)
-                        .font(font) // Font passed in
-                        .foregroundColor(textColor) // Color passed in
-                        .padding(8) // Adjusted padding
-                        .frame(maxWidth: .infinity, minHeight: 40, alignment: .topLeading)
-                        .lineLimit(nil)
+                        .font(font)
+                        .foregroundColor(textColor)
+                        .padding(10)
+                        .frame(maxWidth: .infinity, minHeight: 50, alignment: .topLeading) // Min height for small content
+                        .lineLimit(nil) // Allow unlimited lines
                 }
-                .background(backgroundColor) // Color passed in
-                .cornerRadius(Theme.displayCornerRadius) // Updated CornerRadius
-                .overlay(
-                    RoundedRectangle(cornerRadius: Theme.displayCornerRadius) // Updated CornerRadius
-                        .stroke(Theme.surfaceBorder, lineWidth: 1) // Added border
-                )
-                .frame(maxHeight: 80) // Adjusted maxHeight
+                .background(backgroundColor)
+                .cornerRadius(Theme.displayCornerRadius)
+                .frame(maxHeight: 100) // Max height before scrolling
             }
         }
     }
+
 
     private func updatePreviewImage(morse: String) {
         let trimmedMorse = morse.trimmingCharacters(in: .whitespacesAndNewlines)
