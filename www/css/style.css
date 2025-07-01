@@ -275,19 +275,21 @@ body {
 
 
         /* Settings tab specific (if any more needed beyond general) */
-        .light-theme #master-sound-toggle + div, .light-theme-container #master-sound-toggle + div { /* The visual part of the toggle */
-            background-color: #d1d5db; /* gray-300 for off state */
+        .light-theme #master-sound-toggle + .w-11.h-6, /* Target the specific track div for background */
+        .light-theme-container #master-sound-toggle + .w-11.h-6 {
+            background-color: #d1d5db; /* gray-300 for off state track */
         }
-        .light-theme #master-sound-toggle:checked + div, .light-theme-container #master-sound-toggle:checked + div {
-            background-color: #3b82f6; /* blue-500 for on state */
+        .light-theme #master-sound-toggle:checked + .w-11.h-6, /* Target the specific track div for background */
+        .light-theme-container #master-sound-toggle:checked + .w-11.h-6 {
+            background-color: #3b82f6; /* blue-500 for on state track */
         }
 
         /* Ensure toggle knob border is visible in light mode when OFF */
-        .light-theme #master-sound-toggle:not(:checked) + div::after,
-        .light-theme-container #master-sound-toggle:not(:checked) + div::after {
-            border-color: #6b7280; /* Tailwind gray-500, provides contrast for white knob on gray-300 track */
+        .light-theme #master-sound-toggle:not(:checked) + .w-11.h-6::after,
+        .light-theme-container #master-sound-toggle:not(:checked) + .w-11.h-6::after {
+            border-color: #6b7280; /* Tailwind gray-500, for white knob on gray-300 track */
         }
-        /* Note: Tailwind's `peer-checked:after:border-white` handles the knob border for the ON state */
+        /* Note: Tailwind's `peer-checked:after:border-white` handles the knob border for the ON state (white border on white knob) */
 
 
         /* Modal */
@@ -706,4 +708,19 @@ body.privacy-page.dark-theme {
 .privacy-page.dark-theme #privacyPolicyContent p,
 .privacy-page.dark-theme #privacyPolicyContent li {
     color: #f0f0f0; /* Global light text */
+}
+
+/* --- Base styles for Master Sound Toggle Circle --- */
+#master-sound-toggle + .w-11.h-6::after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 1.25rem; /* Equivalent to h-5/w-5 */
+    height: 1.25rem; /* Equivalent to h-5/w-5 */
+    background-color: #ffffff; /* Equivalent to bg-white */
+    border-radius: 9999px; /* Equivalent to rounded-full */
+    top: 2px; /* Equivalent to top-[2px] */
+    left: 2px; /* Equivalent to left-[2px] */
+    border: 1px solid #d1d5db; /* Default border, Tailwind's border-gray-300 */
+    transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out; /* Specific transitions */
 }
