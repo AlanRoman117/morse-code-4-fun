@@ -182,13 +182,22 @@ document.addEventListener('DOMContentLoaded', () => {
             kochStartBtn.classList.add('hidden');
             if (kochPlayBtn) kochPlayBtn.classList.remove('hidden');
             if (kochAnswerInput) {
-                kochAnswerInput.disabled = false;
-                kochAnswerInput.classList.remove('hidden'); // Ensure input field is visible
                 kochAnswerInput.value = ''; // Clear previous input
-                // On mobile, focus might not be desired if using on-screen buttons.
-                // On desktop, it's good.
                 if (window.matchMedia("(min-width: 768px)").matches) {
+                    // Desktop: show input, enable, make writable, focus
+                    kochAnswerInput.classList.remove('hidden');
+                    // Tailwind uses md:block, so ensure 'hidden' is removed if it was added for mobile
+                    // and rely on CSS for md:block to take effect.
+                    // Or, more directly: kochAnswerInput.style.display = 'block'; (or its default)
+                    kochAnswerInput.disabled = false;
+                    kochAnswerInput.readOnly = false;
                     kochAnswerInput.focus();
+                } else {
+                    // Mobile: hide input
+                    kochAnswerInput.classList.add('hidden');
+                    // kochAnswerInput.style.display = 'none';
+                    kochAnswerInput.disabled = true; // Still good practice
+                    kochAnswerInput.readOnly = true; // Still good practice
                 }
             }
             if (kochFeedbackMessage) kochFeedbackMessage.textContent = '';
@@ -196,7 +205,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             // Optionally, automatically play the first character
-            playNextKochCharacter();
+            // Ensure Web Audio API context (for playMorseSequence) is ready
+            if (typeof initAudio === 'function') {
+                initAudio(); // From main.js
+                if (typeof audioContext !== 'undefined' && audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
+                        console.log("Main audioContext resumed successfully by kochStartBtn.");
+                    }).catch(e => console.error("Error resuming main audioContext from kochStartBtn:", e));
+                }
+            }
+            // Ensure Tone.js AudioContext is started by user gesture
+            Tone.start().then(() => {
+                console.log("Tone.js AudioContext started successfully by kochStartBtn.");
+                playNextKochCharacter();
+            }).catch(error => {
+                console.error("Error starting Tone.js AudioContext from kochStartBtn:", error);
+                playNextKochCharacter(); // Attempt to play anyway
+            });
         });
     }
 
@@ -215,24 +240,49 @@ document.addEventListener('DOMContentLoaded', () => {
             if (kochStartBtn) kochStartBtn.classList.add('hidden'); // Keep original start btn hidden
             if (kochPlayBtn) kochPlayBtn.classList.remove('hidden');
             if (kochAnswerInput) {
-                kochAnswerInput.disabled = false;
-                kochAnswerInput.classList.remove('hidden'); // Ensure input field is visible
                 kochAnswerInput.value = ''; // Clear previous input
                 if (window.matchMedia("(min-width: 768px)").matches) {
+                    // Desktop: show input, enable, make writable, focus
+                    kochAnswerInput.classList.remove('hidden');
+                    kochAnswerInput.disabled = false;
+                    kochAnswerInput.readOnly = false;
                     kochAnswerInput.focus();
+                } else {
+                    // Mobile: hide input
+                    kochAnswerInput.classList.add('hidden');
+                    kochAnswerInput.disabled = true; // Still good practice
+                    kochAnswerInput.readOnly = true; // Still good practice
                 }
             }
             if (kochFeedbackMessage) kochFeedbackMessage.textContent = '';
             renderKochInputButtons(); // Render buttons for the new session
 
             // Play the first character of the new session
-            playNextKochCharacter();
+            // Ensure Web Audio API context (for playMorseSequence) is ready
+            if (typeof initAudio === 'function') {
+                initAudio(); // From main.js
+                if (typeof audioContext !== 'undefined' && audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
+                        console.log("Main audioContext resumed successfully by kochStartNewSessionBtn.");
+                    }).catch(e => console.error("Error resuming main audioContext from kochStartNewSessionBtn:", e));
+                }
+            }
+            // Ensure Tone.js AudioContext is started by user gesture
+            Tone.start().then(() => {
+                console.log("Tone.js AudioContext started successfully by kochStartNewSessionBtn.");
+                playNextKochCharacter();
+            }).catch(error => {
+                console.error("Error starting Tone.js AudioContext from kochStartNewSessionBtn:", error);
+                playNextKochCharacter(); // Attempt to play anyway
+            });
         });
     }
 
     // Add event listener for answer input (for desktop keyboard)
     if (kochAnswerInput) {
-        kochAnswerInput.addEventListener('input', function() { // Use function keyword for 'this'
+        kochAnswerInput.addEventListener('input', function(event) {
+            // Keyboard input is only for desktop, where the field is visible.
+            // No need for mobile check here if field is hidden on mobile.
             if (this.value.length === 1) { // maxlength="1"
                 handleKochAnswer(this.value.toUpperCase());
             }
@@ -299,6 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Toggling 'hidden' should be fine as 'md:flex' only applies at md breakpoint.
         });
     }
+
+    // Removed touchstart and focus listeners for kochAnswerInput as it will be hidden on mobile
 });
 
 // Function to reset Koch Method progress
@@ -358,9 +410,18 @@ function renderKochInputButtons() {
 
 // Function to handle Koch answer from input field or button
 function handleKochAnswer(userAnswer, clickedButtonElement = null) { // Added clickedButtonElement parameter
-    if (!kochAnswerInput || kochAnswerInput.disabled) { // Check if input is allowed
-        // This also implicitly checks if a session is active because kochAnswerInput is disabled when not.
-        console.log("Koch answer input ignored, input field is disabled or no session active.");
+    // If the call is from a button click, we should process it
+    // regardless of kochAnswerInput.disabled state (which is true on mobile).
+    // If it's not from a button (i.e., from keyboard input), then respect kochAnswerInput.disabled.
+    if (clickedButtonElement === null && (!kochAnswerInput || kochAnswerInput.disabled)) {
+        console.log("Koch answer input (from keyboard/text field) ignored, input field is disabled.");
+        return;
+    }
+
+    // Explicitly check if a session is active by seeing if the start button is hidden.
+    // This is a more reliable check for session state than just input field disabled status.
+    if (kochStartBtn && !kochStartBtn.classList.contains('hidden')) {
+        console.log("Koch answer input ignored, no active session (start button is visible).");
         return;
     }
 
