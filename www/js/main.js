@@ -752,6 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const adBannerContainer = document.getElementById('ad-banner-container');
             const adBannerBottom = document.getElementById('ad-banner-bottom'); // Specific placeholder in learn-practice tab
             const goProButtonInSettings = document.getElementById('go-pro-btn'); // Button in settings tab
+            const genericAdPlaceholders = document.querySelectorAll('.ad-placeholder-container');
 
             if (window.isProUser) {
                 // --- Hide Ads ---
@@ -761,6 +762,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (adBannerContainer) {
                      adBannerContainer.style.display = 'none';
                 }
+                genericAdPlaceholders.forEach(ad => {
+                    ad.style.display = 'none';
+                });
                 // If AdMob plugin is used, try to hide its banner
                 if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
                     const { AdMob } = window.Capacitor.Plugins;
@@ -779,12 +783,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- Show Ads ---
                 if (adBannerBottom) {
                     // Display based on original style, assuming 'flex' or 'block'
-                    // For simplicity, let's use 'block'. If it was 'flex', that needs to be known.
-                    adBannerBottom.style.display = 'block';
+                    // For simplicity, let's use 'flex' as it's a common display type for containers.
+                    // The CSS for .ad-placeholder-container uses 'display: flex'.
+                    adBannerBottom.style.display = 'flex';
                 }
                 if (adBannerContainer) {
-                    adBannerContainer.style.display = 'block';
+                    adBannerContainer.style.display = 'block'; // Or 'flex' if appropriate
                 }
+                genericAdPlaceholders.forEach(ad => {
+                    ad.style.display = 'flex'; // These are styled with display: flex in CSS
+                });
                 // If AdMob plugin is used, try to show its banner
                 if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
                     const { AdMob } = window.Capacitor.Plugins;
