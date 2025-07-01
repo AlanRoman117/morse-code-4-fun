@@ -34,7 +34,9 @@ loadUnlockedCharacters();
 let kochStartBtn, kochPlayBtn, kochAnswerInput, kochAccuracyDisplay, kochCharSetDisplay, kochFeedbackMessage, kochLevelsContainer,
     kochResetProgressBtn, kochResetModal, kochConfirmResetBtn, kochCancelResetBtn,
     toggleKochStatusBtn, kochStatusWrapper, kochInputButtonsContainer,
-    toggleKochLevelsBtn, kochLevelsWrapper; // Added for levels collapsible section
+    toggleKochLevelsBtn, kochLevelsWrapper, // Added for levels collapsible section
+    // Elements for Session Complete View
+    kochPracticeArea, kochSessionCompleteView, sessionFinalAccuracy, sessionCorrectChars, sessionTotalChars, kochStartNewSessionBtn;
 
 // Function to populate Koch Levels display
 function populateKochLevels() {
@@ -154,6 +156,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // kochLevelsWrapper = document.getElementById('koch-levels-wrapper'); // Wrapper div
     // We are toggling koch-levels-container directly as it has the md:flex property
 
+    // Session Complete View Elements
+    kochPracticeArea = document.getElementById('koch-practice-area');
+    kochSessionCompleteView = document.getElementById('koch-session-complete-view');
+    sessionFinalAccuracy = document.getElementById('session-final-accuracy');
+    sessionCorrectChars = document.getElementById('session-correct-chars');
+    sessionTotalChars = document.getElementById('session-total-chars');
+    kochStartNewSessionBtn = document.getElementById('koch-start-new-session-btn');
+
+
     // Initial UI setup
     if (kochPlayBtn) kochPlayBtn.classList.add('hidden');
     if (kochAnswerInput) kochAnswerInput.disabled = true; // Disable until session starts
@@ -185,6 +196,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             // Optionally, automatically play the first character
+            playNextKochCharacter();
+        });
+    }
+
+    if (kochStartNewSessionBtn) {
+        kochStartNewSessionBtn.addEventListener('click', () => {
+            // Hide session complete view
+            if (kochSessionCompleteView) kochSessionCompleteView.classList.add('hidden');
+            // Show practice area
+            if (kochPracticeArea) kochPracticeArea.classList.remove('hidden');
+
+            // Reset session stats
+            sessionStats = { correct: 0, total: 0 };
+            updateKochDisplays();
+
+            // Update UI elements (similar to kochStartBtn)
+            if (kochStartBtn) kochStartBtn.classList.add('hidden'); // Keep original start btn hidden
+            if (kochPlayBtn) kochPlayBtn.classList.remove('hidden');
+            if (kochAnswerInput) {
+                kochAnswerInput.disabled = false;
+                kochAnswerInput.classList.remove('hidden'); // Ensure input field is visible
+                kochAnswerInput.value = ''; // Clear previous input
+                if (window.matchMedia("(min-width: 768px)").matches) {
+                    kochAnswerInput.focus();
+                }
+            }
+            if (kochFeedbackMessage) kochFeedbackMessage.textContent = '';
+            renderKochInputButtons(); // Render buttons for the new session
+
+            // Play the first character of the new session
             playNextKochCharacter();
         });
     }
@@ -403,34 +444,55 @@ function handleKochAnswer(userAnswer, clickedButtonElement = null) { // Added cl
 // Function to handle session completion
 function handleSessionCompletion(accuracy) {
     console.log(`Session complete. Accuracy: ${accuracy.toFixed(2)}%`);
+
+    // Hide practice area and show session complete view
+    if (kochPracticeArea) kochPracticeArea.classList.add('hidden');
+    if (kochSessionCompleteView) kochSessionCompleteView.classList.remove('hidden');
+
+    // Populate session complete view
+    if (sessionFinalAccuracy) sessionFinalAccuracy.textContent = `${accuracy.toFixed(0)}%`;
+    if (sessionCorrectChars) sessionCorrectChars.textContent = sessionStats.correct;
+    if (sessionTotalChars) sessionTotalChars.textContent = sessionStats.total;
+
+    // Clear the regular feedback message as the session complete view has its own summary
     if (kochFeedbackMessage) {
-        if (accuracy >= 90) {
-            // Pro User Check
-            if (!window.isProUser && unlockedCharacters.length >= 5) {
-                kochFeedbackMessage.textContent = "You've reached the free limit of 5 characters. Upgrade to Pro to unlock all characters!";
-                kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-yellow-500'; // Pro notice style
-                if (typeof window.showUpsellModal === 'function') {
-                    window.showUpsellModal();
-                }
-            } else {
-                let nextCharToAdd = null;
-                for (const char of kochCharacterOrder) {
-                    if (!unlockedCharacters.includes(char)) {
-                        nextCharToAdd = char;
-                        break;
-                    }
-                }
+        kochFeedbackMessage.textContent = '';
+        kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium'; // Reset class
+    }
 
-                if (nextCharToAdd) {
-                    unlockedCharacters.push(nextCharToAdd);
-                    localStorage.setItem('kochUnlockedCharacters', JSON.stringify(unlockedCharacters));
-                    kochFeedbackMessage.textContent = `Congratulations! You've unlocked a new character: ${nextCharToAdd}`;
-                    kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
-                    updateKochDisplays(); // Update character set display
-                    renderKochInputButtons(); // Re-render buttons with the new character
 
-                    // Trigger confetti
+    if (accuracy >= 90) {
+        // Pro User Check
+        if (!window.isProUser && unlockedCharacters.length >= 5) {
+            // Optionally, display a specific message on the session complete screen or use a modal
+            console.log("User reached free limit. Upsell opportunity.");
+            // For now, the main feedback is on the session complete screen.
+            // If a modal is preferred, it can be triggered here.
+            // The existing logic for showing upsell modal if accuracy >= 90 AND limit reached can be kept or adapted.
+            if (typeof window.showUpsellModal === 'function') {
+                // window.showUpsellModal(); // Decide if this should still pop up here or if message on complete screen is enough
+            }
+        } else {
+            let nextCharToAdd = null;
+            for (const char of kochCharacterOrder) {
+                if (!unlockedCharacters.includes(char)) {
+                    nextCharToAdd = char;
+                    break;
+                }
+            }
+
+            if (nextCharToAdd) {
+                unlockedCharacters.push(nextCharToAdd);
+                localStorage.setItem('kochUnlockedCharacters', JSON.stringify(unlockedCharacters));
+                // Update displays for the next session (character set, levels)
+                updateKochDisplays();
+                // No need to re-render input buttons here, as the session is over.
+                // The message about new char can be part of the session complete screen or a temporary toast.
+                // For now, let's assume the level display updating is sufficient visual feedback for the unlock.
+
+                // Trigger confetti ONLY for new character unlock
                 if (typeof confetti === 'function') {
+                    console.log("Triggering confetti for new character unlock:", nextCharToAdd);
                     confetti({
                         particleCount: 150,
                         spread: 80,
@@ -440,47 +502,55 @@ function handleSessionCompletion(accuracy) {
                     setTimeout(() => confetti({ particleCount: 100, spread: 120, startVelocity: 25, angle: 120, origin: { x: 1, y: 0.7 } }), 500);
                     setTimeout(() => confetti({ particleCount: 100, spread: 150, startVelocity: 30, angle: 90, origin: { y: 0.5 } }), 800);
                 }
+                 // Update the message on the main practice screen's feedback area (though it's hidden now)
+                // This message will be seen if the user somehow navigates back without starting new session.
+                // A better place for this message might be on the session complete view itself.
+                // For now, we'll keep it on kochFeedbackMessage, which is currently hidden at this stage.
+                // Consider adding a specific field on the session complete view for "New Character Unlocked: X"
+                if(kochFeedbackMessage) { // This will be hidden if kochPracticeArea is hidden.
+                    kochFeedbackMessage.textContent = `New character unlocked: ${nextCharToAdd}!`;
+                    kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400';
+                }
 
-                } else { // All characters unlocked (Pro or already had them)
+
+            } else { // All characters unlocked
+                // Message for all characters mastered can be displayed on the session complete screen.
+                // No confetti here as per requirements.
+                console.log("All characters mastered. No confetti.");
+                if(kochFeedbackMessage) { // This message might not be visible if practice area is hidden.
                     kochFeedbackMessage.textContent = "Congratulations! You've mastered all available characters!";
-                    kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400'; // Success style
-                    if (typeof confetti === 'function') {
-                        confetti({
-                            particleCount: 250,
-                            spread: 100,
-                            origin: { y: 0.5 },
-                            gravity: 0.5,
-                            ticks: 400,
-                            colors: ['#4a90e2', '#f6e05e', '#4caf50', '#ffeb3b', '#e91e63']
-                        });
-                    }
+                    kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-green-400';
                 }
             }
-        } else {
-            kochFeedbackMessage.textContent = `Your accuracy was ${accuracy.toFixed(0)}%. Keep practicing with the current set to reach 90%!`;
-            kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-yellow-400'; // Encouragement style
+        }
+    } else {
+        // Message for accuracy < 90% can also be part of the session complete screen.
+        // The session-final-accuracy already shows this.
+        // If kochFeedbackMessage is used, it might be hidden.
+        if(kochFeedbackMessage) {
+            kochFeedbackMessage.textContent = `Keep practicing to reach 90%!`;
+            kochFeedbackMessage.className = 'text-lg text-center min-h-[28px] font-medium text-yellow-400';
         }
     }
 
-    // Manage UI for session end
-    if (kochStartBtn) {
-        kochStartBtn.classList.remove('hidden');
-    }
+    // Manage UI for session end (some parts are handled by showing the session complete view)
+    // The original kochStartBtn is not shown; the new "Start New Session" button is on the complete view.
+    // if (kochStartBtn) {
+    //     kochStartBtn.classList.remove('hidden'); // This will be handled by the new button
+    // }
     if (kochPlayBtn) {
         kochPlayBtn.classList.add('hidden');
     }
     if (kochAnswerInput) {
         kochAnswerInput.disabled = true;
-        kochAnswerInput.value = ''; // Clear any residual input
+        kochAnswerInput.value = '';
+        kochAnswerInput.classList.add('hidden'); // Also hide the input field
     }
-    if (kochFeedbackMessage && kochFeedbackMessage.textContent === "Correct!") {
-        // If the last input was correct, this message might still be there.
-        // The session end message from above should take precedence.
-        // This check is more of a safeguard; the logic above should already set the message.
+
+    renderKochInputButtons(); // Clear on-screen buttons as session is over
+
+    // Ensure focus is not trapped in a hidden/disabled input, move to new session button
+    if (kochStartNewSessionBtn && kochSessionCompleteView && !kochSessionCompleteView.classList.contains('hidden')) {
+        kochStartNewSessionBtn.focus();
     }
-     // Ensure focus is not trapped in the now-disabled input
-    if(document.activeElement === kochAnswerInput) {
-        kochStartBtn.focus(); // Or any other appropriate element
-    }
-    renderKochInputButtons(); // Clear/update buttons based on new session state
 }
