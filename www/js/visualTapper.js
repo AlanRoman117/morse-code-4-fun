@@ -87,48 +87,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (typeof Tone !== 'undefined' && Tone && Tone.Synth) {
-            if (!tapperTone) {
-                try {
-                    tapperTone = new Tone.Synth({
-                        oscillator: { type: 'sine' },
-                        envelope: {
-                            attack: 0.005,
-                            decay: 0.01,  // Can be short if sustain is high
-                            sustain: 0.9, // Make sure this allows sound to hold
-                            release: 0.05 // Quick release
-                        }
-                    }).toDestination();
-                    // console.log("TapperTone synth re-configured for sustain."); // Optional: for debugging
-                } catch (e) {
-                    console.error("Failed to create Tone.Synth for tapper:", e);
-                    return; // Don't proceed if synth creation fails
+            const playNoteInternal = () => {
+                // Synth initialization is now deferred until context is running.
+                if (!tapperTone) {
+                    try {
+                        tapperTone = new Tone.Synth({
+                            oscillator: { type: 'sine' },
+                            envelope: {
+                                attack: 0.005,
+                                decay: 0.01,
+                                sustain: 0.9,
+                                release: 0.05
+                            }
+                        }).toDestination();
+                        // console.log("TapperTone synth created successfully.");
+                    } catch (e) {
+                        console.error("Failed to create Tone.Synth for tapper:", e);
+                        return; // Don't proceed if synth creation fails
+                    }
                 }
-            }
-            // Ensure Tone.js audio context is running (often requires user gesture)
-            const playNote = () => {
+
+                // Now that synth is ensured (or creation failed), proceed to play.
                 if (tapperTone && typeof tapperTone.triggerAttack === 'function') {
-                    // Explicitly release any previous note before attacking a new one.
-                    // This helps prevent errors if the previous note's release was interrupted
-                    // or if taps are extremely rapid.
-                    tapperTone.triggerRelease(); // Release the tail of the previous note.
-                    tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now()); // Attack the new note.
+                    tapperTone.triggerRelease();
+                    tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now());
                     // console.log("triggerAttack called at Tone.now():", Tone.now());
                 }
             };
 
             if (Tone.context.state !== 'running') {
-                // This path should ideally be less common if main.js's masterAudioInitListener works.
+                // This path is taken if the audio context isn't running yet (e.g. first tap).
                 Tone.start().then(() => {
                     // console.log("Tone.start() successful from playTapSound, context state:", Tone.context.state);
-                    playNote();
+                    playNoteInternal(); // Create synth and play note
                 }).catch(e => {
-                    // This catch is for Tone.start() failing.
-                    // The original error "Start time must be strictly greater..." was caught here,
-                    // implying it might have originated from within playNote() called after a problematic Tone.start().
                     console.warn("Tone.js audio context couldn't start via playTapSound's Tone.start(): ", e);
                 });
             } else {
-                playNote();
+                // Context is already running.
+                playNoteInternal(); // Create synth (if needed) and play note
             }
         } else {
             // console.warn("Tone.js not available for tap sound.");

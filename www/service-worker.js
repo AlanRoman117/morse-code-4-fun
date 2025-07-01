@@ -4,17 +4,16 @@ const urlsToCache = [
   'index.html',
   'css/style.css',
   'js/main.js',
-  'js/data/bookData.js', // Added missing script
+  'js/data/bookData.js',
   'js/bookCipher.js',
   'js/kochMethod.js',
   'js/learnPracticeGame.js',
   'js/settings.js',
   'js/visualTapper.js',
-  'js/privacy.js', // Added missing script
+  'js/privacy.js',
   'assets/icons/icon-192x192.png',
   'assets/icons/icon-512x512.png',
-  // 'assets/logo.png', // Removed for now due to path ambiguity relative to SW scope
-  'manifest.json' // Added manifest
+  'manifest.json'
   // Note: If there are other essential assets like fonts or critical images directly part of the app shell,
   // they should be added here as well. For now, focusing on the core files.
   // CDN resources (Tone.js, Tailwind, confetti, marked) are not cached by default by this SW.
