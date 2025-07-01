@@ -266,73 +266,77 @@
         <div class="ad-placeholder-container mt-6">
           </div>
         </div>
-        <div id="settings-tab" class="tab-content hidden">
-            <div class="app-container">
-                <h2 class="section-title text-2xl font-semibold mb-3 text-center">Tapper Speed Settings</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-items-center p-4">
-                    <div class="w-full">
-                        <label for="unit-time-input" class="block text-sm font-medium mb-2">Morse Unit Time (ms):</label>
-                        <input type="number" id="unit-time-input" value="150" min="50" max="500" step="10" class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white">
-                        <span id="unit-time-save-feedback" class="text-sm ml-2 feedback-message"></span>
-                    </div>
-                    <div class="mt-4 md:mt-0 w-full text-center md:text-left">
-                        <p class="text-sm font-medium text-gray-300">Current effective value: <span id="current-unit-time-display" class="font-bold text-white">150</span> ms</p>
-                    </div>
-                </div>
+<div id="settings-tab" class="tab-content hidden">
+    <div class="app-container">
+        <h2 class="text-3xl font-bold mb-6 text-center text-white">Settings</h2>
 
-                <!-- New Sound Settings Section -->
-                <h2 class="section-title text-2xl font-semibold mt-6 mb-3 text-center">Sound Settings</h2>
-                <div class="flex items-center justify-center p-4">
-                    <label for="master-sound-toggle" class="mr-4 text-sm font-medium text-gray-300">Master Sound</label>
-                    <div class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="master-sound-toggle" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        <span id="master-sound-status-text" class="ml-3 text-sm font-medium text-gray-300">On</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="flex flex-col gap-6">
+                <div class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <h3 class="section-title text-xl font-semibold mb-4 text-center">Tapper Settings</h3>
+                    <div class="flex flex-col items-center space-y-4">
+                        <label for="unit-time-input" class="block text-sm font-medium text-center">Morse Unit Time (ms)
+                            <span class="block text-xs text-gray-400">Determines the speed of your tapping.</span>
+                        </label>
+                        <input type="number" id="unit-time-input" value="150" min="50" max="500" step="10" class="mt-1 block w-full max-w-xs px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white text-center">
+                        <div class="text-sm text-gray-300">Current: <span id="current-unit-time-display" class="font-bold text-white">150</span> ms <span id="unit-time-save-feedback" class="ml-2 feedback-message"></span></div>
                     </div>
                 </div>
 
-                <!-- Theme Toggle Button Moved Here -->
-                <h2 class="section-title text-2xl font-semibold mt-6 mb-3 text-center">Appearance</h2>
-                <div class="flex items-center justify-center p-4">
-                    <button id="toggle-theme-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Toggle Dark/Light Mode</button>
-                </div>
-
-                <div class="settings mb-6"> <!-- Moved Morse Playback Settings -->
-                    <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Playback Settings</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <h3 class="section-title text-xl font-semibold mb-4 text-center">Text Playback Settings</h3>
+                    <div class="space-y-4">
                         <div>
-                            <label for="wpm-slider" class="block text-sm font-medium">Text Playback Speed (WPM): <span id="wpm-value">20</span></label>
-                            <input type="range" id="wpm-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                            <label for="wpm-slider" class="block text-sm font-medium">Playback Speed (WPM): <span id="wpm-value">20</span></label>
+                            <input type="range" id="wpm-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
                         </div>
                         <div>
-                            <label for="farnsworth-slider" class="block text-sm font-medium">Text Playback Farnsworth WPM: <span id="farnsworth-value">20</span></label>
-                            <input type="range" id="farnsworth-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                            <label for="farnsworth-slider" class="block text-sm font-medium">Farnsworth WPM: <span id="farnsworth-value">20</span></label>
+                            <input type="range" id="farnsworth-slider" min="5" max="40" value="20" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
                         </div>
                         <div>
-                            <label for="freq-slider" class="block text-sm font-medium">Playback Tone Frequency (Hz): <span id="freq-value">600</span></label>
-                            <input type="range" id="freq-slider" min="300" max="1000" value="600" step="50" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                            <label for="freq-slider" class="block text-sm font-medium">Tone Frequency (Hz): <span id="freq-value">600</span></label>
+                            <input type="range" id="freq-slider" min="300" max="1000" value="600" step="50" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Monetization Section -->
-                <h2 class="section-title text-2xl font-semibold mt-6 mb-3 text-center">App Version</h2>
-                <div class="flex items-center justify-center p-4">
-                    <button id="go-pro-btn" class="bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                        Unlock All Features (Go Pro!)
-                    </button>
+            <div class="flex flex-col gap-6">
+                <div class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <h3 class="section-title text-xl font-semibold mb-4 text-center">App Settings</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label for="master-sound-toggle" class="text-sm font-medium text-gray-300">Master Sound</label>
+                            <div class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="master-sound-toggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                <span id="master-sound-status-text" class="ml-3 text-sm font-medium text-gray-300 w-6 text-left">On</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                             <label for="toggle-theme-btn" class="text-sm font-medium text-gray-300">Appearance</label>
+                             <button id="toggle-theme-btn" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Toggle Theme</button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Legal/About Section -->
-                <h2 class="section-title text-2xl font-semibold mt-6 mb-3 text-center">Legal</h2>
-                <div class="flex items-center justify-center p-4">
-                    <a href="privacy_screen.html" id="privacy-policy-link" class="bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                        View Privacy Policy
-                    </a>
+                <div class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                     <h3 class="section-title text-xl font-semibold mb-4 text-center">App Version & Legal</h3>
+                     <div class="flex flex-col items-center space-y-4">
+                        <button id="go-pro-btn" class="bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 w-full max-w-xs">
+                            Unlock All Features (Go Pro!)
+                        </button>
+                        <a href="privacy_screen.html" id="privacy-policy-link" class="bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-full max-w-xs text-center">
+                            View Privacy Policy
+                        </a>
+                    </div>
                 </div>
-
             </div>
         </div>
+    </div>
+</div>
         <div id="morse-io-tab" class="tab-content hidden">
             <div class="app-container">
                 <h2 class="section-title text-2xl font-semibold mb-3 text-center">Morse Input/Output</h2>

@@ -282,6 +282,13 @@ body {
             background-color: #3b82f6; /* blue-500 for on state */
         }
 
+        /* Ensure toggle knob border is visible in light mode when OFF */
+        .light-theme #master-sound-toggle:not(:checked) + div::after,
+        .light-theme-container #master-sound-toggle:not(:checked) + div::after {
+            border-color: #6b7280; /* Tailwind gray-500, provides contrast for white knob on gray-300 track */
+        }
+        /* Note: Tailwind's `peer-checked:after:border-white` handles the knob border for the ON state */
+
 
         /* Modal */
         .light-theme #unlocked-text-modal .bg-gray-800,
