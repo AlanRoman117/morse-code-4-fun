@@ -1,5 +1,14 @@
 // --- App State ---
-let isProUser = false; // Initialize Pro status
+// let isProUser = false; // Initialize Pro status
+let isProUser = loadProStatus(); // MODIFIED: Load Pro status from localStorage
+
+function loadProStatus() {
+    const proStatus = localStorage.getItem('isProUser');
+    // Ensure that the comparison is strict and handles null/undefined cases gracefully.
+    // If localStorage.getItem('isProUser') returns null (key doesn't exist),
+    // it won't be 'true', so isProUser will correctly be false.
+    return proStatus === 'true';
+}
 
 // Morse code dictionary
         const morseCode = {
@@ -740,36 +749,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Function to update visibility of Pro/Free elements based on isProUser
         function updateUserProStatusUI() {
-            // Ad banner visibility
-            if (adBannerBottom) {
-                if (window.isProUser) {
-                    adBannerBottom.classList.add('hidden');
-                } else {
-                    adBannerBottom.classList.remove('hidden');
+            const adBannerContainer = document.getElementById('ad-banner-container');
+            const adBannerBottom = document.getElementById('ad-banner-bottom'); // Specific placeholder in learn-practice tab
+            const goProButtonInSettings = document.getElementById('go-pro-btn'); // Button in settings tab
+
+            if (window.isProUser) {
+                // --- Hide Ads ---
+                if (adBannerBottom) {
+                    adBannerBottom.style.display = 'none';
+                }
+                if (adBannerContainer) {
+                     adBannerContainer.style.display = 'none';
+                }
+                // If AdMob plugin is used, try to hide its banner
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+                    const { AdMob } = window.Capacitor.Plugins;
+                    AdMob.hideBanner().catch(err => console.warn('AdMob hideBanner error:', err));
+                }
+
+                // --- Update "Go Pro" button in Settings ---
+                if (goProButtonInSettings) {
+                    goProButtonInSettings.textContent = 'You are a Pro User!';
+                    goProButtonInSettings.disabled = true;
+                    goProButtonInSettings.classList.remove('bg-green-500', 'hover:bg-green-600', 'active:bg-green-700');
+                    goProButtonInSettings.classList.add('bg-gray-500', 'opacity-70', 'cursor-not-allowed');
+                }
+
+            } else {
+                // --- Show Ads ---
+                if (adBannerBottom) {
+                    // Display based on original style, assuming 'flex' or 'block'
+                    // For simplicity, let's use 'block'. If it was 'flex', that needs to be known.
+                    adBannerBottom.style.display = 'block';
+                }
+                if (adBannerContainer) {
+                    adBannerContainer.style.display = 'block';
+                }
+                // If AdMob plugin is used, try to show its banner
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+                    const { AdMob } = window.Capacitor.Plugins;
+                    // Re-showing might involve re-calling showBanner if it was removed/destroyed
+                    // For now, we assume it was just hidden. If not, AdMob.showBanner() would be needed.
+                    // AdMob.showBanner(...original options...).catch(err => console.warn('AdMob showBanner error:', err));
+                    // Let's assume for now that if it was hidden, it can be shown.
+                    // If AdMob.hideBanner() truly removes it, then we need to call the full showBanner again.
+                    // The AdMob logic in DOMContentLoaded initializes and shows the banner.
+                    // So, if not pro, we rely on that initial load or a page refresh to show it.
+                    // A more robust solution might be to have a dedicated showAd/hideAd function.
+                }
+
+                // --- Update "Go Pro" button in Settings ---
+                if (goProButtonInSettings) {
+                    goProButtonInSettings.textContent = 'Unlock All Features (Go Pro!)';
+                    goProButtonInSettings.disabled = false;
+                    goProButtonInSettings.classList.add('bg-green-500', 'hover:bg-green-600', 'active:bg-green-700');
+                    goProButtonInSettings.classList.remove('bg-gray-500', 'opacity-70', 'cursor-not-allowed');
                 }
             }
 
-            // Book library banner and locked states (call populate which now handles this)
+            // --- Refresh Book Library ---
+            // This will use window.isProUser to show/hide locks and the "unlock more books" banner
             if (typeof populateBookLibrary === 'function') {
-                 // Check if the book cipher tab is active or if it's okay to populate it
-                 // For simplicity, we can call it. It might re-render the library.
-                 // If performance becomes an issue, this could be optimized.
                 populateBookLibrary();
             }
 
-            // Koch method restrictions are handled within Koch method logic when user completes a session.
-            // However, if we want to immediately reflect a change in isProUser on the Koch UI (e.g. a message), it would go here.
-            // For now, the existing Koch logic handles the functional restriction.
-
-            // "Go Pro" button in settings - potentially hide if user becomes Pro.
-            // For now, the button remains visible. If it should be hidden:
-            // if (goProBtn) {
-            //     if (window.isProUser) {
-            //         goProBtn.classList.add('hidden'); // Or change text to "You are Pro!"
-            //     } else {
-            //         goProBtn.classList.remove('hidden');
-            //     }
-            // }
+            // --- Refresh Koch Method UI (if applicable) ---
+            // This ensures any pro-related UI in Koch method (e.g., unlocking all levels) is updated.
+            if (typeof window.initializeKochMethod === 'function') {
+                // initializeKochMethod typically reads isProUser and sets up UI accordingly.
+                window.initializeKochMethod();
+            }
+             // Also update the visibility of the "Unlock Books" banner in the library,
+             // which is handled by populateBookLibrary, but an explicit call here ensures it if the function is available
+            if (typeof window.toggleUnlockBooksBanner === 'function') {
+                window.toggleUnlockBooksBanner(!window.isProUser);
+            }
         }
 
 
@@ -784,24 +838,98 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (upgradeToProBtn) {
             upgradeToProBtn.addEventListener('click', () => {
-                // For now, this button doesn't trigger a real purchase.
-                // It could, for example, close the modal or show a "Coming Soon" message.
-                console.log('Upgrade to Pro button clicked - Placeholder action');
-                // For testing: Toggle Pro status and update UI
-                window.isProUser = !window.isProUser;
-                console.log('isProUser toggled to:', window.isProUser);
+                console.log('Upgrade to Pro button clicked');
+                window.isProUser = true;
+                localStorage.setItem('isProUser', 'true');
+                console.log('isProUser set to true and saved to localStorage');
                 updateUserProStatusUI();
-                hideUpsellModal(); // Hide modal after "purchase"
+                if (typeof populateBookLibrary === 'function') {
+                    populateBookLibrary();
+                }
+                // Consider also updating Koch method UI if it has pro features visible
+                if (typeof window.initializeKochMethod === 'function') {
+                    window.initializeKochMethod(); // Re-initialize to reflect pro status
+                }
+                hideUpsellModal();
             });
         }
 
         // Initial UI update based on isProUser status when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            // ... other DOMContentLoaded logic ...
-            updateUserProStatusUI();
+            window.isProUser = loadProStatus(); // Load pro status early
 
-            // Initialize and show banner ad
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+            populateMorseReference();
+            applySavedTheme();
+            updateDurations();
+
+            // One-time audio initialization on first user interaction
+            const masterAudioInitListener = () => {
+                console.log("First user interaction, initializing master audio context.");
+                initAudio();
+                document.body.removeEventListener('click', masterAudioInitListener);
+                document.body.removeEventListener('touchstart', masterAudioInitListener);
+            };
+            document.body.addEventListener('click', masterAudioInitListener);
+            document.body.addEventListener('touchstart', masterAudioInitListener);
+
+            // Set initial values for sliders display
+            wpmValue.textContent = wpmSlider.value;
+            farnsworthValue.textContent = farnsworthSlider.value;
+            freqValue.textContent = freqSlider.value;
+
+            // Event listener for "Play My Tapped Morse" button
+            const playTappedMorseBtn = document.getElementById('play-tapped-morse-btn');
+            const tapperDecodedOutputEl = document.getElementById('tapperDecodedOutput');
+
+            if (playTappedMorseBtn && tapperDecodedOutputEl) {
+                playTappedMorseBtn.addEventListener('click', async () => {
+                    if (isPlaying) {
+                        console.log("Audio is currently playing. Please wait.");
+                        return;
+                    }
+                    initAudio(); // Ensure AudioContext is ready
+
+                    const textToPlay = tapperDecodedOutputEl.textContent;
+                    if (!textToPlay || textToPlay.trim() === '') {
+                        console.log("No tapped text to play.");
+                        // Optionally, provide user feedback e.g., alert("No tapped text to play.");
+                        return;
+                    }
+
+                    const morseToPlay = textToMorse(textToPlay.toUpperCase());
+                    if (!morseToPlay || morseToPlay.trim() === '') {
+                        console.log("Could not convert tapped text to Morse.");
+                        // Optionally, provide user feedback
+                        return;
+                    }
+
+                    // Assuming UNIT_TIME_MS is globally available or getVisualTapperUnitTime() exists
+                    let currentUnitTimeMs = 150; // Default if not found
+                    if (typeof getVisualTapperUnitTime === 'function') {
+                        currentUnitTimeMs = getVisualTapperUnitTime();
+                    } else if (typeof UNIT_TIME_MS !== 'undefined') { // Fallback to global if getter undefined
+                        currentUnitTimeMs = UNIT_TIME_MS;
+                        console.warn("Using global UNIT_TIME_MS as getVisualTapperUnitTime() is not defined.");
+                    } else if (typeof window.UNIT_TIME_MS !== 'undefined') { // Further fallback
+                        currentUnitTimeMs = window.UNIT_TIME_MS;
+                        console.warn("Using window.UNIT_TIME_MS as getVisualTapperUnitTime() is not defined.");
+                    } else {
+                        console.warn("Global UNIT_TIME_MS and getVisualTapperUnitTime() not found, using default 150ms for playback.");
+                    }
+
+                    const customDotDuration = currentUnitTimeMs / 1000.0; // Convert ms to seconds
+
+                    await playMorseSequence(morseToPlay, customDotDuration, getPlaybackFrequency()); // MODIFIED to use getter
+                });
+            } else {
+                console.error("Could not find 'play-tapped-morse-btn' or 'tapperDecodedOutput' elements.");
+            }
+            // ... other DOMContentLoaded logic ...
+            updateUserProStatusUI(); // This will now use the loaded isProUser status
+
+            // Initialize and show banner ad ONLY IF NOT PRO USER
+            if (!window.isProUser) {
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
                 const { AdMob } = window.Capacitor.Plugins;
                 AdMob.initialize({
                     requestTrackingAuthorization: true, // Optional: if you want to request tracking authorization via AdMob
