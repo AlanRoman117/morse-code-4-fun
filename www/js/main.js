@@ -947,7 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // console.log("AdMob initialized successfully.");
                     // Now show the banner ad
                     AdMob.showBanner({
-                        adId: "ca-app-pub-xxxxxxxxxxxxxxxxx/yyyyyyyyyy", // Replace with your actual Banner Ad Unit ID
+                        adId: "ca-app-pub-6940502431077467/3842216044", // Replace with your actual Banner Ad Unit ID
                         adSize: "BANNER", // or "ADAPTIVE_BANNER", "SMART_BANNER" etc.
                         position: "BOTTOM_CENTER", // AdMob will handle placing it at bottom. Our CSS container is a fallback or for web.
                         margin: 0, // Margin in pixels, if needed
