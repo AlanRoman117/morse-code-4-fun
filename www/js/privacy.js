@@ -21,6 +21,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // --- End Theme application logic ---
 
+    const backButton = document.getElementById('backButton');
+    if (backButton) {
+        backButton.addEventListener('click', function(event) {
+            const targetTab = backButton.getAttribute('data-target-tab');
+            if (targetTab) {
+                try {
+                    localStorage.setItem('targetTab', targetTab);
+                    // console.log(`[privacy.js] targetTab '${targetTab}' saved to localStorage.`);
+                } catch (e) {
+                    console.error("[privacy.js] Error saving targetTab to localStorage:", e);
+                }
+            }
+            // Allow default navigation to index.html to proceed
+        });
+    } else {
+        console.warn("[privacy.js] Back button not found. Navigation logic not attached.");
+    }
+
     const privacyPolicyContentDiv = document.getElementById('privacyPolicyContent');
     if (!privacyPolicyContentDiv) {
         console.error('Privacy policy content div not found.');
