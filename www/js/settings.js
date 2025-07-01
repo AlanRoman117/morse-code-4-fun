@@ -7,14 +7,14 @@ function loadMasterSoundSetting() {
         isMasterSoundEnabled = JSON.parse(savedSetting); // Ensure boolean
     }
     // If nothing in localStorage, it remains true (the default)
-    console.log('Master sound setting loaded:', isMasterSoundEnabled);
+    // console.log('Master sound setting loaded:', isMasterSoundEnabled);
     // Ensure the global variable is updated after loading
     window.isMasterSoundEnabled = isMasterSoundEnabled;
 }
 
 function saveMasterSoundSetting() {
     localStorage.setItem('masterSoundEnabled', JSON.stringify(window.isMasterSoundEnabled));
-    console.log('Master sound setting saved:', window.isMasterSoundEnabled);
+    // console.log('Master sound setting saved:', window.isMasterSoundEnabled);
 }
 
 // Load the setting when the script is initialized
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newState = masterSoundToggle.checked;
             window.setMasterSoundEnabled(newState); // Updates global var and saves to localStorage
             masterSoundStatusText.textContent = newState ? 'On' : 'Off';
-            console.log('Master Sound toggled to:', newState ? 'On' : 'Off');
+            // console.log('Master Sound toggled to:', newState ? 'On' : 'Off');
         });
     }
     if (typeof getVisualTapperUnitTime === 'function') {
