@@ -65,7 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        libraryContainer.innerHTML = ''; // Clear existing content
+        // Selectively remove only book items to preserve other elements like the banner
+        const itemsToRemove = libraryContainer.querySelectorAll('.book-cover-item');
+        itemsToRemove.forEach(item => item.remove());
+        // libraryContainer.innerHTML = ''; // Old way: Cleared existing content, including banner
 
         if (!bookCipherBooks || Object.keys(bookCipherBooks).length === 0) {
             console.warn("bookCipherBooks object is empty or not defined. Cannot populate library.");

@@ -616,6 +616,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const masterAudioInitListener = () => {
                 console.log("First user interaction, initializing master audio context.");
                 initAudio();
+                // Attempt to start Tone.js AudioContext
+                if (typeof Tone !== 'undefined' && Tone.start) {
+                    Tone.start().then(() => {
+                        console.log("Tone.js audio context started successfully via masterAudioInitListener.");
+                    }).catch(e => {
+                        console.warn("Tone.start() failed in masterAudioInitListener:", e);
+                    });
+                }
                 document.body.removeEventListener('click', masterAudioInitListener);
                 document.body.removeEventListener('touchstart', masterAudioInitListener);
             };
@@ -976,4 +984,5 @@ document.addEventListener('DOMContentLoaded', () => {
                     // adBannerContainer.style.display = 'none'; // Or add a class to hide it
                 }
             }
+        } // Closing brace for if (!window.isProUser)
         });

@@ -87,38 +87,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (typeof Tone !== 'undefined' && Tone && Tone.Synth) {
-            if (!tapperTone) {
-                try {
-                    tapperTone = new Tone.Synth({
-                        oscillator: { type: 'sine' },
-                        envelope: {
-                            attack: 0.005,
-                            decay: 0.01,  // Can be short if sustain is high
-                            sustain: 0.9, // Make sure this allows sound to hold
-                            release: 0.05 // Quick release
-                        }
-                    }).toDestination();
-                    // console.log("TapperTone synth re-configured for sustain."); // Optional: for debugging
-                } catch (e) {
-                    console.error("Failed to create Tone.Synth for tapper:", e);
-                    return; // Don't proceed if synth creation fails
-                }
-            }
-            // Ensure Tone.js audio context is running (often requires user gesture)
-            // console.log("Tone.context.state before Tone.start():", Tone.context.state);
-            if (Tone.context.state !== 'running') {
-                Tone.start().then(() => {
-                    // console.log("Tone.start() successful, context state:", Tone.context.state);
-                    if (tapperTone && typeof tapperTone.triggerAttack === 'function') { // CHANGED
-                         // console.log("Attempting to triggerAttack on tapperTone.");
-                         tapperTone.triggerAttack(TAP_SOUND_FREQ); // CHANGED to triggerAttack
+            const playNoteInternal = () => {
+                // Synth initialization is now deferred until context is running.
+                if (!tapperTone) {
+                    try {
+                        tapperTone = new Tone.Synth({
+                            oscillator: { type: 'sine' },
+                            envelope: {
+                                attack: 0.005,
+                                decay: 0.01,
+                                sustain: 0.9,
+                                release: 0.05
+                            }
+                        }).toDestination();
+                        // console.log("TapperTone synth created successfully.");
+                    } catch (e) {
+                        console.error("Failed to create Tone.Synth for tapper:", e);
+                        return; // Don't proceed if synth creation fails
                     }
-                }).catch(e => console.warn("Tone.js audio context couldn't start on tap: ", e));
-            } else {
-                 if (tapperTone && typeof tapperTone.triggerAttack === 'function') { // CHANGED
-                     // console.log("AudioContext already running. Attempting to triggerAttack on tapperTone.");
-                     tapperTone.triggerAttack(TAP_SOUND_FREQ); // CHANGED to triggerAttack
                 }
+
+                // Now that synth is ensured (or creation failed), proceed to play.
+                if (tapperTone && typeof tapperTone.triggerAttack === 'function') {
+                    tapperTone.triggerRelease();
+                    tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now());
+                    // console.log("triggerAttack called at Tone.now():", Tone.now());
+                }
+            };
+
+            if (Tone.context.state !== 'running') {
+                // This path is taken if the audio context isn't running yet (e.g. first tap).
+                Tone.start().then(() => {
+                    // console.log("Tone.start() successful from playTapSound, context state:", Tone.context.state);
+                    playNoteInternal(); // Create synth and play note
+                }).catch(e => {
+                    console.warn("Tone.js audio context couldn't start via playTapSound's Tone.start(): ", e);
+                });
+            } else {
+                // Context is already running.
+                playNoteInternal(); // Create synth (if needed) and play note
             }
         } else {
             // console.warn("Tone.js not available for tap sound.");
@@ -126,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function stopTapSound() {
-        // console.log("stopTapSound called."); // For debugging
+        // console.log("stopTapSound called at Tone.now():", Tone.now()); // For debugging
         if (tapperTone && typeof tapperTone.triggerRelease === 'function') {
             // console.log("Attempting to triggerRelease on tapperTone.");
             tapperTone.triggerRelease(); // This stops the sound based on the envelope's release phase
