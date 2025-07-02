@@ -1,0 +1,771 @@
+body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a; /* Dark background */
+            color: #f0f0f0; /* Light text */
+            margin: 0;
+            /* padding: 20px; Adjusted by Tailwind classes now for responsive nav */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            /* Add padding to the top and bottom that respects the device's safe areas */
+            padding-top: env(safe-area-inset-top, 1.25rem); /* 1.25rem is p-5 fallback */
+            padding-bottom: env(safe-area-inset-bottom, 6rem); /* 6rem is pb-24 fallback */
+        }
+        .app-container {
+            background-color: #2c2c2c; /* Slightly lighter dark shade for the container */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            width: 100%;
+        }
+        .main-title {
+            color: #4a90e2; /* A bright blue for the title */
+            /* Add this line to push it down from the notch */
+            margin-top: env(safe-area-inset-top, 1rem);
+        }
+        .input-output-box {
+            background-color: #3a3a3a; /* Darker input areas */
+            color: #f0f0f0;
+            border: 1px solid #555; /* Subtle border */
+            border-radius: 4px;
+            min-height: 100px;
+            padding: 10px;
+            white-space: pre-wrap; /* Ensures spaces and newlines are preserved */
+            word-wrap: break-word; /* Prevents overflow */
+        }
+        .section-title {
+            color: #4a90e2; /* Blue for section titles */
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .reference-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .reference-table th, .reference-table td {
+            border: 1px solid #555;
+            padding: 8px;
+            text-align: center;
+        }
+        .reference-table th {
+            background-color: #3a3a3a; /* Header background for table */
+        }
+        .hidden {
+            display: none;
+        }
+        .active-tab-button {
+            font-weight: 600; /* Tailwind semibold */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .tab-content {
+            width: 100%; /* Ensure it spans the full width available */
+            /* e.g., padding-top: 1rem; */
+        }
+
+        #tab-content-wrapper {
+            width: 100%;
+        }
+
+        /* Tapper CSS */
+        .tapper {
+            width: 120px; /* Mobile first size */
+            height: 120px; /* Mobile first size */
+            border-radius: 50%;
+            background-color: #4a5568; /* Tailwind gray-600 */
+            border: 4px solid #2d3748; /* Tailwind gray-700 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem; /* Smaller for mobile */
+            font-weight: bold;
+            color: #e2e8f0; /* Tailwind gray-300 */
+            cursor: pointer;
+            touch-action: manipulation; /* Prevents double-tap to zoom */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            /* --- ADD THESE --- */
+            -webkit-tap-highlight-color: transparent; /* Removes the gray highlight on tap in mobile Safari */
+            -webkit-touch-callout: none; /* Disables the menu that appears on long press */
+            transition: all 0.1s ease-out;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            flex-shrink: 0; /* Added from original context if tapper was in flex */
+        }
+        /* Add media query for larger screens */
+        @media (min-width: 768px) { /* md breakpoint */
+            .tapper {
+                width: 150px;
+                height: 150px;
+                font-size: 1.5rem; /* Restore original font size for md and up */
+            }
+        }
+        .tapper:active, .tapper.active {
+            background-color: #f6e05e; /* Tailwind yellow-300 */
+            color: #1a202c; /* Tailwind gray-900 */
+            transform: scale(0.95);
+            box-shadow: 0 0 20px #f6e05e, 0 0 30px #f6e05e;
+        }
+        #spaceButton {
+            /* Using Tailwind in HTML for most styling */
+            /* Example: width: 70px; height: 70px; border-radius: 50%; */
+            -webkit-user-select: none; /* For Safari */
+            -ms-user-select: none;     /* For IE/Edge */
+            user-select: none;         /* Standard */
+            touch-action: manipulation; /* Prevents double-tap to zoom, etc. */
+            -webkit-tap-highlight-color: transparent; /* Removes the gray highlight on tap in mobile Safari */
+            -webkit-touch-callout: none; /* Disables the menu that appears on long press */
+        }
+        .table-highlight {
+            background-color: #f6e05e; /* Tailwind yellow-300 or a similar vibrant color */
+            color: #1a202c; /* Tailwind gray-900 or a dark color for contrast */
+            font-weight: bold;
+        }
+
+        /* Light Theme Styles */
+        body.light-theme {
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            color: #1f2937; /* Tailwind gray-800 */
+        }
+        .app-container.light-theme-container {
+            background-color: #ffffff; /* white */
+            color: #1f2937; /* Tailwind gray-800 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+        }
+
+        /* General light theme adjustments for Tailwind classes */
+        .light-theme nav button,
+        .light-theme-container nav button {
+            background-color: #e5e7eb; /* gray-200 */
+            color: #374151; /* gray-700 */
+        }
+        .light-theme nav button:hover,
+        .light-theme-container nav button:hover {
+            background-color: #d1d5db; /* gray-300 */
+        }
+        .light-theme nav button.active-tab-button,
+        .light-theme-container nav button.active-tab-button {
+            background-color: #3b82f6; /* blue-500 */
+            color: #ffffff; /* white */
+        }
+        .light-theme nav button.active-tab-button:hover,
+        .light-theme-container nav button.active-tab-button:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+
+
+        .light-theme .input-output-box,
+        .light-theme-container .input-output-box {
+            background-color: #e5e7eb; /* Tailwind gray-200 */
+            color: #1f2937; /* Tailwind gray-800 */
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+        }
+
+        .light-theme .text-gray-200,
+        .light-theme-container .text-gray-200,
+        .light-theme .text-gray-300,
+        .light-theme-container .text-gray-300,
+        .light-theme .text-gray-400, /* For placeholders or secondary text */
+        .light-theme-container .text-gray-400 {
+             color: #374151 !important; /* Tailwind gray-700, !important to override Tailwind if needed */
+        }
+        .light-theme .text-white, /* For elements that are explicitly text-white in dark mode */
+        .light-theme-container .text-white {
+            color: #1f2937 !important; /* Tailwind gray-800 */
+        }
+
+        .light-theme .section-title,
+        .light-theme-container .section-title {
+            color: #2563eb; /* Tailwind blue-600 for light theme */
+        }
+
+        /* Backgrounds that are dark gray in dark mode */
+        .light-theme .bg-gray-600, .light-theme-container .bg-gray-600,
+        .light-theme .bg-gray-700, .light-theme-container .bg-gray-700,
+        .light-theme .bg-gray-800, .light-theme-container .bg-gray-800 {
+            background-color: #e5e7eb !important; /* gray-200 */
+            color: #1f2937 !important; /* Ensure text on these backgrounds is dark */
+        }
+
+        .light-theme .border-gray-600, .light-theme-container .border-gray-600 {
+            border-color: #d1d5db !important; /* gray-300 */
+        }
+        /* Note: .placeholder-gray-400 is handled by the general .text-gray-400 override now */
+        .light-theme .placeholder-gray-500::placeholder,
+        .light-theme-container .placeholder-gray-500::placeholder {
+            color: #6b7280; /* gray-500 */
+        }
+
+        /* Specific text colors that need adjustment */
+        .light-theme .text-yellow-400, .light-theme-container .text-yellow-400 {
+            color: #ca8a04; /* Tailwind yellow-600, better contrast on light */
+        }
+        .light-theme .text-yellow-500, .light-theme-container .text-yellow-500 {
+            color: #b45309; /* Tailwind amber-600, better contrast on light */
+        }
+        .light-theme .text-green-400, .light-theme-container .text-green-400 {
+            color: #15803d; /* Tailwind green-700 */
+        }
+         .light-theme .text-blue-400, .light-theme-container .text-blue-400 {
+            color: #2563eb; /* Tailwind blue-600 */
+        }
+        .light-theme .text-purple-400, .light-theme-container .text-purple-400 {
+            color: #7e22ce; /* Tailwind purple-600 */
+        }
+
+
+        /* Book Cipher Specific */
+        .light-theme .book-cover-item, .light-theme-container .book-cover-item {
+            background-color: #e0e7ff; /* Tailwind indigo-100 */
+            border-color: #c7d2fe; /* Tailwind indigo-200 */
+            color: #3730a3; /* Tailwind indigo-800 */
+        }
+        .light-theme .book-cover-item:hover, .light-theme-container .book-cover-item:hover {
+            background-color: #c7d2fe; /* Tailwind indigo-200 */
+            border-color: #a5b4fc; /* Tailwind indigo-300 */
+        }
+        .light-theme .book-cover-selected, .light-theme-container .book-cover-selected {
+            background-color: #4f46e5; /* Tailwind indigo-600 */
+            border-color: #818cf8; /* Tailwind indigo-400 */
+            color: #ffffff; /* White text on dark indigo */
+        }
+        .light-theme #full-book-morse-display, .light-theme-container #full-book-morse-display {
+            background-color: #f3f4f6; /* gray-100 */
+            border-color: #d1d5db; /* gray-300 */
+            color: #1f2937; /* gray-800 */
+        }
+
+
+        /* Morse Pals Specific */
+        .light-theme .selected-friend, .light-theme-container .selected-friend {
+            background-color: #dbeafe; /* Tailwind blue-100 */
+            border-left-color: #3b82f6; /* Tailwind blue-500 */
+            color: #1e40af; /* Tailwind blue-800 */
+        }
+        /* Message Bubbles in Morse Pals & Global Beacon */
+        /* Received (gray in dark) */
+        .light-theme .bg-gray-600.p-3.rounded-lg, /* More specific selector for message bubbles */
+        .light-theme-container .bg-gray-600.p-3.rounded-lg {
+            background-color: #e5e7eb !important; /* gray-200 */
+            color: #1f2937 !important; /* gray-800 */
+        }
+         /* Sent (blue in dark) - these are often fine, but ensure good contrast of text if bubble color changes */
+        .light-theme .bg-blue-500.text-white.p-3.rounded-lg,
+        .light-theme-container .bg-blue-500.text-white.p-3.rounded-lg {
+            background-color: #3b82f6 !important; /* blue-500 */
+            color: #ffffff !important; /* white */
+        }
+        /* Global Beacon message items */
+        .light-theme .chat-feed .message, .light-theme-container .chat-feed .message {
+             background-color: #f3f4f6 !important; /* gray-100 */
+             border: 1px solid #e5e7eb; /* gray-200 */
+        }
+
+
+        /* Koch Method Input */
+        .light-theme #koch-answer-input, .light-theme-container #koch-answer-input {
+            background-color: #ffffff;
+            border-color: #d1d5db; /* gray-300 */
+            color: #1f2937; /* gray-800 */
+        }
+        .light-theme #koch-answer-input::placeholder, .light-theme-container #koch-answer-input::placeholder {
+            color: #9ca3af; /* gray-400 */
+        }
+
+
+        /* Settings tab specific (if any more needed beyond general) */
+        .light-theme #master-sound-toggle + .w-11.h-6, /* Target the specific track div for background */
+        .light-theme-container #master-sound-toggle + .w-11.h-6 { 
+            background-color: #d1d5db; /* gray-300 for off state track */
+        }
+        .light-theme #master-sound-toggle:checked + .w-11.h-6, /* Target the specific track div for background */
+        .light-theme-container #master-sound-toggle:checked + .w-11.h-6 {
+            background-color: #3b82f6; /* blue-500 for on state track */
+        }
+
+        /* Ensure toggle knob border is visible in light mode when OFF */
+        .light-theme #master-sound-toggle:not(:checked) + .w-11.h-6::after,
+        .light-theme-container #master-sound-toggle:not(:checked) + .w-11.h-6::after {
+            border-color: #6b7280; /* Tailwind gray-500, for white knob on gray-300 track */
+        }
+        /* Note: Tailwind's `peer-checked:after:border-white` handles the knob border for the ON state (white border on white knob) */
+
+
+        /* Modal */
+        .light-theme #unlocked-text-modal .bg-gray-800,
+        .light-theme-container #unlocked-text-modal .bg-gray-800 {
+            background-color: #ffffff !important; /* White modal background */
+        }
+        .light-theme #unlocked-text-modal .bg-gray-700,
+        .light-theme-container #unlocked-text-modal .bg-gray-700 { /* Modal content area */
+            background-color: #f3f4f6 !important; /* gray-100 for content area */
+            color: #1f2937 !important;
+        }
+        .light-theme #unlocked-text-modal-title,
+        .light-theme-container #unlocked-text-modal-title {
+            color: #1f2937 !important; /* Dark text for title */
+        }
+
+
+        /* Theme-specific styles for Tailwind-styled elements */
+        .light-theme #unit-time-input,
+        .light-theme-container #unit-time-input {
+            background-color: #e5e7eb; /* gray-200 */
+            border-color: #d1d5db; /* gray-300 */
+            color: #1f2937; /* gray-800 */
+        }
+        .light-theme #unit-time-input::placeholder,
+        .light-theme-container #unit-time-input::placeholder {
+            color: #6b7280; /* gray-500 */
+        }
+
+        .light-theme #wpm-slider, .light-theme-container #wpm-slider,
+        .light-theme #farnsworth-slider, .light-theme-container #farnsworth-slider,
+        .light-theme #freq-slider, .light-theme-container #freq-slider {
+            background-color: #d1d5db; /* gray-300 for track */
+            /* This only styles the track for some browsers if appearance-none is set.
+               Full slider styling is complex and browser-specific.
+               Tailwind typically handles this with pseudo-elements like ::-webkit-slider-thumb etc.
+               which are harder to override cleanly outside of Tailwind's dark: variant.
+               For now, this will change the track color.
+            */
+        }
+
+        .light-theme #book-selection, .light-theme-container #book-selection,
+        .light-theme #target-text-display, .light-theme-container #target-text-display,
+        .light-theme #unlocked-text-display, .light-theme-container #unlocked-text-display,
+        .light-theme #current-decoded-char, .light-theme-container #current-decoded-char,
+        .light-theme #tapperDecodedOutput, .light-theme-container #tapperDecodedOutput,
+        .light-theme #tapperMorseOutput, .light-theme-container #tapperMorseOutput {
+            background-color: #e5e7eb; /* gray-200 */
+            color: #1f2937; /* gray-800 */
+        }
+        .light-theme #book-selection, .light-theme-container #book-selection,
+        .light-theme #target-text-display, .light-theme-container #target-text-display,
+        .light-theme #unlocked-text-display, .light-theme-container #unlocked-text-display {
+            border-color: #d1d5db; /* gray-300 */
+        }
+        /* Ensure text-white elements become dark text in light theme */
+        .light-theme #book-selection, .light-theme-container #book-selection { /* text-white */
+            color: #1f2937; /* gray-800 */
+        }
+
+        .light-theme .reference-table th,
+        .light-theme-container .reference-table th,
+        .light-theme .reference-table td,
+        .light-theme-container .reference-table td {
+            border: 1px solid #d1d5db; /* gray-300 */
+        }
+        .light-theme .reference-table th,
+        .light-theme-container .reference-table th {
+            background-color: #e5e7eb; /* gray-200 */
+            /* Text color should be inherited from .app-container.light-theme-container */
+        }
+
+        .light-theme .tapper, /* For tapper within .light-theme body */
+        .light-theme-container .tapper { /* For tapper within .light-theme-container */
+            background-color: #9ca3af; /* Tailwind gray-400 */
+            border-color: #6b7280; /* Tailwind gray-500 */
+            color: #111827; /* Tailwind gray-900, adjusted for good contrast on gray-400 */
+        }
+        /* Active state for tapper (.tapper:active or .tapper.active) uses yellow-300 and gray-900,
+           which should be fine in light mode as well. No override needed for active state. */
+
+        /* Feedback message styling for themes */
+        .light-theme .feedback-message.text-green-500,
+        .light-theme-container .feedback-message.text-green-500 {
+            color: #16a34a; /* Tailwind green-600 */
+        }
+        .light-theme .feedback-message.text-red-500,
+        .light-theme-container .feedback-message.text-red-500 {
+            color: #dc2626; /* Tailwind red-600 */
+        }
+        .light-theme .feedback-message.text-yellow-500, /* For book cipher messages */
+        .light-theme-container .feedback-message.text-yellow-500 {
+            color: #d97706; /* Tailwind amber-600 for better contrast on light bg */
+        }
+
+    /* Styling for selected friend in Morse Pals list */
+    .selected-friend {
+        background-color: #4A5568; /* Tailwind gray-600, a bit darker than hover to show selection */
+        font-weight: bold; /* Make text bold */
+        border-left: 4px solid #4299e1; /* Tailwind blue-500, for a distinct indicator */
+    }
+
+    /* Book Library Styles */
+    .book-cover-item {
+        background-color: #2D3748; /* Tailwind gray-800 */
+        padding: 0.5rem; /* p-2 */
+        border-radius: 0.375rem; /* rounded-md */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        border: 1px solid #4A5568; /* border-gray-600 */
+        color: white;
+        font-size: 0.875rem; /* text-sm */
+        font-weight: 500; /* font-medium */
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        word-break: break-word; /* Ensure text wraps */
+        height: 8rem; /* h-32 Tailwind equiv. */
+        /* width-full is implied by grid behavior */
+    }
+
+    .book-cover-item:hover {
+        background-color: #4A5568; /* Tailwind gray-600 */
+        border-color: #718096; /* Tailwind gray-500 */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+    }
+
+    .book-cover-selected {
+        background-color: #3182CE; /* Tailwind blue-600 (adjusted from #4299E1 for better match) */
+        border-color: #63B3ED; /* Tailwind blue-400 */
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
+        /* Using a border to simulate ring effect for simplicity and control */
+        border-width: 2px;
+        /* ring-2 ring-blue-300 - Tailwind's ring is often an outline/box-shadow.
+           A border is simpler here if not using @apply.
+           If you want true ring, it's box-shadow: 0 0 0 2px theme('colors.blue.300');
+           but this can conflict with existing shadow. For now, thicker border of a highlight color.
+        */
+        transform: scale(1.05); /* Optional: slight scale */
+    }
+    /* Ensure selected text remains readable if bg changes significantly */
+    .book-cover-selected {
+        color: white; /* Ensure text is white on blue background */
+    }
+
+    /* For Book Cipher Highlighting */
+    .current-morse-target {
+        background-color: #f6e05e; /* Tailwind yellow-300 */
+        color: #1a202c;           /* Tailwind gray-900 */
+        font-weight: bold;
+        padding: 0.1em 0.25em;     /* Use em for padding relative to font size */
+        border-radius: 3px;
+        box-shadow: 0 0 5px #f6e05e; /* Optional: add a subtle glow */
+        transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; /* Smooth transition */
+    }
+
+    .morse-char-span {
+        /* Add a little padding to each span so highlight doesn't look too cramped */
+        padding: 0.05em;
+    }
+
+    /* Ensure the full morse display has good contrast and readability */
+    #full-book-morse-display {
+        font-family: 'Courier New', Courier, monospace; /* Monospaced font for Morse */
+        font-size: 1.1rem; /* Slightly larger font for readability */
+        line-height: 1.6;  /* Adjust line spacing */
+        /* max-height: 400px; /* Already set in HTML, confirm it's good */
+        /* overflow-y: auto; /* Already set in HTML */
+        /* background-color: #1f2937; /* Slightly different shade if needed, current is gray-700 */
+    }
+
+   .deciphered-char {
+       color: #a0aec0; /* A light gray color (Tailwind gray-500) */
+       font-weight: bold; /* Make it bold to stand out */
+   }
+
+    /* Input feedback animations */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    @keyframes glow-green {
+        0% { box-shadow: 0 0 3px rgba(74, 222, 128, 0.7); } /* Tailwind green-400 */
+        50% { box-shadow: 0 0 15px 5px rgba(74, 222, 128, 1); }
+        100% { box-shadow: 0 0 3px rgba(74, 222, 128, 0.7); }
+    }
+
+    .shake-red {
+        animation: shake 0.5s ease-in-out;
+        background-color: #fca5a5; /* Tailwind red-300 */
+        border-color: #ef4444 !important; /* Tailwind red-500, !important to override focus styles if needed */
+        color: #7f1d1d; /* Tailwind red-900 for text */
+    }
+
+    .glow-green {
+        animation: glow-green 0.8s ease-out;
+        background-color: #86efac; /* Tailwind green-300 */
+        border-color: #22c55e !important; /* Tailwind green-500, !important to override focus styles */
+        color: #14532d; /* Tailwind green-900 for text */
+    }
+
+        #predictive-taps-display {
+            height: auto; /* Allow height to adjust for wrapped content */
+            min-height: 3em; /* Keep the min-height to prevent layout shift */
+            display: flex;
+            flex-wrap: wrap; /* This is the key property to allow wrapping */
+            justify-content: center;
+            gap: 0.25rem; /* Adds a small space between badges */
+            align-items: center;
+            /* Assuming other styles like padding, border are handled by Tailwind classes in HTML */
+            /* If not, add them here:
+            /* padding: 0.5rem; */
+            /* border: 1px solid #4A5568; /* Example border */
+            /* border-radius: 0.375rem; /* Example border-radius */
+        }
+
+        /* Upsell Modal Styles */
+        /* The modal itself uses Tailwind classes for positioning and basic layout.
+           Specific styling for elements within the modal can be added here if needed,
+           but the current HTML uses Tailwind extensively. */
+
+        /* Example: Style for the list items if Tailwind wasn't sufficient */
+        /* #upsell-modal ul li {
+            color: #333;
+        } */
+
+/* --- Additions for Dark Theme --- */
+/* When .light-theme is NOT present on body, these styles apply for #upsell-modal */
+/* Targets the div that has .bg-white and .text-gray-800 in the HTML */
+body:not(.light-theme) #upsell-modal > div > div.bg-white.text-gray-800 {
+    background-color: #2c2c2c !important; /* Similar to .app-container dark bg (#2c2c2c) */
+    color: #f0f0f0 !important; /* Light text (#f0f0f0) */
+}
+
+body:not(.light-theme) #upsell-modal .text-purple-600 { /* Modal Title */
+    color: #a78bfa !important; /* Lighter purple (Tailwind purple-400) */
+}
+
+body:not(.light-theme) #upsell-modal #close-upsell-modal-btn.text-gray-600 { /* Close button icon */
+    color: #d1d5db !important; /* Tailwind gray-300 */
+}
+body:not(.light-theme) #upsell-modal #close-upsell-modal-btn.text-gray-600:hover {
+    color: #f9fafb !important; /* Tailwind gray-100 */
+}
+
+/* General text within the modal that was text-gray-800 or similar */
+body:not(.light-theme) #upsell-modal .text-lg.mb-4, /* "Upgrade to Pro and get access..." */
+body:not(.light-theme) #upsell-modal ul.list-disc li { /* List items text */
+    color: #f0f0f0 !important; /* Ensure they become light text */
+}
+
+/* SVG icons within list items are text-green-500. Adjust if needed. */
+body:not(.light-theme) #upsell-modal ul.list-disc li .text-green-500 {
+    color: #4ade80 !important; /* Tailwind green-400, slightly brighter for dark background */
+}
+
+body:not(.light-theme) #upsell-modal .text-xs.text-gray-500 { /* Placeholder payment text */
+    color: #9ca3af !important; /* Tailwind gray-400, which is light enough for dark bg */
+}
+
+/* The main upgrade button (bg-purple-600 text-white) is styled via Tailwind and should be fine. */
+/* No changes needed for it unless specific contrast issues arise. */
+
+/* --- End of Additions for Dark Theme --- */
+
+        .char-badge {
+            /* Tailwind classes: bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 */
+            background-color: #4A5568; /* bg-gray-600 */
+            color: #E2E8F0; /* text-gray-200 */
+            font-size: 0.75rem; /* text-xs */
+            font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* font-mono */
+            border-radius: 0.375rem; /* rounded-md */
+            padding-left: 0.5rem; /* px-2 */
+            padding-right: 0.5rem; /* px-2 */
+            padding-top: 0.25rem; /* py-1 */
+            padding-bottom: 0.25rem; /* py-1 */
+            /* Adding display inline-flex for better alignment if needed, though flex items in a flex container behave well */
+            display: inline-flex;
+            align-items: center;
+            margin: 0.125rem; /* Add a small margin for separation if gap isn't enough or for items that might break lines weirdly */
+        }
+
+        .char-badge.exact-match-highlight {
+            background-color: #FBBF24; /* Corresponds to Tailwind's yellow-400 */
+            color: #000000;       /* Corresponds to Tailwind's black */
+        }
+
+@media (min-width: 768px) { /* This is Tailwind's 'md' breakpoint */
+  #morse-reference-container.hidden {
+    display: block !important; /* Force the table to be visible on desktop */
+  }
+
+  #toggle-reference-btn {
+    display: none !important; /* Ensure the toggle button is hidden on desktop */
+  }
+}
+
+.ad-placeholder-container {
+  width: 100%;
+  min-height: 60px;
+  background-color: #3a3a3a;
+  border: 1px dashed #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: #888;
+}
+.ad-placeholder-container::before {
+  content: 'Ad Placeholder';
+}
+
+#ad-banner-container {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000; /* Ensure it's on top of other content */
+  /* Optional: Add background color for testing visibility */
+  /* background-color: rgba(255, 0, 0, 0.1); */
+  /* Optional: Add a minimum height if needed, AdMob SDK might handle this */
+  /* min-height: 50px; */
+}
+
+/* --- Privacy Policy Page Styles --- */
+/* Default (Light Theme) Styles for Privacy Page */
+body.privacy-page {
+    font-family: sans-serif; /* Overrides main body font for this page if desired, or remove if main font is ok */
+    padding: 15px;
+    background-color: #f4f4f4;
+    color: #333333;
+    /* Reset some global body styles if they conflict */
+    display: block; /* Override display:flex from global body */
+    align-items: initial; /* Override align-items:center */
+    min-height: auto; /* Override min-height:100vh */
+}
+
+.privacy-page .privacy-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    max-width: 800px; /* Limit width for readability */
+    margin: 0 auto; /* Center the container */
+}
+
+.privacy-page h1 {
+    color: #333333;
+    text-align: center;
+    margin-bottom: 20px; /* Added margin */
+}
+
+.privacy-page a#backButton {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.privacy-page a#backButton:hover {
+    background-color: #0056b3;
+}
+
+.privacy-page #privacyPolicyContent h2 { /* Assuming MD might produce H2 */
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    color: #444444;
+}
+
+.privacy-page #privacyPolicyContent h3 {
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+    color: #555555;
+}
+
+.privacy-page #privacyPolicyContent ul {
+    margin-left: 20px;
+    list-style-type: disc;
+    padding-left: 20px; /* Ensure padding for list items */
+}
+
+.privacy-page #privacyPolicyContent li {
+    margin-bottom: 0.5em;
+    line-height: 1.6; /* Improve readability */
+}
+
+.privacy-page #privacyPolicyContent p {
+    line-height: 1.6; /* Improve readability for paragraphs too */
+    margin-bottom: 1em;
+}
+
+.privacy-page #privacyPolicyContent a {
+    color: #007bff;
+    text-decoration: underline;
+}
+.privacy-page #privacyPolicyContent a:hover {
+    color: #0056b3;
+}
+
+
+/* Dark Theme Styles for Privacy Page */
+/* Applied when body has both .privacy-page and .dark-theme (or the global .light-theme is NOT present) */
+/* Using .dark-theme as the trigger class, assuming js/privacy.js will add it */
+
+body.privacy-page.dark-theme {
+    background-color: #1a1a1a; /* Global dark bg */
+    color: #f0f0f0; /* Global light text */
+}
+
+.privacy-page.dark-theme .privacy-container {
+    background-color: #2c2c2c; /* Global app container dark bg */
+    color: #f0f0f0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Darker shadow */
+}
+
+.privacy-page.dark-theme h1 {
+    color: #4a90e2; /* Main title blue from global dark theme */
+}
+
+.privacy-page.dark-theme a#backButton {
+    background-color: #4a5568; /* Tailwind gray-600 */
+    color: #e2e8f0; /* Tailwind gray-300 */
+}
+
+.privacy-page.dark-theme a#backButton:hover {
+    background-color: #2d3748; /* Tailwind gray-700 */
+}
+
+.privacy-page.dark-theme #privacyPolicyContent h2 {
+    color: #cccccc; /* Lighter gray for headings */
+}
+
+.privacy-page.dark-theme #privacyPolicyContent h3 {
+    color: #bbbbbb; /* Lighter gray for sub-headings */
+}
+
+.privacy-page.dark-theme #privacyPolicyContent a {
+    color: #60a5fa; /* Lighter blue for links (Tailwind blue-400) */
+}
+.privacy-page.dark-theme #privacyPolicyContent a:hover {
+    color: #93c5fd; /* Tailwind blue-300 */
+}
+
+/* Ensure that general text within privacyPolicyContent inherits correctly */
+.privacy-page.dark-theme #privacyPolicyContent,
+.privacy-page.dark-theme #privacyPolicyContent p,
+.privacy-page.dark-theme #privacyPolicyContent li {
+    color: #f0f0f0; /* Global light text */
+}
+
+/* --- Base styles for Master Sound Toggle Circle --- */
+#master-sound-toggle + .w-11.h-6::after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 1.25rem; /* Equivalent to h-5/w-5 */
+    height: 1.25rem; /* Equivalent to h-5/w-5 */
+    background-color: #ffffff; /* Equivalent to bg-white */
+    border-radius: 9999px; /* Equivalent to rounded-full */
+    top: 2px; /* Equivalent to top-[2px] */
+    left: 2px; /* Equivalent to left-[2px] */
+    border: 1px solid #d1d5db; /* Default border, Tailwind's border-gray-300 */
+    transform: translateX(0); /* Initial position */
+    transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out; /* Specific transitions */
+}
+
+#master-sound-toggle:checked + .w-11.h-6::after {
+    transform: translateX(20px); /* Move circle to the right */
+    /* border-color will be handled by peer-checked:after:border-white in HTML or light theme override */
+}
