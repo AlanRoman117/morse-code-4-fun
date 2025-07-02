@@ -965,7 +965,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!window.isProUser) {
                 if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
                 const { AdMob } = window.Capacitor.Plugins;
-                const { AdMob, BannerAdPluginEvents, AdMobBannerSize } = window.Capacitor.Plugins;
 
                 // Function to adjust body padding
                 const adjustBodyPaddingForAd = (adHeight) => {
