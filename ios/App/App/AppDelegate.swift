@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import GoogleMobileAds // This line is crucial
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,7 +8,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // This line starts the Google Mobile Ads SDK when your app launches.
+        GADMobileAds.sharedInstance().start(completionHandler: nil)
+
+        
         return true
     }
 
