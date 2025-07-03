@@ -17,6 +17,7 @@ DEPENDENCIES:
   - "CapacitorCommunityAdmob (from `../../node_modules/@capacitor-community/admob`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
+  - Google-Mobile-Ads-SDK
 
 SPEC REPOS:
   trunk:
@@ -41,6 +42,6 @@ SPEC CHECKSUMS:
   Google-Mobile-Ads-SDK: 301a16c461c331ba34ff4dab40a22ab7c147af61
   GoogleUserMessagingPlatform: a8b56893477f67212fbc8411c139e61d463349f5
 
-PODFILE CHECKSUM: f95e7fb990ba1df2d183ba3c39f252cccc72bf6e
+PODFILE CHECKSUM: 3f337fa5db2afcc25554ee179caae4cb6f31e805
 
 COCOAPODS: 1.16.2
