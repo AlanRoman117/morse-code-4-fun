@@ -6,11 +6,15 @@ const { AdMob, AdmobConsentStatus, BannerAdPluginEvents } = window.Capacitor.Plu
 export const AdMobService = {
   isInitialized: false,
 
+// In admob.js, inside the AdMobService object
+
   async initialize() {
     if (this.isInitialized) {
       return;
     }
     console.log('Starting AdMob initialization with UMP consent flow...');
+
+    // STEP 1: Handle Consent
     const consentInfo = await AdMob.requestConsentInfo();
     if (
       consentInfo.isConsentFormAvailable &&
@@ -18,16 +22,24 @@ export const AdMobService = {
     ) {
       await AdMob.showConsentForm();
     }
+
+    // STEP 2: Handle Tracking Authorization
     const trackingStatus = await AdMob.trackingAuthorizationStatus();
     if (trackingStatus.status === 'notDetermined') {
         await AdMob.requestTrackingAuthorization();
     }
+
+    // STEP 3: Initialize AdMob
     await AdMob.initialize({
       requestTrackingAuthorization: false,
       initializeForTesting: true,
     });
     this.isInitialized = true;
     console.log('AdMob SDK initialized successfully.');
+
+    // STEP 4: Setup Listeners and Show Banner
+    this.setupBannerListener();
+    this.showBanner();
   },
 
   setupBannerListener() {
