@@ -1,3 +1,5 @@
+import { AdMobService } from './admob.js';
+
 // --- App State ---
 let isProUser = loadProStatus();
 
@@ -23,6 +25,12 @@ function initAudio() { if (!audioContext) { audioContext = new (window.AudioCont
 
 // --- App Initialization on DOMContentLoaded ---
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize AdMob Service
+    AdMobService.initialize().then(() => {
+        // Once initialized, you can show an ad, like the banner
+        AdMobService.showBanner();
+    });
+
     window.isProUser = loadProStatus();
     populateMorseReference();
     applySavedTheme();
