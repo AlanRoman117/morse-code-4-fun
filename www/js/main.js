@@ -29,8 +29,9 @@ let resizeTimer;
 
 function initAudio() { if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); gainNode = audioContext.createGain(); gainNode.connect(audioContext.destination); } }
 
+
 // --- App Initialization on DOMContentLoaded ---
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     window.isProUser = loadProStatus();
     populateMorseReference();
     applySavedTheme();
@@ -47,32 +48,43 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', masterAudioInitListener);
     document.body.addEventListener('touchstart', masterAudioInitListener);
 
-    // --- AdMob Initialization Block ---
+    // --- FINAL AdMob Initialization Block ---
     if (window.Capacitor?.Plugins?.AdMob) {
         const { AdMob, BannerAdPluginEvents } = window.Capacitor.Plugins;
 
         if (!window.isProUser) {
-            AdMob.initialize({
-                requestTrackingAuthorization: true,
-                testingDevices: ["YOUR_TEST_DEVICE_ID"], // Optional: Add your device ID here
-                initializeForTesting: true,
-            }).then(() => {
+            try {
+                // Simplified initialization to request tracking and then proceed.
+                await AdMob.requestTrackingAuthorization();
+                
+                await AdMob.initialize({
+                    initializeForTesting: true,
+                });
+
                 console.log('[AdMob] Initialization successful. Now showing banner.');
+
+                // --- Show Banner Ad with a small delay ---
                 AdMob.addListener(BannerAdPluginEvents.Loaded, () => console.log('[AdMob] Banner loaded.'));
                 AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (error) => console.error('[AdMob] Banner failed to load:', error));
 
-                const adOptions = {
-                    adId: "ca-app-pub-3940256099942544/2934735716",
-                    adSize: 'ADAPTIVE_BANNER',
-                    position: 'BOTTOM_CENTER',
-                    margin: 0,
-                    isTesting: true,
-                };
-                AdMob.showBanner(adOptions);
-            }).catch(error => console.error('[AdMob] Initialization failed:', error));
+                setTimeout(() => {
+                    const adOptions = {
+                        adId: "ca-app-pub-6940502431077467/3842216044", // Your REAL Banner Ad Unit ID
+                        adSize: 'ADAPTIVE_BANNER',
+                        position: 'BOTTOM_CENTER',
+                        margin: 0,
+                        isTesting: false, // Set to false when using your real Ad Unit ID
+                    };
+                    AdMob.showBanner(adOptions);
+                }, 1000); // 1-second delay to ensure SDK is fully ready
+
+            } catch (error) {
+                console.error('[AdMob] Full initialization chain failed:', error);
+            }
         }
     }
 
+    // --- Final UI State Updates ---
     if (typeof populateBookLibrary === 'function') populateBookLibrary();
     if (typeof window.initializeKochMethod === 'function') window.initializeKochMethod();
     updateGoProButtonUI();
@@ -86,7 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// All your other functions follow...
+
+// All other functions follow...
 function updateGoProButtonUI() {
     const goProButtonInSettings = document.getElementById('go-pro-btn');
     if (goProButtonInSettings) {

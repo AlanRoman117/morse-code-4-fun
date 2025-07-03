@@ -1039,41 +1039,14 @@ if (typeof attachTapperToArea === 'function') {
                 modal.classList.remove('hidden');
 
                 // Ensure close button listener is attached only once
-                if (!closeModalBtn.dataset.listenerAttached) {
-                    closeModalBtn.addEventListener('click', () => {
-                        modal.classList.add('hidden');
-                        // --- Interstitial Ad Logic ---
-                        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
-                            const { AdMob } = window.Capacitor.Plugins;
-                            // Prepare Interstitial Ad
-                            AdMob.prepareInterstitial({
-                                adId: "ca-app-pub-xxxxxxxxxxxxxxxxx/zzzzzzzzzz", // Replace with your actual Interstitial Ad Unit ID
-                                isTesting: true, // IMPORTANT: Set to true for development/testing, false for production
-                                // npa: true, // Non-Personalized Ads, if consent requires it
-                            })
-                            .then(() => {
-                                console.log("Interstitial ad prepared successfully.");
-                                // Show Interstitial Ad
-                                AdMob.showInterstitial()
-                                    .then(() => {
-                                        console.log("Interstitial ad shown successfully.");
-                                    })
-                                    .catch(error => {
-                                        console.error("Error showing interstitial ad:", error);
-                                    });
-                            })
-                            .catch(error => {
-                                console.error("Error preparing interstitial ad:", error);
-                                // Even if preparing fails, the app flow should continue.
-                                // The ad simply won't show.
-                            });
-                        } else {
-                            console.warn("AdMob Capacitor plugin not available. Interstitial ad will not be shown.");
-                        }
-                        // --- End Interstitial Ad Logic ---
-                    });
-                    closeModalBtn.dataset.listenerAttached = 'true';
-                }
+            if (window.Capacitor?.Plugins?.AdMob && !window.isProUser) {
+        const { AdMob } = window.Capacitor.Plugins;
+        AdMob.prepareInterstitial({
+            adId: "ca-app-pub-6940502431077467/3842216044", // Test Interstitial ID
+            isTesting: true,
+        }).then(() => console.log('[AdMob] Interstitial ad prepared.')
+        ).catch(e => console.error('[AdMob] Error preparing interstitial ad:', e));
+    }
             } else {
                 console.error("Modal elements not found for displaying unlocked text.");
                 alert("Error: Could not display the unlocked text. UI elements missing.");
