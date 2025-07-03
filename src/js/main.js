@@ -28,12 +28,13 @@ function initAudio() { if (!audioContext) { audioContext = new (window.AudioCont
 
 // --- App Initialization on DOMContentLoaded ---
 document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize AdMob Service
-    AdMobService.initialize().then(() => {
-        // Once initialized, you can show an ad, like the banner
-        AdMobService.showBanner();
-    });
+    // Initialize AdMob Service and wait for it to complete
+    await AdMobService.initialize();
 
+    // Now that initialization is guaranteed to be finished, show the banner
+    AdMobService.showBanner();
+
+    // The rest of your app's initialization logic can now run
     window.isProUser = loadProStatus();
     populateMorseReference();
     applySavedTheme();
