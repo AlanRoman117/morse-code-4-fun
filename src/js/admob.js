@@ -12,20 +12,22 @@ export const AdMobService = {
     }
     console.log('Starting AdMob initialization with UMP consent flow...');
 
-    // --- DEBUGGING OPTIONS TO FORCE CONSENT FORM ---
-    // This uses the test device ID from your Xcode console log.
+    // --- STEP 1: RESET CONSENT (for debugging) ---
+    // This is a powerful debug tool to force the consent form to show every time.
+    await AdMob.resetConsentInfo();
+    console.log('Consent info has been reset for debugging.');
+    // ---------------------------------------------
+
     const umpDebugSettings = {
       testDeviceIdentifiers: ['E3D6A0C8-F0A4-49E5-B389-CC7EC8649636'],
       geography: 1, // 1 = EEA (forces the consent form for testing)
     };
-    // --------------------------------------------------
 
-    // STEP 1: Request consent information with debug settings
     const consentInfo = await AdMob.requestConsentInfo({
       debugSettings: umpDebugSettings,
     });
+    console.log('UMP Consent Info:', consentInfo);
 
-    // STEP 2: Show consent form if required (will be required in debug mode)
     if (
       consentInfo.isConsentFormAvailable &&
       consentInfo.status === AdmobConsentStatus.REQUIRED
@@ -34,15 +36,13 @@ export const AdMobService = {
       await AdMob.showConsentForm();
     }
 
-    // STEP 3: Initialize AdMob
     await AdMob.initialize({
-      requestTrackingAuthorization: false, // UMP handles this
+      requestTrackingAuthorization: false,
       initializeForTesting: true,
     });
     this.isInitialized = true;
     console.log('AdMob SDK initialized successfully.');
 
-    // STEP 4: Setup Listeners and Show Banner
     this.setupBannerListener();
     this.showBanner();
   },
