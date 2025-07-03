@@ -35,8 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     applySavedTheme();
     updateDurations();
 
-// In main.js, inside the DOMContentLoaded listener
-
     // --- Initialize AdMob Asynchronously in the Background ---
     AdMobService.initialize();
 
