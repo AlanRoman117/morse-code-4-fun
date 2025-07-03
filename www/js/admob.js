@@ -1,6 +1,6 @@
 // src/js/admob.js
 
-const { AdMob, AdmobConsentStatus } = window.Capacitor.Plugins;
+const { AdMob, AdmobConsentStatus, BannerAdPluginEvents } = window.Capacitor.Plugins;
 
 // --- AdMob Service ---
 // Encapsulates all AdMob logic into a single object.
@@ -59,16 +59,16 @@ export const AdMobService = {
    * This prevents the banner from overlapping your app's content.
    */
   setupBannerListener() {
-    AdMob.addListener('onBannerAdSizeChanged', (size) => {
-      console.log(`Banner Ad: Size changed to ${size.width}x${size.height}`);
-      // Find the main content container of your app
-      const appContent = document.querySelector('body'); // Or a more specific main container
-      if (appContent) {
-        // Apply the ad's height as a bottom margin or padding
-        appContent.style.paddingBottom = `${size.height}px`;
-      }
+    // Use the correct event name from the plugin
+    AdMob.addListener(BannerAdPluginEvents.SizeChanged, (size) => {
+        console.log(`Banner Ad: UI adjustment for size ${size.width}x${size.height}`);
+        const nav = document.querySelector('nav');
+        if (nav) {
+            // Set the 'bottom' style of the nav bar to the height of the ad
+            nav.style.bottom = `${size.height}px`;
+        }
     });
-  },
+},
 
   /**
    * Shows a banner ad.
