@@ -46,7 +46,7 @@ export const AdMobService = {
       requestTrackingAuthorization: false, // UMP handles this, so set to false
       initializeForTesting: true, // Critical for development
     });
-
+    
     this.isInitialized = true;
     console.log('AdMob SDK initialized successfully after consent flow.');
 
@@ -87,7 +87,7 @@ export const AdMobService = {
     AdMob.addListener('onBannerAdFailedToLoad', (error) => {
       console.error('Banner Ad: Failed to load.', error);
     });
-
+    
     const options = {
       adId: 'ca-app-pub-3940256099942544/2934735716', // Google's test ID for banners
       adSize: 'ADAPTIVE_BANNER',
