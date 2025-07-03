@@ -55,19 +55,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!window.isProUser) {
             try {
                 // Simplified initialization to request tracking and then proceed.
-                await AdMob.requestTrackingAuthorization();
+                console.log('[AdMob] Attempting to request tracking authorization...');
+                try {
+                    const trackingAuthResult = await AdMob.requestTrackingAuthorization();
+                    console.log('[AdMob] Tracking authorization successful:', trackingAuthResult);
+                } catch (trackingError) {
+                    console.error('[AdMob] Requesting tracking authorization failed:', trackingError);
+                    // Optionally, re-throw or handle this error if critical
+                }
                 
-                await AdMob.initialize({
-                    initializeForTesting: true,
-                });
+                console.log('[AdMob] Attempting to initialize AdMob SDK...');
+                try {
+                    await AdMob.initialize({
+                        initializeForTesting: true,
+                    });
+                    console.log('[AdMob] AdMob SDK Initialization successful.');
+                } catch (initError) {
+                    console.error('[AdMob] AdMob SDK Initialization failed:', initError);
+                    // Optionally, re-throw or handle this error if critical
+                }
 
-                console.log('[AdMob] Initialization successful. Now showing banner.');
+                console.log('[AdMob] Proceeding to show banner.');
 
                 // --- Show Banner Ad with a small delay ---
                 AdMob.addListener(BannerAdPluginEvents.Loaded, () => console.log('[AdMob] Banner loaded.'));
                 AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (error) => console.error('[AdMob] Banner failed to load:', error));
 
                 setTimeout(() => {
+                    console.log('[AdMob] Attempting to show banner ad...');
                     const adOptions = {
                         adId: "ca-app-pub-6940502431077467/3842216044", // Your REAL Banner Ad Unit ID
                         adSize: 'ADAPTIVE_BANNER',
@@ -75,7 +90,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         margin: 0,
                         isTesting: false, // Set to false when using your real Ad Unit ID
                     };
-                    AdMob.showBanner(adOptions);
+                    AdMob.showBanner(adOptions).then(() => {
+                        console.log('[AdMob] showBanner call successful.');
+                    }).catch(bannerError => {
+                        console.error('[AdMob] showBanner call failed:', bannerError);
+                    });
                 }, 1000); // 1-second delay to ensure SDK is fully ready
 
             } catch (error) {
