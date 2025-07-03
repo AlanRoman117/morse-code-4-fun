@@ -8,60 +8,30 @@ export const AdMobService = {
   // A flag to prevent multiple initializations
   isInitialized: false,
 
-  /**
-   * Initializes the AdMob service, handling the critical iOS consent flow.
-   * This MUST be called once when the app starts.
-   */
   async initialize() {
     // Prevent re-initialization
     if (this.isInitialized) {
       console.log('AdMob Service already initialized.');
       return;
     }
+    console.log('Starting DIRECT App Tracking authorization...');
 
-    console.log('Starting AdMob initialization with consent flow...');
+    // --- Direct ATT Test ---
+    // We are calling the tracking request directly to isolate the issue.
+    const { status } = await AdMob.requestTrackingAuthorization();
+    console.log('Direct ATT Request Status:', status);
 
-    // --- DEBUGGING OPTIONS ---
-    // Use the testDeviceIdentifiers from your Xcode console log
-    const umpDebugSettings = {
-      testDeviceIdentifiers: ['E3D6A0C8-F0A4-49E5-B389-CC7EC8649636'],
-      geography: 1, // 1 = EEA (European Economic Area), forces the consent form
-    };
-    // -------------------------
-
-    // STEP 1: Request Consent Information from Google's UMP with DEBUG settings
-    const consentInfo = await AdMob.requestConsentInfo({
-        debugSettings: umpDebugSettings,
-    });
-    console.log('UMP Consent Info:', consentInfo);
-
-    // STEP 2: Check if a consent form is available and required
-    if (
-      consentInfo.isConsentFormAvailable &&
-      consentInfo.status === AdmobConsentStatus.REQUIRED
-    ) {
-      console.log('UMP consent form is required. Showing form...');
-      // STEP 3: Show the UMP Consent Form
-      await AdMob.showConsentForm();
-      console.log('UMP consent form has been shown.');
-    }
-
-    // STEP 4: Check the final App Tracking Transparency (ATT) status for logging
-    const trackingStatus = await AdMob.trackingAuthorizationStatus();
-    console.log('Final ATT Status:', trackingStatus.status);
-
-    // STEP 5: Initialize the AdMob SDK AFTER the consent flow is complete
+    // --- Initialize AdMob ---
     await AdMob.initialize({
-      requestTrackingAuthorization: false,
       initializeForTesting: true,
     });
     
     this.isInitialized = true;
-    console.log('AdMob SDK initialized successfully after consent flow.');
+    console.log('AdMob SDK initialized successfully.');
 
+    // --- Show Banner ---
     console.log('Setting up banner listeners...');
     this.setupBannerListener();
-
     console.log('Attempting to show banner...');
     this.showBanner();
   },
