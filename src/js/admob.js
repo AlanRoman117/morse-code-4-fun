@@ -75,27 +75,27 @@ export const AdMobService = {
    */
   async showBanner() {
     if (!this.isInitialized) {
-      console.error('AdMob not initialized. Call AdMobService.initialize() first.');
-      return;
+        console.error('AdMob not initialized. Call AdMobService.initialize() first.');
+        return;
     }
 
     // Attach listeners BEFORE showing the banner for robust error handling
-    AdMob.addListener('onBannerAdLoaded', () => {
-      console.log('Banner Ad: Loaded');
+    AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
+        console.log('Banner Ad: Loaded');
     });
 
-    AdMob.addListener('onBannerAdFailedToLoad', (error) => {
-      console.error('Banner Ad: Failed to load.', error);
+    AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (error) => {
+        console.error('Banner Ad: Failed to load.', error);
     });
-    
+
     const options = {
-      adId: 'ca-app-pub-3940256099942544/2934735716', // Google's test ID for banners
-      adSize: 'ADAPTIVE_BANNER',
-      position: 'BOTTOM_CENTER',
-      isTesting: true, // Redundant but good for clarity
+        adId: 'ca-app-pub-3940256099942544/2934735716', // Google's test ID for banners
+        adSize: 'ADAPTIVE_BANNER',
+        position: 'BOTTOM_CENTER',
+        isTesting: true,
     };
 
     await AdMob.showBanner(options);
     console.log('Banner Ad: showBanner() called successfully.');
-  },
+},
 };
