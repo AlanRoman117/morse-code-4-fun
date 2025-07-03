@@ -6,32 +6,37 @@ const { AdMob, AdmobConsentStatus, BannerAdPluginEvents } = window.Capacitor.Plu
 export const AdMobService = {
   isInitialized: false,
 
-// In admob.js, inside the AdMobService object
-
   async initialize() {
     if (this.isInitialized) {
       return;
     }
     console.log('Starting AdMob initialization with UMP consent flow...');
 
-    // STEP 1: Handle Consent
-    const consentInfo = await AdMob.requestConsentInfo();
+    // --- DEBUGGING OPTIONS TO FORCE CONSENT FORM ---
+    // This uses the test device ID from your Xcode console log.
+    const umpDebugSettings = {
+      testDeviceIdentifiers: ['E3D6A0C8-F0A4-49E5-B389-CC7EC8649636'],
+      geography: 1, // 1 = EEA (forces the consent form for testing)
+    };
+    // --------------------------------------------------
+
+    // STEP 1: Request consent information with debug settings
+    const consentInfo = await AdMob.requestConsentInfo({
+      debugSettings: umpDebugSettings,
+    });
+
+    // STEP 2: Show consent form if required (will be required in debug mode)
     if (
       consentInfo.isConsentFormAvailable &&
       consentInfo.status === AdmobConsentStatus.REQUIRED
     ) {
+      console.log('UMP consent form is required. Showing form...');
       await AdMob.showConsentForm();
-    }
-
-    // STEP 2: Handle Tracking Authorization
-    const trackingStatus = await AdMob.trackingAuthorizationStatus();
-    if (trackingStatus.status === 'notDetermined') {
-        await AdMob.requestTrackingAuthorization();
     }
 
     // STEP 3: Initialize AdMob
     await AdMob.initialize({
-      requestTrackingAuthorization: false,
+      requestTrackingAuthorization: false, // UMP handles this
       initializeForTesting: true,
     });
     this.isInitialized = true;
