@@ -36,7 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDurations();
 
     // --- Initialize AdMob Asynchronously in the Background ---
-    AdMobService.initialize(); // Just call initialize and let it do its job.
+    AdMobService.initialize().then(() => {
+        AdMobService.setupBannerListener();
+        // Add a short delay to prevent race conditions
+        setTimeout(() => {
+            AdMobService.showBanner();
+        }, 50); // 50 millisecond delay
+    });
 
     // --- The rest of your initialization code ---
     const masterAudioInitListener = () => {
