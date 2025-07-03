@@ -52,6 +52,11 @@ export const AdMobService = {
 
     // After initialization, setup listeners for UI adjustments
     this.setupBannerListener();
+
+    //
+    // Call showBanner() from right here!
+    //
+    this.showBanner();
   },
 
   /**
