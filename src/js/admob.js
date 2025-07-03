@@ -21,8 +21,18 @@ export const AdMobService = {
 
     console.log('Starting AdMob initialization with consent flow...');
 
-    // STEP 1: Request Consent Information from Google's UMP
-    const consentInfo = await AdMob.requestConsentInfo();
+    // --- DEBUGGING OPTIONS ---
+    // Use the testDeviceIdentifiers from your Xcode console log
+    const umpDebugSettings = {
+      testDeviceIdentifiers: ['E3D6A0C8-F0A4-49E5-B389-CC7EC8649636'],
+      geography: 1, // 1 = EEA (European Economic Area), forces the consent form
+    };
+    // -------------------------
+
+    // STEP 1: Request Consent Information from Google's UMP with DEBUG settings
+    const consentInfo = await AdMob.requestConsentInfo({
+        debugSettings: umpDebugSettings,
+    });
     console.log('UMP Consent Info:', consentInfo);
 
     // STEP 2: Check if a consent form is available and required
@@ -32,7 +42,6 @@ export const AdMobService = {
     ) {
       console.log('UMP consent form is required. Showing form...');
       // STEP 3: Show the UMP Consent Form
-      // This form automatically triggers the Apple ATT prompt
       await AdMob.showConsentForm();
       console.log('UMP consent form has been shown.');
     }
@@ -43,19 +52,17 @@ export const AdMobService = {
 
     // STEP 5: Initialize the AdMob SDK AFTER the consent flow is complete
     await AdMob.initialize({
-      requestTrackingAuthorization: false, // UMP handles this, so set to false
-      initializeForTesting: true, // Critical for development
+      requestTrackingAuthorization: false,
+      initializeForTesting: true,
     });
     
     this.isInitialized = true;
     console.log('AdMob SDK initialized successfully after consent flow.');
 
-    // After initialization, setup listeners for UI adjustments
+    console.log('Setting up banner listeners...');
     this.setupBannerListener();
 
-    //
-    // Call showBanner() from right here!
-    //
+    console.log('Attempting to show banner...');
     this.showBanner();
   },
 
