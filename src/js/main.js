@@ -27,19 +27,21 @@ function initAudio() { if (!audioContext) { audioContext = new (window.AudioCont
 
 
 // --- App Initialization on DOMContentLoaded ---
-document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize AdMob Service and wait for it to complete
-    await AdMobService.initialize();
-
-    // Now that initialization is guaranteed to be finished, show the banner
-    AdMobService.showBanner();
-
-    // The rest of your app's initialization logic can now run
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Initialize Core App UI Immediately ---
+    // This code will now run instantly, making your app interactive.
     window.isProUser = loadProStatus();
     populateMorseReference();
     applySavedTheme();
     updateDurations();
 
+    // --- Initialize AdMob Asynchronously in the Background ---
+    AdMobService.initialize().then(() => {
+        // This code runs only after AdMob initialization is complete.
+        AdMobService.showBanner();
+    });
+
+    // --- The rest of your initialization code ---
     const masterAudioInitListener = () => {
         initAudio();
         if (typeof Tone !== 'undefined' && Tone.start) {
@@ -51,7 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.addEventListener('click', masterAudioInitListener);
     document.body.addEventListener('touchstart', masterAudioInitListener);
 
-    // --- Final UI State Updates ---
     if (typeof populateBookLibrary === 'function') populateBookLibrary();
     if (typeof window.initializeKochMethod === 'function') window.initializeKochMethod();
     updateGoProButtonUI();
