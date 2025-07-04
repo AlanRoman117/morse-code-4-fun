@@ -33,7 +33,10 @@ export const AdMobService = {
       consentInfo.status === AdmobConsentStatus.REQUIRED
     ) {
       console.log('UMP consent form is required. Showing form...');
-      await AdMob.showConsentForm();
+      // Wrap the call in a setTimeout to ensure it runs on the main thread
+      setTimeout(async () => {
+        await AdMob.showConsentForm();
+      }, 0);
     }
 
     await AdMob.initialize({
