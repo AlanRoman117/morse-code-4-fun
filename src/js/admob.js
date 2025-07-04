@@ -11,33 +11,34 @@ export const AdMobService = {
     }
     console.log('Final Test: Forcing consent form directly.');
 
-    // STEP 1: RESET CONSENT (ensures a clean slate)
-    await AdMob.resetConsentInfo();
-    console.log('Consent info has been reset.');
+    // Add a small delay to ensure the main ViewController is ready
+    setTimeout(async () => {
+      // STEP 1: RESET CONSENT (ensures a clean slate)
+      await AdMob.resetConsentInfo();
+      console.log('Consent info has been reset.');
 
-    // STEP 2: SHOW THE FORM DIRECTLY
-    // We are bypassing the `requestConsentInfo` call for this test
-    // to prove that the form itself can be shown.
-    console.log('Attempting to show consent form directly...');
-    try {
-      await AdMob.showConsentForm();
-      console.log('Consent form was shown and dismissed.');
-    } catch (error) {
-      console.error('CRITICAL: showConsentForm() failed!', error);
-      return; // Stop execution if the form fails
-    }
+      // STEP 2: SHOW THE FORM DIRECTLY
+      console.log('Attempting to show consent form directly...');
+      try {
+        await AdMob.showConsentForm();
+        console.log('Consent form was shown and dismissed.');
+      } catch (error) {
+        console.error('CRITICAL: showConsentForm() failed!', error);
+        return; // Stop execution if the form fails
+      }
 
-    // STEP 3: INITIALIZE ADMOB
-    await AdMob.initialize({
-      requestTrackingAuthorization: false,
-      initializeForTesting: true,
-    });
-    this.isInitialized = true;
-    console.log('AdMob SDK initialized successfully.');
+      // STEP 3: INITIALIZE ADMOB
+      await AdMob.initialize({
+        requestTrackingAuthorization: false,
+        initializeForTesting: true,
+      });
+      this.isInitialized = true;
+      console.log('AdMob SDK initialized successfully.');
 
-    // STEP 4: SHOW THE BANNER
-    this.setupBannerListener();
-    this.showBanner();
+      // STEP 4: SHOW THE BANNER
+      this.setupBannerListener();
+      this.showBanner();
+    }, 250); // 250 millisecond delay to ensure the view is ready
   },
 
   setupBannerListener() {
