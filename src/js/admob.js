@@ -1,4 +1,4 @@
-// The Final, Corrected admob.js
+// The Final, Definitive admob.js
 
 const { AdMob, AdmobConsentStatus, BannerAdPluginEvents } = window.Capacitor.Plugins;
 
@@ -9,37 +9,25 @@ export const AdMobService = {
     if (this.isInitialized) {
       return;
     }
-    console.log('Starting AdMob initialization with UMP consent flow...');
+    console.log('Final Test: Forcing consent form directly.');
 
-    // STEP 1: RESET CONSENT (for debugging)
+    // STEP 1: RESET CONSENT (ensures a clean slate)
     await AdMob.resetConsentInfo();
-    console.log('Consent info has been reset for debugging.');
+    console.log('Consent info has been reset.');
 
-    // --- DEBUG SETTINGS TO FORCE THE FORM ---
-    const umpDebugSettings = {
-      testDeviceIdentifiers: ['4F624EB2-3567-4481-BEB8-A1B684C9F258'],
-      geography: 1,
-    };
-
-    // STEP 2: REQUEST CONSENT
-    const consentInfo = await AdMob.requestConsentInfo({
-      debugSettings: umpDebugSettings,
-    });
-    console.log('UMP Consent Info:', consentInfo);
-
-    // STEP 3: SHOW THE FORM (if required)
-    if (
-      consentInfo.isConsentFormAvailable &&
-      consentInfo.status === AdmobConsentStatus.REQUIRED
-    ) {
-      console.log('UMP consent form is required. Showing form...');
-      // Wrap the call in a setTimeout to ensure it runs on the main thread
-      setTimeout(async () => {
-        await AdMob.showConsentForm();
-      }, 0);
+    // STEP 2: SHOW THE FORM DIRECTLY
+    // We are bypassing the `requestConsentInfo` call for this test
+    // to prove that the form itself can be shown.
+    console.log('Attempting to show consent form directly...');
+    try {
+      await AdMob.showConsentForm();
+      console.log('Consent form was shown and dismissed.');
+    } catch (error) {
+      console.error('CRITICAL: showConsentForm() failed!', error);
+      return; // Stop execution if the form fails
     }
 
-    // STEP 4: INITIALIZE ADMOB (only after consent is handled)
+    // STEP 3: INITIALIZE ADMOB
     await AdMob.initialize({
       requestTrackingAuthorization: false,
       initializeForTesting: true,
@@ -47,7 +35,7 @@ export const AdMobService = {
     this.isInitialized = true;
     console.log('AdMob SDK initialized successfully.');
 
-    // STEP 5: SHOW THE BANNER
+    // STEP 4: SHOW THE BANNER
     this.setupBannerListener();
     this.showBanner();
   },
