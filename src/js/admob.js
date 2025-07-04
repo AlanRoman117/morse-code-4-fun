@@ -31,8 +31,10 @@ export const AdMobService = {
       consentInfo.status === AdmobConsentStatus.REQUIRED
     ) {
       console.log('Attempting to show consent form...');
+      setTimeout(async () => {
       await AdMob.showConsentForm();
       console.log('Consent form shown and dismissed.');
+      }, 0);
     }
 
     await AdMob.initialize({
