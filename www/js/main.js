@@ -35,26 +35,27 @@ document.addEventListener('DOMContentLoaded', () => {
     applySavedTheme();
     updateDurations();
 
-    // --- Initialize AdMob Asynchronously in the Background ---
-    // --- Listen for the App to become active before initializing AdMob ---
-    // This is the most reliable way to avoid the "No ViewController" error.
+    // --- Definitive AdMob Initialization ---
+    // This is the most robust pattern for initializing native UI plugins.
     const { App } = window.Capacitor.Plugins;
     let admobInitialized = false;
 
-    App.addListener('appStateChange', (state) => {
-        // state.isActive is true when the app is in the foreground and ready.
-        // The admobInitialized flag ensures this only runs once.
-        if (state.isActive && !admobInitialized) {
+    const initAdMobOnActive = async () => {
+        if (admobInitialized) return; // Prevent double initialization
+
+        const state = await App.getState();
+        if (state.isActive) {
             console.log('App is active, initializing AdMob...');
-            admobInitialized = true; // Prevent it from running again
-            AdMobService.initialize().then(() => {
-                // Add a small delay to ensure the UI is ready
-                setTimeout(() => {
-                    AdMobService.showBanner();
-                }, 100);
-            });
+            admobInitialized = true;
+            AdMobService.initialize();
         }
-    });
+    };
+
+    // Listen for the app to resume, in case it wasn't active at first
+    App.addListener('appStateChange', initAdMobOnActive);
+
+    // Check the state immediately on startup
+    initAdMobOnActive();
 
     // --- The rest of your initialization code ---
     const masterAudioInitListener = () => {
