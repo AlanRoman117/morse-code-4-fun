@@ -26,23 +26,21 @@ let resizeTimer;
 function initAudio() { if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); gainNode = audioContext.createGain(); gainNode.connect(audioContext.destination); } }
 
 
-// --- App Initialization on DOMContentLoaded ---
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Initialize Core App UI Immediately ---
-    // This code will now run instantly, making your app interactive.
+// --- App Initialization on deviceready ---
+// This is the most reliable event to ensure all plugins are ready.
+document.addEventListener('deviceready', () => {
+    // --- Initialize Core App UI ---
     window.isProUser = loadProStatus();
     populateMorseReference();
     applySavedTheme();
     updateDurations();
 
     // --- Definitive AdMob Initialization ---
-    // This is the most robust pattern for initializing native UI plugins.
     const { App } = window.Capacitor.Plugins;
     let admobInitialized = false;
 
     const initAdMobOnActive = async () => {
-        if (admobInitialized) return; // Prevent double initialization
-
+        if (admobInitialized) return;
         const state = await App.getState();
         if (state.isActive) {
             console.log('App is active, initializing AdMob...');
@@ -50,11 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             AdMobService.initialize();
         }
     };
-
-    // Listen for the app to resume, in case it wasn't active at first
     App.addListener('appStateChange', initAdMobOnActive);
-
-    // Check the state immediately on startup
     initAdMobOnActive();
 
     // --- The rest of your initialization code ---
@@ -80,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
         showTab('introduction-tab');
     }
-});
+}, false);
 
 
 // All other functions follow...
