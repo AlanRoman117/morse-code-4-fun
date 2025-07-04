@@ -19,7 +19,7 @@ export const AdMobService = {
     // ---------------------------------------------
 
     const umpDebugSettings = {
-      testDeviceIdentifiers: ['E3D6A0C8-F0A4-49E5-B389-CC7EC8649636'],
+      testDeviceIdentifiers: ['4F624EB2-3567-4481-BEB8-A1B684C9F258'],
       geography: 1, // 1 = EEA (forces the consent form for testing)
     };
 
