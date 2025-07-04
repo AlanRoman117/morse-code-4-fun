@@ -1,12 +1,13 @@
 // The Final admob.js for admob-plus
 
 // The AdMob object is now accessed directly from the global admob object
-const { AdMob } = admob.plus;
 
 export const AdMobService = {
   isInitialized: false,
 
   async initialize() {
+    const { AdMob } = admob.plus;
+    
     if (this.isInitialized) {
       return;
     }
