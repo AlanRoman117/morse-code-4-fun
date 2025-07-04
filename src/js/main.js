@@ -1,24 +1,54 @@
-import { AdMobService } from './admob.js';
+// The Final, Definitive main.js
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    // This runs first, setting up the basic UI
     initializeCoreUI();
 });
 
 document.addEventListener('deviceready', () => {
-    // This runs second, once all plugins are ready.
-    // Its ONLY job is to start the AdMob service.
-    console.log('Device is ready, initializing AdMob Service...');
-    AdMobService.initialize();
+    console.log('Device is ready. Attempting DIRECT AdMob-Plus initialization...');
+
+    // Use the admob object directly
+    const { AdMob } = admob.plus;
+
+    // Listen for events right on the document
+    document.addEventListener('admob.ad.load', () => {
+        console.log('SUCCESS: Banner Ad Loaded');
+        const { adHeight } = AdMob.banner.state;
+        const nav = document.querySelector('nav');
+        if (nav && adHeight > 0) {
+            console.log(`Ad impression registered. Adjusting UI for height: ${adHeight}`);
+            nav.style.bottom = `${adHeight}px`;
+        }
+    });
+    document.addEventListener('admob.ad.loadfail', (evt) => {
+        console.error('FAILURE: Banner Ad failed to load.', evt.data);
+    });
+
+    // Start the SDK and then show the banner
+    AdMob.start()
+        .then(() => {
+            console.log('AdMob Plus SDK started successfully.');
+            const banner = new AdMob.BannerAd({
+                adUnitId: 'ca-app-pub-3940256099942544/2934735716', // Test ID
+            });
+            return banner.show();
+        })
+        .then(() => {
+            console.log('Banner show() command was successful.');
+        })
+        .catch(error => {
+            console.error('CRITICAL ERROR in AdMob chain:', error);
+        });
+
 }, false);
 
 
 function initializeCoreUI() {
-    // All your other UI setup code goes here.
+    // All your other UI setup code
     window.isProUser = loadProStatus();
     populateMorseReference();
-    applySavedTheme();
+    applySavedTheme(); // Apply theme early
     updateDurations();
 
     const masterAudioInitListener = () => {
@@ -38,14 +68,14 @@ function initializeCoreUI() {
 
     try {
         const targetTabFromStorage = localStorage.getItem('targetTab');
-        showTab(targetTabFromStorage || 'introduction-tab');
+        showTab(targetTabFromStorage || 'introduction-tab'); // showTab will also call applySavedTheme
         if (targetTabFromStorage) localStorage.removeItem('targetTab');
     } catch (e) {
         showTab('introduction-tab');
     }
 }
 
-// Definitions needed by initializeCoreUI and other app logic
+// ... All your other functions ...
 function loadProStatus() {
     const proStatus = localStorage.getItem('isProUser');
     return proStatus === 'true';
@@ -65,7 +95,15 @@ let isPlaying = false;
 let stopMorseCode = false;
 let resizeTimer;
 
-function initAudio() { if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); gainNode = audioContext.createGain(); gainNode.connect(audioContext.destination); } }
+function initAudio() {
+    if (!audioContext && (window.AudioContext || window.webkitAudioContext)) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        gainNode = audioContext.createGain();
+        gainNode.connect(audioContext.destination);
+    } else if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().catch(e => console.warn("AudioContext resume failed:", e));
+    }
+}
 
 function updateGoProButtonUI() {
     const goProButtonInSettings = document.getElementById('go-pro-btn');
@@ -99,33 +137,39 @@ const freqValue = document.getElementById('freq-value');
 const morseReferenceBody = document.getElementById('morse-reference-body');
 const toggleThemeBtn = document.getElementById('toggle-theme-btn');
 
-let wpm = wpmSlider ? parseInt(wpmSlider.value) : 20;
-let farnsworthWpm = farnsworthSlider ? parseInt(farnsworthSlider.value) : 20;
-let frequency = freqSlider ? parseInt(freqSlider.value) : 600;
+let wpm = 20;
+let farnsworthWpm = 20;
+let frequency = 600;
+if (wpmSlider) wpm = parseInt(wpmSlider.value); else if (localStorage.getItem('wpm')) wpm = parseInt(localStorage.getItem('wpm'));
+if (farnsworthSlider) farnsworthWpm = parseInt(farnsworthSlider.value); else if (localStorage.getItem('farnsworthWpm')) farnsworthWpm = parseInt(localStorage.getItem('farnsworthWpm'));
+if (freqSlider) frequency = parseInt(freqSlider.value); else if (localStorage.getItem('frequency')) frequency = parseInt(localStorage.getItem('frequency'));
+
 
 let dotDuration = 1.2 / wpm;
 
 function updateDurations() {
     dotDuration = 1.2 / wpm;
-    if (farnsworthWpm < wpm && farnsworthWpm > 0) {
-        // Farnsworth logic placeholder
-    }
-    if (farnsworthSlider && wpmSlider && farnsworthSlider.value > wpmSlider.value) {
-        farnsworthSlider.value = wpmSlider.value;
-        if(farnsworthValue) farnsworthValue.textContent = wpmSlider.value;
+    // Farnsworth WPM should not exceed character WPM
+    if (farnsworthWpm > wpm) {
         farnsworthWpm = wpm;
+        if(farnsworthSlider) farnsworthSlider.value = wpm;
+        if(farnsworthValue) farnsworthValue.textContent = wpm;
     }
+    // Save settings to localStorage
+    localStorage.setItem('wpm', wpm.toString());
+    localStorage.setItem('farnsworthWpm', farnsworthWpm.toString());
+    localStorage.setItem('frequency', frequency.toString());
 }
 
 if(textInput) textInput.addEventListener('input', () => {
-    const text = textInput.value.toUpperCase();
-    morseOutput.value = textToMorse(text);
+    const text = textInput.value; // Keep case for potential future use, convert to Morse in function
+    if(morseOutput) morseOutput.value = textToMorse(text);
 });
 
 if(playMorseBtn) playMorseBtn.addEventListener('click', async () => {
     if (isPlaying) return;
     initAudio();
-    const morse = morseOutput.value;
+    const morse = morseOutput ? morseOutput.value : "";
     if (morse) {
         await playMorseSequence(morse);
     }
@@ -134,15 +178,16 @@ if(playMorseBtn) playMorseBtn.addEventListener('click', async () => {
 if(stopMorseBtn) stopMorseBtn.addEventListener('click', () => {
     if (isPlaying) {
         stopMorseCode = true;
-        stopMorseBtn.disabled = true;
+        if(stopMorseBtn) stopMorseBtn.disabled = true;
         if (oscillator) {
-            oscillator.stop();
+            try { oscillator.stop(); } catch(e) { /* ignore if already stopped */ }
             oscillator.disconnect();
             oscillator = null;
         }
-        if (gainNode) {
+        if (gainNode && audioContext) {
             gainNode.gain.cancelScheduledValues(audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.01);
         }
         isPlaying = false;
         if(playMorseBtn) playMorseBtn.disabled = false;
@@ -151,30 +196,40 @@ if(stopMorseBtn) stopMorseBtn.addEventListener('click', () => {
 
 if(copyTextBtn) copyTextBtn.addEventListener('click', () => {
     const feedbackEl = document.getElementById('copy-text-feedback');
-    navigator.clipboard.writeText(textInput.value)
-        .then(() => {
-            feedbackEl.textContent = 'Copied!';
-            setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
-        })
-        .catch(err => {
-            feedbackEl.textContent = 'Error!';
-            console.error('Error copying text: ', err);
-            setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
-        });
+    if (textInput && navigator.clipboard) {
+        navigator.clipboard.writeText(textInput.value)
+            .then(() => {
+                if(feedbackEl) feedbackEl.textContent = 'Copied!';
+                setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+            })
+            .catch(err => {
+                if(feedbackEl) feedbackEl.textContent = 'Error copying!';
+                console.error('Error copying text: ', err);
+                setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+            });
+    } else if (feedbackEl) {
+        feedbackEl.textContent = 'Cannot copy.';
+        setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+    }
 });
 
 if(copyMorseBtn) copyMorseBtn.addEventListener('click', () => {
     const feedbackEl = document.getElementById('copy-morse-feedback');
-    navigator.clipboard.writeText(morseOutput.value)
-        .then(() => {
-            feedbackEl.textContent = 'Copied!';
-            setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
-        })
-        .catch(err => {
-            feedbackEl.textContent = 'Error!';
-            console.error('Error copying Morse code: ', err);
-            setTimeout(() => { feedbackEl.textContent = ''; }, 2000);
-        });
+    if (morseOutput && navigator.clipboard) {
+        navigator.clipboard.writeText(morseOutput.value)
+            .then(() => {
+                if(feedbackEl) feedbackEl.textContent = 'Copied!';
+                setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+            })
+            .catch(err => {
+                if(feedbackEl) feedbackEl.textContent = 'Error copying!';
+                console.error('Error copying Morse code: ', err);
+                setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+            });
+    } else if (feedbackEl) {
+        feedbackEl.textContent = 'Cannot copy.';
+        setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+    }
 });
 
 if(wpmSlider) wpmSlider.addEventListener('input', (e) => {
@@ -185,10 +240,6 @@ if(wpmSlider) wpmSlider.addEventListener('input', (e) => {
 
 if(farnsworthSlider) farnsworthSlider.addEventListener('input', (e) => {
     farnsworthWpm = parseInt(e.target.value);
-    if (farnsworthWpm > wpm) {
-        farnsworthWpm = wpm;
-        e.target.value = wpm;
-    }
     if(farnsworthValue) farnsworthValue.textContent = farnsworthWpm;
     updateDurations();
 });
@@ -196,12 +247,16 @@ if(farnsworthSlider) farnsworthSlider.addEventListener('input', (e) => {
 if(freqSlider) freqSlider.addEventListener('input', (e) => {
     frequency = parseInt(e.target.value);
     if(freqValue) freqValue.textContent = frequency;
+    updateDurations(); // Frequency doesn't change dot duration, but good practice to call update.
 });
 
 if(toggleThemeBtn) toggleThemeBtn.addEventListener('click', () => {
-    document.body.classList.toggle('light-theme');
-    document.querySelectorAll('.app-container').forEach(c => c.classList.toggle('light-theme-container'));
-    localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    const bodyClassList = document.body.classList;
+    bodyClassList.toggle('light-theme');
+    bodyClassList.toggle('dark');
+    const currentTheme = bodyClassList.contains('light-theme') ? 'light' : 'dark';
+    localStorage.setItem('theme', currentTheme);
+    applySavedTheme();
 });
 
 const navTabButtons = document.querySelectorAll('nav button[data-tab]');
@@ -228,21 +283,25 @@ function detachSharedTapper() {
 function showTab(tabIdToShow) {
     detachSharedTapper();
     tabContentDivs.forEach(div => div.classList.add('hidden'));
-    navTabButtons.forEach(button => {
-        button.classList.remove('active-tab-button', 'bg-blue-600', 'text-white');
-        button.classList.add('bg-gray-700', 'text-gray-300');
-    });
+
     const selectedTabContent = document.getElementById(tabIdToShow);
     if (selectedTabContent) selectedTabContent.classList.remove('hidden');
-    const selectedNavButton = document.querySelector(`nav button[data-tab='${tabIdToShow}']`);
-    if (selectedNavButton) {
-        selectedNavButton.classList.add('active-tab-button', 'bg-blue-600', 'text-white');
-        selectedNavButton.classList.remove('bg-gray-700', 'text-gray-300');
-    }
+
+    navTabButtons.forEach(button => {
+        if (button.getAttribute('data-tab') === tabIdToShow) {
+            button.classList.add('active-tab-button');
+        } else {
+            button.classList.remove('active-tab-button');
+        }
+    });
+
+    applySavedTheme();
+
     if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') startNewChallenge();
-    if (tabIdToShow === 'book-cipher-tab') attachTapperToArea('bookCipherTapperArea');
-    else if (tabIdToShow === 'learn-practice-tab') attachTapperToArea('tapper-placeholder');
-    else if (tabIdToShow === 'introduction-tab') attachTapperToArea('introTapperArea');
+    if (tabIdToShow === 'book-cipher-tab' && sharedVisualTapperWrapper) attachTapperToArea('bookCipherTapperArea');
+    else if (tabIdToShow === 'learn-practice-tab' && sharedVisualTapperWrapper) attachTapperToArea('tapper-placeholder');
+    else if (tabIdToShow === 'introduction-tab' && sharedVisualTapperWrapper) attachTapperToArea('introTapperArea');
+    localStorage.setItem('lastTab', tabIdToShow);
 }
 
 navTabButtons.forEach(button => {
@@ -250,7 +309,7 @@ navTabButtons.forEach(button => {
 });
 
 function textToMorse(text) {
-    return text.split('').map(char => morseCode[char] || (char === ' ' ? '/' : '')).join(' ');
+    return text.toUpperCase().split('').map(char => morseCode[char] || (char === ' ' ? '/' : '')).join(' ');
 }
 
 async function playMorseSequence(morse, customDotDur, customFreq) {
@@ -259,53 +318,288 @@ async function playMorseSequence(morse, customDotDur, customFreq) {
     stopMorseCode = false;
     if(playMorseBtn) playMorseBtn.disabled = true;
     if(stopMorseBtn) stopMorseBtn.disabled = false;
-    // Body of function was truncated in original prompt, using what was available.
-    // This function will likely need its full original body to work correctly.
-    // For now, this is what was provided as "the rest of the function"
-    // from the original file reading in previous steps.
+
+    const charSpeedWpm = wpm; // Speed of individual dits and dahs
+    const overallSpeedWpm = (farnsworthWpm < charSpeedWpm && farnsworthWpm > 0) ? farnsworthWpm : charSpeedWpm;
+
+    const unitDur = customDotDur || (1.2 / charSpeedWpm); // Duration of one dot, based on char speed
+
+    // Calculate delays based on overall speed for Farnsworth, otherwise char speed
+    let interElementDelay = unitDur; // Space between dits/dahs of a character
+    let shortGap = unitDur * 3;      // Space between characters
+    let mediumGap = unitDur * 7;     // Space between words (for '/')
+
+    if (overallSpeedWpm < charSpeedWpm) { // Farnsworth timing applies
+        // Standard definition of Farnsworth: character speed (dits/dahs) is maintained.
+        // The extra spacing is added between characters and between words.
+        // Word "PARIS" has 50 units. Time for PARIS at charSpeedWpm = 50 * (1.2 / charSpeedWpm)
+        // Total time for a "standard word" at overallSpeedWpm = 60 / overallSpeedWpm
+        // The difference is the extra space to be distributed.
+        // A common way: T_char_eff = (60 / overallSpeedWpm) * (L_char / L_std_word)
+        // T_word_eff = (60 / overallSpeedWpm) * (L_word / L_std_word)
+        // This is complex. Simpler: stretch the spaces.
+        // Let C = charSpeedWpm, F = overallSpeedWpm.
+        // Time for 1 dit at speed C = 1.2/C.
+        // If F < C, then spaces are longer.
+        // Ratio of total time for a word: C/F.
+        // Standard space durations are 1 (intra-char), 3 (inter-char), 7 (inter-word) units of (1.2/C)
+        // The "silent" parts of these are 1, 2, 6 units respectively (if we consider the preceding sound).
+        // Or, more simply, the silent period after a char before the next one starts.
+        // Let's use the "PARIS" method. A standard word is 50 units long.
+        // Time for PARIS at charSpeedWpm: T_paris_char = 50 * (1.2 / charSpeedWpm).
+        // Expected time for PARIS at overallSpeedWpm: T_paris_farns = 60 / overallSpeedWpm.
+        // Extra time per standard word = T_paris_farns - T_paris_char.
+        // Assume PARIS has 5 letters, so 4 inter-character spaces.
+        // Extra time per inter-character space = (T_paris_farns - T_paris_char) / 4. (This is one model)
+        // So, shortGap = 3 * unitDur + extra_time_per_inter_char_space.
+        // And mediumGap = 7 * unitDur + extra_time_per_word_space (maybe also scaled).
+
+        // Simpler Farnsworth: Scale spaces to achieve the target overall WPM.
+        // Character elements are sent at `charSpeedWpm`.
+        // The spaces between characters and words are lengthened.
+        // The factor 'k' by which the "silent" parts of spaces are stretched:
+        // Effective character duration (including its trailing space) is what matters.
+        // Let T_dot = 1.2 / charSpeedWpm.
+        // Standard character: average 5 dots (e.g. E=1, T=3, A=6, O=9, M=7, avg ~5). Plus 3 dots space. Total 8 dots.
+        // Standard word: 5 chars. 5 * (5+3) - 3 (no space after last char) + 7 (word space) = 40 - 3 + 7 = 44 units. (This varies by definition, "PARIS" is 50).
+        // Let's use a ratio method for space extension:
+        const spaceExtensionRatio = charSpeedWpm / overallSpeedWpm;
+        if (spaceExtensionRatio > 1) {
+            // Only extend the silent part of the gap.
+            // Standard inter-char gap is 3 units. Sound + 2 units silence. Extend the 2 units.
+            // Standard word gap is 7 units. Sound + 6 units silence. Extend the 6 units.
+            // This is still tricky. Let's use a widely cited Farnsworth formula:
+            // T_dot = 1.2 / Wc (Wc = char speed)
+            // T_farns_char_space = ( (60/Wf) - ( (Ls/Lw) * (60/Wc) ) ) / ( (Nc-1)/Lw )
+            // Wf = Farnsworth speed, Ls = total dits in avg word, Lw = total elements in avg word, Nc=num chars
+            // This is too complex for here.
+            // Simple approach: make inter-character and inter-word spaces longer.
+            // The "effective" duration of a dot for spacing calculations becomes (1.2 / overallSpeedWpm).
+            let spacingUnitDur = 1.2 / overallSpeedWpm;
+            shortGap = spacingUnitDur * 3;
+            mediumGap = spacingUnitDur * 7;
+            // But the actual dits/dahs play at `unitDur` (based on charSpeedWpm)
+        }
+    }
+
+    const currentFreq = customFreq || frequency;
+
+    for (let i = 0; i < morse.length; i++) {
+        if (stopMorseCode) break;
+        const char = morse[i];
+        let durationToPlay = 0;
+        let silenceAfterElement = interElementDelay; // Default silence after a dit or dah within a char
+
+        switch (char) {
+            case '.':
+                durationToPlay = unitDur;
+                break;
+            case '-':
+                durationToPlay = unitDur * 3;
+                break;
+            case ' ': // Morse space: implies end of a character, start of inter-character gap
+                durationToPlay = 0; // No sound
+                silenceAfterElement = shortGap - interElementDelay; // Subtract the already accounted for inter-element space
+                break;
+            case '/': // Morse slash: implies end of a word, start of inter-word gap
+                durationToPlay = 0; // No sound
+                silenceAfterElement = mediumGap - interElementDelay; // Subtract inter-element, assume previous was a char end
+                break;
+        }
+
+        if (durationToPlay > 0) {
+            await playTone(currentFreq, durationToPlay);
+        }
+
+        // Determine if it's the last element of a character or word
+        const isLastElementOfChar = (i < morse.length - 1 && (morse[i+1] === ' ' || morse[i+1] === '/'));
+        const isLastElementOverall = (i === morse.length - 1);
+
+        if (!isLastElementOfChar && !isLastElementOverall && durationToPlay > 0) { // If it's a dit/dah within a char
+             await delay(interElementDelay);
+        } else if (silenceAfterElement > 0 && (char === ' ' || char === '/')) { // If it's a space character from Morse string
+            await delay(silenceAfterElement);
+        } else if (isLastElementOfChar && durationToPlay > 0) { // End of char, but not end of sequence
+            // The next char will be ' ' or '/', which handles the longer gap.
+            // So, just the standard inter-element delay here.
+            await delay(interElementDelay);
+        }
+        // No delay after the very last element of the sequence.
+    }
+
+    if (!stopMorseCode) {
+      if(playMorseBtn) playMorseBtn.disabled = false;
+      if(stopMorseBtn) stopMorseBtn.disabled = true;
+    }
+    isPlaying = false;
+    if (oscillator && !stopMorseCode) {
+        try { oscillator.stop(); } catch(e) {/* ignore */}
+        oscillator.disconnect();
+        oscillator = null;
+    }
+}
+
+function playTone(freq, durationSeconds) {
+    return new Promise((resolve) => {
+        if (!audioContext) initAudio(); // Attempt to init if not already
+        if (!audioContext || audioContext.state === 'closed') {
+            console.warn("AudioContext not available or closed for playTone.");
+            resolve();
+            return;
+        }
+        if (audioContext.state === 'suspended') {
+             audioContext.resume().catch(e => console.warn("AudioContext resume failed:", e));
+        }
+
+        let currentOscillator = audioContext.createOscillator();
+        currentOscillator.type = 'sine';
+        currentOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+
+        if (!gainNode) { // Should be created by initAudio
+            gainNode = audioContext.createGain();
+            gainNode.connect(audioContext.destination);
+        }
+
+        currentOscillator.connect(gainNode);
+        // Ramp up gain quickly to avoid clicks
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.005);
+
+        currentOscillator.start(audioContext.currentTime);
+
+        // Ramp down gain before stopping to avoid clicks
+        gainNode.gain.setValueAtTime(1, audioContext.currentTime + durationSeconds - 0.005);
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + durationSeconds);
+
+        currentOscillator.stop(audioContext.currentTime + durationSeconds);
+
+        currentOscillator.onended = () => {
+            try {
+                currentOscillator.disconnect();
+            } catch(e) {/* ignore if already disconnected */}
+            resolve();
+        };
+        oscillator = currentOscillator; // Store reference to current oscillator for stop button
+    });
+}
+
+function delay(durationSeconds) {
+    return new Promise(resolve => setTimeout(resolve, durationSeconds * 1000));
 }
 
 function populateMorseReference() {
-    // Body of function was truncated in original prompt, using what was available.
-    // This function will likely need its full original body to work correctly.
-    // For now, this is what was provided as "the rest of the function"
-    // from the original file reading in previous steps.
     if (!morseReferenceBody) return;
-    let content = '';
+    morseReferenceBody.innerHTML = '';
+    let firstHalfContent = '<div class="w-1/2 pr-2 text-sm">';
+    let secondHalfContent = '<div class="w-1/2 pl-2 text-sm">';
+
     const entries = Object.entries(morseCode);
     const half = Math.ceil(entries.length / 2);
-    const firstHalf = entries.slice(0, half);
-    const secondHalf = entries.slice(half);
 
-    content += '<div class="w-1/2 pr-1">'; // Tailwind class for half-width with padding
-    firstHalf.forEach(([char, code]) => {
-        content += `<div class="flex justify-between py-1 border-b border-gray-700"><span>${char}</span><span>${code}</span></div>`;
+    entries.forEach(([char, code], index) => {
+        const div = `<div class="flex justify-between py-1 border-b border-gray-300 dark:border-gray-700"><span>${char}</span><span class="font-mono">${code}</span></div>`;
+        if (index < half) {
+            firstHalfContent += div;
+        } else {
+            secondHalfContent += div;
+        }
     });
-    content += '</div>';
-    content += '<div class="w-1/2 pl-1">'; // Tailwind class for half-width with padding
-    secondHalf.forEach(([char, code]) => {
-        content += `<div class="flex justify-between py-1 border-b border-gray-700"><span>${char}</span><span>${code}</span></div>`;
-    });
-    content += '</div>';
-    morseReferenceBody.innerHTML = `<div class="flex">${content}</div>`; // Flex container for columns
+
+    firstHalfContent += '</div>';
+    secondHalfContent += '</div>';
+    morseReferenceBody.innerHTML = `<div class="flex">${firstHalfContent}${secondHalfContent}</div>`;
+    // applySavedTheme will be called by showTab or initial load, ensuring styles are correct.
 }
 
 
 function applySavedTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    document.body.classList.toggle('light-theme', savedTheme === 'light');
-    document.querySelectorAll('.app-container').forEach(c => c.classList.toggle('light-theme-container', savedTheme === 'light'));
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const isLight = savedTheme === 'light';
+
+    document.body.classList.toggle('light-theme', isLight);
+    document.body.classList.toggle('dark', !isLight);
+
+    document.querySelectorAll('.app-container').forEach(c => {
+        c.classList.toggle('light-theme-container', isLight);
+        c.classList.toggle('dark-theme-container', !isLight);
+    });
+
+    navTabButtons.forEach(button => {
+        const isActive = button.classList.contains('active-tab-button');
+        button.classList.remove(
+            'bg-blue-600', 'text-white', 'dark:bg-blue-500', 'dark:text-gray-100',
+            'bg-gray-200', 'text-gray-700', 'hover:bg-gray-300',
+            'dark:bg-gray-700', 'dark:text-gray-300', 'dark:hover:bg-gray-600'
+        );
+
+        if (isActive) {
+            if (isLight) {
+                button.classList.add('bg-blue-600', 'text-white');
+            } else {
+                button.classList.add('dark:bg-blue-500', 'dark:text-gray-100');
+            }
+        } else {
+            if (isLight) {
+                button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            } else {
+                button.classList.add('dark:bg-gray-700', 'dark:text-gray-300', 'dark:hover:bg-gray-600');
+            }
+        }
+    });
+
+    if (morseReferenceBody) {
+         morseReferenceBody.querySelectorAll('.border-b').forEach(el => {
+            el.classList.toggle('border-gray-300', isLight);
+            el.classList.toggle('dark:border-gray-700', !isLight);
+         });
+    }
+    if (toggleThemeBtn) {
+        toggleThemeBtn.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+    }
 }
 
 const shareButton = document.getElementById('share-btn');
 if (shareButton) {
     shareButton.addEventListener('click', async () => {
+        const textVal = textInput ? textInput.value : "";
+        const feedbackEl = document.getElementById('share-feedback');
+
         if (window.Capacitor?.Plugins?.Share) {
             const { Share } = window.Capacitor.Plugins;
-            const textToShare = document.getElementById('text-input').value;
-            if (textToShare) {
-                await Share.share({ text: `I just tapped this out in the Morse Code Learner: "${textToShare}"` });
-            } else { alert("Nothing to share!"); }
+            if (textVal) {
+                try {
+                    await Share.share({ text: `I just tapped this out in the Morse Code Learner: "${textVal}"` });
+                } catch (shareError) {
+                    console.error("Share error (Capacitor):", shareError);
+                    if(feedbackEl) feedbackEl.textContent = 'Share failed.';
+                    setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+                }
+            } else {
+                if(feedbackEl) feedbackEl.textContent = 'Nothing to share!';
+                setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+            }
+        } else if (navigator.share) { // Fallback to Web Share API
+             if (textVal) {
+                try {
+                    await navigator.share({
+                        title: 'Morse Code Message',
+                        text: `I just tapped this out in the Morse Code Learner: "${textVal}"`,
+                    });
+                } catch (error) {
+                    console.error('Web Share API error:', error);
+                    if(feedbackEl) feedbackEl.textContent = 'Share failed.';
+                    setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+                }
+            } else {
+                if(feedbackEl) feedbackEl.textContent = 'Nothing to share!';
+                setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 2000);
+            }
+        } else {
+            console.log("Share API not available.");
+            if (feedbackEl) {
+                feedbackEl.textContent = 'Share not available on this device.';
+                setTimeout(() => { if(feedbackEl) feedbackEl.textContent = ''; }, 3000);
+            }
         }
     });
 }
@@ -316,11 +610,11 @@ const goProFromLibraryBtn = document.getElementById('go-pro-from-library-btn');
 const closeUpsellModalBtn = document.getElementById('close-upsell-modal-btn');
 const upgradeToProBtn = document.getElementById('upgrade-to-pro-btn');
 
-function showUpsellModal() { if (upsellModal) upsellModal.classList.remove('hidden'); }
+function showUpsellModal() { if (upsellModal && !window.isProUser) upsellModal.classList.remove('hidden'); }
 function hideUpsellModal() { if (upsellModal) upsellModal.classList.add('hidden'); }
 
-if (goProBtn) goProBtn.addEventListener('click', showUpsellModal);
-if (goProFromLibraryBtn) goProFromLibraryBtn.addEventListener('click', showUpsellModal);
+if (goProBtn && !window.isProUser) goProBtn.addEventListener('click', showUpsellModal);
+if (goProFromLibraryBtn && !window.isProUser) goProFromLibraryBtn.addEventListener('click', showUpsellModal);
 if (closeUpsellModalBtn) closeUpsellModalBtn.addEventListener('click', hideUpsellModal);
 if (upgradeToProBtn) {
     upgradeToProBtn.addEventListener('click', () => {
@@ -330,12 +624,33 @@ if (upgradeToProBtn) {
         if (typeof window.initializeKochMethod === 'function') window.initializeKochMethod();
         updateGoProButtonUI();
         hideUpsellModal();
+        // Refresh current tab if it has pro features that are now unlocked.
+        const currentTab = localStorage.getItem('lastTab');
+        if(currentTab) showTab(currentTab);
     });
 }
 
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-        populateMorseReference();
+        if (document.getElementById('morse-reference-body')) {
+            populateMorseReference();
+        }
     }, 250);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Sliders values from localStorage or defaults
+    if (wpmSlider && wpmValue) { wpmSlider.value = wpm; wpmValue.textContent = wpm; }
+    if (farnsworthSlider && farnsworthValue) { farnsworthSlider.value = farnsworthWpm; farnsworthValue.textContent = farnsworthWpm; }
+    if (freqSlider && freqValue) { freqSlider.value = frequency; freqValue.textContent = frequency; }
+
+    const lastTab = localStorage.getItem('lastTab');
+    if (lastTab) {
+        showTab(lastTab);
+    } else {
+        showTab('introduction-tab'); // Default tab
+    }
+    // Ensure durations are correct based on potentially loaded slider values
+    updateDurations();
 });
