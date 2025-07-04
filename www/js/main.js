@@ -47,7 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.isActive && !admobInitialized) {
             console.log('App is active, initializing AdMob...');
             admobInitialized = true; // Prevent it from running again
-            AdMobService.initialize();
+            AdMobService.initialize().then(() => {
+                // Add a small delay to ensure the UI is ready
+                setTimeout(() => {
+                    AdMobService.showBanner();
+                }, 100);
+            });
         }
     });
 
