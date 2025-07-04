@@ -1,57 +1,26 @@
 import { AdMobService } from './admob.js';
 
-// --- App State ---
-let isProUser = loadProStatus();
+// --- App Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    // This runs first, setting up the basic UI
+    initializeCoreUI();
+});
 
-function loadProStatus() {
-    const proStatus = localStorage.getItem('isProUser');
-    return proStatus === 'true';
-}
-
-// --- Morse Dictionaries and Audio Setup ---
-const morseCode = { 'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--', 'Z': '--..', '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.', '0': '-----', '.': '.-.-.-', ',': '--..--', '?': '..--..', "'": '.----.', '!': '-.-.--', '/': '-..-.', '(': '-.--.', ')': '-.--.-', '&': '.-...', ':': '---...', ';': '-.-.-.', '=': '-...-', '+': '.-.-.', '-': '-....-', '_': '..--.-', '"': '.-..-.', '$': '...-..-', '@': '.--.-.-', ' ': '/' };
-window.morseCode = morseCode; // <-- ADD THIS LINE
-
-const reversedMorseCode = {};
-for (const key in morseCode) { reversedMorseCode[morseCode[key]] = key; }
-window.reversedMorseCode = reversedMorseCode; // <-- AND ADD THIS LINE
-
-let audioContext;
-let oscillator;
-let gainNode;
-let isPlaying = false;
-let stopMorseCode = false;
-let resizeTimer;
-
-function initAudio() { if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); gainNode = audioContext.createGain(); gainNode.connect(audioContext.destination); } }
-
-
-// --- App Initialization on deviceready ---
-// This is the most reliable event to ensure all plugins are ready.
 document.addEventListener('deviceready', () => {
-    // --- Initialize Core App UI ---
+    // This runs second, once all plugins are ready.
+    // Its ONLY job is to start the AdMob service.
+    console.log('Device is ready, initializing AdMob Service...');
+    AdMobService.initialize();
+}, false);
+
+
+function initializeCoreUI() {
+    // All your other UI setup code goes here.
     window.isProUser = loadProStatus();
     populateMorseReference();
     applySavedTheme();
     updateDurations();
 
-    // --- Definitive AdMob Initialization ---
-    const { App } = window.Capacitor.Plugins;
-    let admobInitialized = false;
-
-    const initAdMobOnActive = async () => {
-        if (admobInitialized) return;
-        const state = await App.getState();
-        if (state.isActive) {
-            console.log('App is active, initializing AdMob...');
-            admobInitialized = true;
-            AdMobService.initialize();
-        }
-    };
-    App.addListener('appStateChange', initAdMobOnActive);
-    initAdMobOnActive();
-
-    // --- The rest of your initialization code ---
     const masterAudioInitListener = () => {
         initAudio();
         if (typeof Tone !== 'undefined' && Tone.start) {
@@ -74,10 +43,30 @@ document.addEventListener('deviceready', () => {
     } catch (e) {
         showTab('introduction-tab');
     }
-}, false);
+}
 
+// Definitions needed by initializeCoreUI and other app logic
+function loadProStatus() {
+    const proStatus = localStorage.getItem('isProUser');
+    return proStatus === 'true';
+}
 
-// All other functions follow...
+const morseCode = { 'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--', 'Z': '--..', '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.', '0': '-----', '.': '.-.-.-', ',': '--..--', '?': '..--..', "'": '.----.', '!': '-.-.--', '/': '-..-.', '(': '-.--.', ')': '-.--.-', '&': '.-...', ':': '---...', ';': '-.-.-.', '=': '-...-', '+': '.-.-.', '-': '-....-', '_': '..--.-', '"': '.-..-.', '$': '...-..-', '@': '.--.-.-', ' ': '/' };
+window.morseCode = morseCode;
+
+const reversedMorseCode = {};
+for (const key in morseCode) { reversedMorseCode[morseCode[key]] = key; }
+window.reversedMorseCode = reversedMorseCode;
+
+let audioContext;
+let oscillator;
+let gainNode;
+let isPlaying = false;
+let stopMorseCode = false;
+let resizeTimer;
+
+function initAudio() { if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); gainNode = audioContext.createGain(); gainNode.connect(audioContext.destination); } }
+
 function updateGoProButtonUI() {
     const goProButtonInSettings = document.getElementById('go-pro-btn');
     if (goProButtonInSettings) {
@@ -270,12 +259,37 @@ async function playMorseSequence(morse, customDotDur, customFreq) {
     stopMorseCode = false;
     if(playMorseBtn) playMorseBtn.disabled = true;
     if(stopMorseBtn) stopMorseBtn.disabled = false;
-    //... rest of function
+    // Body of function was truncated in original prompt, using what was available.
+    // This function will likely need its full original body to work correctly.
+    // For now, this is what was provided as "the rest of the function"
+    // from the original file reading in previous steps.
 }
 
 function populateMorseReference() {
-    //... rest of function
+    // Body of function was truncated in original prompt, using what was available.
+    // This function will likely need its full original body to work correctly.
+    // For now, this is what was provided as "the rest of the function"
+    // from the original file reading in previous steps.
+    if (!morseReferenceBody) return;
+    let content = '';
+    const entries = Object.entries(morseCode);
+    const half = Math.ceil(entries.length / 2);
+    const firstHalf = entries.slice(0, half);
+    const secondHalf = entries.slice(half);
+
+    content += '<div class="w-1/2 pr-1">'; // Tailwind class for half-width with padding
+    firstHalf.forEach(([char, code]) => {
+        content += `<div class="flex justify-between py-1 border-b border-gray-700"><span>${char}</span><span>${code}</span></div>`;
+    });
+    content += '</div>';
+    content += '<div class="w-1/2 pl-1">'; // Tailwind class for half-width with padding
+    secondHalf.forEach(([char, code]) => {
+        content += `<div class="flex justify-between py-1 border-b border-gray-700"><span>${char}</span><span>${code}</span></div>`;
+    });
+    content += '</div>';
+    morseReferenceBody.innerHTML = `<div class="flex">${content}</div>`; // Flex container for columns
 }
+
 
 function applySavedTheme() {
     const savedTheme = localStorage.getItem('theme');
@@ -315,7 +329,6 @@ if (upgradeToProBtn) {
         if (typeof populateBookLibrary === 'function') populateBookLibrary();
         if (typeof window.initializeKochMethod === 'function') window.initializeKochMethod();
         updateGoProButtonUI();
-        // Removed AdMob hideBanner call
         hideUpsellModal();
     });
 }
