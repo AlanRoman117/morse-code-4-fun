@@ -5,7 +5,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@capacitor-community/admob": "^7.0.3",
+    "@admob-plus/capacitor": "^2.0.0-alpha.4",
     "@capacitor/app": "^7.0.1",
     "@capacitor/ios": "^7.4.0",
     "@capacitor/share": "^7.0.1"
