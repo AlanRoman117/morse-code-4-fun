@@ -1,29 +1,29 @@
-// The Final, Definitive admob.js for AdMob-Plus
-
-// The AdMob object is now accessed INSIDE the functions that use it.
+// The Final, Definitive admob.js with Chained Promises
 
 export const AdMobService = {
   isInitialized: false,
 
-  async initialize() {
-    // Access the plugin here, once the app is ready and this function is called.
-    const { AdMob } = admob.plus;
-
+  initialize() {
     if (this.isInitialized) {
       return;
     }
-    console.log('AdMob Plus: Initializing...');
+    console.log('AdMob Plus: Starting initialization chain...');
 
-    // This single call handles consent and starts the SDK.
-    await AdMob.start();
-    this.isInitialized = true;
-    console.log('AdMob Plus: SDK Initialized.');
-
-    this.showBanner();
+    // Use .then() chaining to be more resilient to bridge issues.
+    // The admob.plus.start() promise will resolve when the SDK is ready.
+    admob.plus.start()
+      .then(() => {
+        this.isInitialized = true;
+        console.log('AdMob Plus: SDK Initialized successfully.');
+        this.showBanner();
+      })
+      .catch(error => {
+        console.error('CRITICAL ERROR during AdMob Start:', error);
+      });
   },
 
-  async showBanner() {
-    // Access the plugin here as well to be safe.
+  showBanner() {
+    // We can now safely assume AdMob is ready.
     const { AdMob } = admob.plus;
 
     if (!this.isInitialized) {
@@ -48,7 +48,6 @@ export const AdMobService = {
     const banner = new AdMob.BannerAd({
       adUnitId: 'ca-app-pub-3940256099942544/2934735716',
     });
-
-    await banner.show();
+    banner.show();
   },
 };
