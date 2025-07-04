@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "@capacitor-community/admob": "^7.0.3",
+    "@capacitor/app": "^7.0.1",
     "@capacitor/ios": "^7.4.0",
     "@capacitor/share": "^7.0.1"
   }
