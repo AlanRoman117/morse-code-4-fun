@@ -489,28 +489,69 @@ function delay(durationSeconds) {
 
 function populateMorseReference() {
     if (!morseReferenceBody) return;
-    morseReferenceBody.innerHTML = '';
-    let firstHalfContent = '<div class="w-1/2 pr-2 text-sm">';
-    let secondHalfContent = '<div class="w-1/2 pl-2 text-sm">';
+    morseReferenceBody.innerHTML = ''; // Clear existing content
 
     const entries = Object.entries(morseCode);
-    const half = Math.ceil(entries.length / 2);
+    const numEntries = entries.length;
 
-    entries.forEach(([char, code], index) => {
-        const div = `<div class="flex justify-between py-1 border-b border-gray-300 dark:border-gray-700"><span>${char}</span><span class="font-mono">${code}</span></div>`;
-        if (index < half) {
-            firstHalfContent += div;
+    for (let i = 0; i < numEntries; i += 2) {
+        const tr = document.createElement('tr');
+
+        // First pair: Character and Morse
+        const char1 = entries[i][0];
+        const code1 = entries[i][1];
+
+        let idChar1 = char1;
+        if (char1 === '.') idChar1 = 'Period'; else if (char1 === ',') idChar1 = 'Comma'; else if (char1 === '?') idChar1 = 'QuestionMark'; else if (char1 === "'") idChar1 = 'Apostrophe'; else if (char1 === '!') idChar1 = 'ExclamationMark'; else if (char1 === '/') idChar1 = 'Slash'; else if (char1 === '(') idChar1 = 'ParenthesisOpen'; else if (char1 === ')') idChar1 = 'ParenthesisClose'; else if (char1 === '&') idChar1 = 'Ampersand'; else if (char1 === ':') idChar1 = 'Colon'; else if (char1 === ';') idChar1 = 'Semicolon'; else if (char1 === '=') idChar1 = 'Equals'; else if (char1 === '+') idChar1 = 'Plus'; else if (char1 === '-') idChar1 = 'Hyphen'; else if (char1 === '_') idChar1 = 'Underscore'; else if (char1 === '"') idChar1 = 'Quote'; else if (char1 === '$') idChar1 = 'Dollar'; else if (char1 === '@') idChar1 = 'AtSign'; else if (char1 === ' ') idChar1 = 'Space';
+
+
+        const tdChar1 = document.createElement('td');
+        tdChar1.textContent = char1;
+        tdChar1.id = `ref-char-${idChar1}`;
+        tr.appendChild(tdChar1);
+
+        const tdMorse1 = document.createElement('td');
+        tdMorse1.textContent = code1;
+        tdMorse1.id = `ref-morse-${idChar1}`;
+        tdMorse1.classList.add('font-mono'); // Keep morse code monospaced
+        tr.appendChild(tdMorse1);
+
+        // Second pair: Character and Morse (if exists)
+        if (i + 1 < numEntries) {
+            const char2 = entries[i+1][0];
+            const code2 = entries[i+1][1];
+
+            let idChar2 = char2;
+            if (char2 === '.') idChar2 = 'Period'; else if (char2 === ',') idChar2 = 'Comma'; else if (char2 === '?') idChar2 = 'QuestionMark'; else if (char2 === "'") idChar2 = 'Apostrophe'; else if (char2 === '!') idChar2 = 'ExclamationMark'; else if (char2 === '/') idChar2 = 'Slash'; else if (char2 === '(') idChar2 = 'ParenthesisOpen'; else if (char2 === ')') idChar2 = 'ParenthesisClose'; else if (char2 === '&') idChar2 = 'Ampersand'; else if (char2 === ':') idChar2 = 'Colon'; else if (char2 === ';') idChar2 = 'Semicolon'; else if (char2 === '=') idChar2 = 'Equals'; else if (char2 === '+') idChar2 = 'Plus'; else if (char2 === '-') idChar2 = 'Hyphen'; else if (char2 === '_') idChar2 = 'Underscore'; else if (char2 === '"') idChar2 = 'Quote'; else if (char2 === '$') idChar2 = 'Dollar'; else if (char2 === '@') idChar2 = 'AtSign'; else if (char2 === ' ') idChar2 = 'Space';
+
+
+            const tdChar2 = document.createElement('td');
+            tdChar2.textContent = char2;
+            tdChar2.id = `ref-char-${idChar2}`;
+            tr.appendChild(tdChar2);
+
+            const tdMorse2 = document.createElement('td');
+            tdMorse2.textContent = code2;
+            tdMorse2.id = `ref-morse-${idChar2}`;
+            tdMorse2.classList.add('font-mono');
+            tr.appendChild(tdMorse2);
         } else {
-            secondHalfContent += div;
+            // If there's an odd number of entries, add empty cells for the second pair
+            const tdChar2 = document.createElement('td');
+            tdChar2.innerHTML = '&nbsp;'; // Non-breaking space to maintain cell structure
+            tr.appendChild(tdChar2);
+            const tdMorse2 = document.createElement('td');
+            tdMorse2.innerHTML = '&nbsp;';
+            tr.appendChild(tdMorse2);
         }
-    });
-
-    firstHalfContent += '</div>';
-    secondHalfContent += '</div>';
-    morseReferenceBody.innerHTML = `<div class="flex">${firstHalfContent}${secondHalfContent}</div>`;
-    // applySavedTheme will be called by showTab or initial load, ensuring styles are correct.
+        morseReferenceBody.appendChild(tr);
+    }
+    // applySavedTheme will be called by showTab or initial load, or by theme toggle.
+    // We might need to explicitly call it here if the table borders are not themed correctly initially.
+    // However, the cell content theming (text color) should be inherited.
+    // The borders are on .reference-table th, .reference-table td in CSS, so they should be fine.
+    // Let's test without explicit applySavedTheme here first.
 }
-
 
 function applySavedTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
