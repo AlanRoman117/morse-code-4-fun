@@ -88,6 +88,17 @@ const reversedMorseCode = {};
 for (const key in morseCode) { reversedMorseCode[morseCode[key]] = key; }
 window.reversedMorseCode = reversedMorseCode;
 
+// Function to convert a single Morse code string to its text equivalent
+function morseToText(morse) {
+    if (typeof reversedMorseCode !== 'undefined' && reversedMorseCode.hasOwnProperty(morse)) {
+        return reversedMorseCode[morse];
+    }
+    // Return empty string or a placeholder for unknown Morse code.
+    // An empty string is often less disruptive for display purposes.
+    return '';
+}
+window.morseToText = morseToText;
+
 let audioContext;
 let oscillator;
 let gainNode;
