@@ -101,16 +101,18 @@
                     <div class="w-full p-2">
                         <div id="learnPracticeTapperArea" class="text-center my-2 md:my-3 flex flex-col items-center">
                             <h2 class="section-title text-xl md:text-2xl font-semibold mb-2 md:mb-3 text-center">Practice Tapping Morse</h2>
+                            <p id="practiceText" class="text-2xl md:text-3xl font-bold text-yellow-400 min-h-[32px] md:min-h-[40px] text-center mb-2 md:mb-3"></p>
+                            <p id="tapperDecodedOutput" class="text-xl md:text-2xl min-h-[24px] md:min-h-[30px] break-all text-center bg-gray-700 p-1 md:p-2 rounded mb-2 md:mb-3"></p>
+
                             <!-- The shared visual tapper will be inserted here by JavaScript -->
-                            <div id="tapperGameControls" class="mt-2 md:mt-3 flex flex-col space-y-1 md:space-y-2 w-full max-w-xs"> <!-- Button container -->
+                            <div id="tapper-placeholder" class="w-full mt-2 md:mt-3 mb-3 md:mb-4"></div> <!-- Placeholder for tapper, added bottom margin -->
+
+                            <div id="tapperGameControls" class="flex flex-col space-y-1 md:space-y-2 w-full max-w-xs"> <!-- Button container -->
                                 <button id="newChallengeButton" class="w-full bg-green-500 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">New Challenge</button>
                                 <button id="play-tapped-morse-btn" class="w-full bg-purple-500 hover:bg-purple-700 active:bg-purple-800 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Play My Tapped Morse</button>
                                 <button id="clearTapperInputButton" class="w-full bg-red-500 hover:bg-red-700 active:bg-red-800 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Clear My Tapping</button>
                             </div>
-                            <p id="practiceText" class="text-2xl md:text-3xl font-bold text-yellow-400 min-h-[32px] md:min-h-[40px] text-center mt-3 md:mt-4"></p>
-                            <p id="tapperDecodedOutput" class="text-xl md:text-2xl min-h-[24px] md:min-h-[30px] break-all text-center bg-gray-700 p-1 md:p-2 rounded mt-1 md:mt-2"></p>
-                            <div id="tapper-placeholder" class="w-full mt-2 md:mt-3"></div> <!-- Placeholder for tapper -->
-                            <p id="practiceMessage" class="text-base md:text-lg text-center min-h-[20px] md:min-h-[24px] mt-1 md:mt-2"></p>
+                            <p id="practiceMessage" class="text-base md:text-lg text-center min-h-[20px] md:min-h-[24px] mt-3 md:mt-4"></p>
                         </div>
                     </div>
                 </div>
