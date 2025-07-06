@@ -117,6 +117,13 @@ body {
             -webkit-tap-highlight-color: transparent; /* Removes the gray highlight on tap in mobile Safari */
             -webkit-touch-callout: none; /* Disables the menu that appears on long press */
         }
+        #spaceButton.active { /* For JavaScript-triggered active state */
+            background-color: #2c5282; /* Tailwind's blue-800. Adjust if your blue-800 is different. */
+            /* Add any other styles from the :active pseudo-class if needed, e.g., transform */
+        }
+        #deleteLastCharButton.active { /* For JavaScript-triggered active state */
+            background-color: #991b1b; /* Tailwind's red-800. Adjust if your red-800 is different. */
+        }
         .table-highlight {
             background-color: #f6e05e; /* Tailwind yellow-300 or a similar vibrant color */
             color: #1a202c; /* Tailwind gray-900 or a dark color for contrast */
