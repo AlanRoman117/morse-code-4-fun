@@ -34,9 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const tapper = document.getElementById('tapper');
     const tapperMorseOutput = document.getElementById('tapperMorseOutput');
     const spaceButton = document.getElementById('spaceButton');
+    const deleteLastCharButton = document.getElementById('deleteLastCharButton');
 
-    if (!tapper || !tapperMorseOutput || !spaceButton) {
-        console.error("VisualTapper Error: One or more essential tapper DOM elements (tapper, tapperMorseOutput, spaceButton) not found. Tapper will not initialize.");
+    if (!tapper || !tapperMorseOutput || !spaceButton || !deleteLastCharButton) {
+        console.error("VisualTapper Error: One or more essential tapper DOM elements (tapper, tapperMorseOutput, spaceButton, deleteLastCharButton) not found. Tapper will not initialize.");
         return; // Stop initialization if critical elements are missing
     }
 
@@ -302,6 +303,96 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(silenceTimer); // Clear any pending letter-end timer from tapping
         decodeMorse(true); // true indicates it's an explicit action from the space button
     });
+
+    deleteLastCharButton.addEventListener('click', () => {
+        if (isPlayingBack) return;
+        deleteLastDecodedChar();
+    });
+
+    // Listen for spacebar press on desktop to act like the spaceButton
+    // Also listen for Backspace key to act like the deleteLastCharButton
+    document.addEventListener('keydown', (event) => {
+        // Check if the pressed key is the spacebar
+        if (event.key === ' ' || event.keyCode === 32) {
+            // Prevent spacebar action if focus is on an input, textarea, or contenteditable
+            const activeElement = document.activeElement;
+            if (activeElement) {
+                const tagName = activeElement.tagName.toLowerCase();
+                const isContentEditable = activeElement.isContentEditable;
+                if (tagName === 'input' || tagName === 'textarea' || isContentEditable) {
+                    // Don't interfere with typing in input fields
+                    return;
+                }
+            }
+
+            // Prevent default spacebar behavior (e.g., scrolling)
+            event.preventDefault();
+
+            // Simulate spaceButton click / call decodeMorse
+            if (isPlayingBack) return; // Check isPlayingBack status
+            clearTimeout(silenceTimer);
+            decodeMorse(true);
+
+            // Optional: Visual feedback for spacebar press, like flashing the spaceButton
+            if (spaceButton) {
+                spaceButton.classList.add('active'); // Use a temporary class for visual feedback
+                setTimeout(() => {
+                    spaceButton.classList.remove('active');
+                }, 100);
+            }
+        }
+        // Check if the pressed key is the Backspace key
+        else if (event.key === 'Backspace' || event.keyCode === 8) {
+            // Prevent Backspace action if focus is on an input, textarea, or contenteditable
+            const activeElement = document.activeElement;
+            if (activeElement) {
+                const tagName = activeElement.tagName.toLowerCase();
+                const isContentEditable = activeElement.isContentEditable;
+                // Allow backspace in input/textarea, but prevent browser navigation if not in an input
+                if (tagName === 'input' || tagName === 'textarea' || isContentEditable) {
+                    // If it's an input field, let the default backspace behavior occur.
+                    // However, if it's a specific input we DON'T want backspace to work in (e.g. koch answer input),
+                    // we might need more specific logic here or in that input's own event handlers.
+                    // For now, generic inputs are allowed to use backspace.
+                    return;
+                }
+            }
+            // If not in an input field, prevent default browser back navigation
+            event.preventDefault();
+
+            if (isPlayingBack) return;
+            deleteLastDecodedChar();
+
+            // Optional: Visual feedback for backspace press, like flashing the deleteLastCharButton
+            if (deleteLastCharButton) {
+                deleteLastCharButton.classList.add('active'); // Use a temporary class for visual feedback
+                setTimeout(() => {
+                    deleteLastCharButton.classList.remove('active');
+                }, 100);
+            }
+        }
+    });
+
+    function deleteLastDecodedChar() {
+        if (currentText.length > 0) {
+            currentText = currentText.slice(0, -1);
+            // console.log("VisualTapper: Deleted last character. New currentText:", currentText);
+
+            // Dispatch custom event for other modules to consume
+            const event = new CustomEvent('visualTapperInput', {
+                detail: { type: 'delete_char', newFullText: currentText }
+            });
+            document.dispatchEvent(event);
+            // console.log("VisualTapper: Dispatched visualTapperInput (delete_char) with newFullText:", currentText);
+
+            // Update any directly controlled UI elements if necessary
+            // For example, if a specific output field is always updated by visualTapper itself.
+            // Currently, tapperDecodedOutput on learn/practice tab is updated by learnPracticeGame.js
+            // by listening to 'visualTapperInput'.
+        } else {
+            // console.log("VisualTapper: No characters to delete.");
+        }
+    }
 
     function decodeMorse(isExplicitAction) {
         clearTimeout(silenceTimer); // Stop any running letter-end timer
