@@ -721,3 +721,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ensure durations are correct based on potentially loaded slider values
     updateDurations();
 });
+
+// Make functions globally available for other scripts if not using modules for everything
+window.textToMorse = textToMorse;
+window.playMorseSequence = playMorseSequence;
+window.initAudio = initAudio;
+// morseToText is already on window, morseCode and reversedMorseCode are also already on window.

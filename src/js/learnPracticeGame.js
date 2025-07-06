@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // practiceMessage.style.color = '#DC2626';
                 practiceMessage.textContent = ""; // Clear message on delete if not perfectly correct start
             }
-            console.log("LearnPracticeGame: Deleted char. New currentTappedString:", currentTappedString);
+            // console.log("LearnPracticeGame: Deleted char. New currentTappedString:", currentTappedString); // Log removed
         }
     });
 
@@ -217,46 +217,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // updateTableHighlight was moved to global scope
 
+    // updateTableHighlight was moved to global scope
+
     if (playTappedMorseBtn) {
         playTappedMorseBtn.addEventListener('click', async () => {
-            console.log("[LearnPracticeGame] 'Play My Tapped Morse' button clicked.");
+            // console.log("[LearnPracticeGame] 'Play My Tapped Morse' button clicked."); // Log removed
             const textToPlay = tapperDecodedOutput.textContent;
-            console.log("[LearnPracticeGame] Text to play:", textToPlay);
+            // console.log("[LearnPracticeGame] Text to play:", textToPlay); // Log removed
 
             if (textToPlay.trim() === '') {
-                console.log("[LearnPracticeGame] No text to play.");
+                // console.log("[LearnPracticeGame] No text to play."); // Log removed
                 return;
             }
 
             if (typeof textToMorse !== 'function' || typeof playMorseSequence !== 'function') {
-                console.error("[LearnPracticeGame] textToMorse or playMorseSequence function is not available.");
+                console.error("[LearnPracticeGame] textToMorse or playMorseSequence function is not available."); // Keep this error log
                 return;
             }
-
+            
             // Ensure audio context is ready
             if (typeof initAudio === 'function') {
                 initAudio();
             } else {
-                console.warn("[LearnPracticeGame] initAudio function not available. Audio might not play reliably.");
+                console.warn("[LearnPracticeGame] initAudio function not available. Audio might not play reliably."); // Keep this warning
             }
              // It's also good practice to ensure Tone.js is started by a user gesture if relying on it.
             // However, playMorseSequence in main.js should handle its own Tone.js context if it uses it.
 
             const morseToPlay = textToMorse(textToPlay);
-            console.log("[LearnPracticeGame] Morse to play:", morseToPlay);
+            // console.log("[LearnPracticeGame] Morse to play:", morseToPlay); // Log removed
 
             if (morseToPlay) {
                 try {
-                    console.log("[LearnPracticeGame] Calling playMorseSequence...");
-                    // playMorseSequence is async, so await it.
-                    // It uses settings from main.js (WPM, Farnsworth, Freq)
-                    await playMorseSequence(morseToPlay);
-                    console.log("[LearnPracticeGame] playMorseSequence finished.");
+                    // console.log("[LearnPracticeGame] Calling playMorseSequence..."); // Log removed
+                    await playMorseSequence(morseToPlay); 
+                    // console.log("[LearnPracticeGame] playMorseSequence finished."); // Log removed
                 } catch (error) {
-                    console.error("[LearnPracticeGame] Error during playMorseSequence:", error);
+                    console.error("[LearnPracticeGame] Error during playMorseSequence:", error); // Keep this error log
                 }
             } else {
-                console.log("[LearnPracticeGame] Nothing to play (text converted to empty Morse).");
+                // console.log("[LearnPracticeGame] Nothing to play (text converted to empty Morse)."); // Log removed
             }
         });
     }
