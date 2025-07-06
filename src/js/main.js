@@ -499,64 +499,79 @@ function delay(durationSeconds) {
 }
 
 function populateMorseReference() {
-    if (!morseReferenceBody) return;
+    if (!morseReferenceBody) {
+        // console.error("Morse reference body not found!"); // Log removed
+        return;
+    }
     morseReferenceBody.innerHTML = ''; // Clear existing content
+    // console.log("Populating Morse Reference Table..."); // Log removed
 
     const entries = Object.entries(morseCode);
     const numEntries = entries.length;
+    // console.log(`Total Morse code entries: ${numEntries}`); // Log removed
 
-    for (let i = 0; i < numEntries; i += 2) {
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+    const pairsPerRow = isDesktop ? 4 : 2; // Number of (Char, Morse) pairs per row
+    // console.log(`Screen isDesktop: ${isDesktop}, Pairs per row: ${pairsPerRow}`); // Log removed
+
+    for (let i = 0; i < numEntries; i += pairsPerRow) {
         const tr = document.createElement('tr');
+        // console.log(`Starting new row (i=${i})`); // Log removed
+        for (let j = 0; j < pairsPerRow; j++) {
+            const entryIndex = i + j;
+            if (entryIndex < numEntries) {
+                const char = entries[entryIndex][0];
+                const code = entries[entryIndex][1];
 
-        // First pair: Character and Morse
-        const char1 = entries[i][0];
-        const code1 = entries[i][1];
+                let idChar = char;
+                if (char === '.') idChar = 'Period';
+                else if (char === ',') idChar = 'Comma';
+                else if (char === '?') idChar = 'QuestionMark';
+                else if (char === "'") idChar = 'Apostrophe';
+                else if (char === '!') idChar = 'ExclamationMark';
+                else if (char === '/') idChar = 'Slash';
+                else if (char === '(') idChar = 'ParenthesisOpen';
+                else if (char === ')') idChar = 'ParenthesisClose';
+                else if (char === '&') idChar = 'Ampersand';
+                else if (char === ':') idChar = 'Colon';
+                else if (char === ';') idChar = 'Semicolon';
+                else if (char === '=') idChar = 'Equals';
+                else if (char === '+') idChar = 'Plus';
+                else if (char === '-') idChar = 'Hyphen';
+                else if (char === '_') idChar = 'Underscore';
+                else if (char === '"') idChar = 'Quote';
+                else if (char === '$') idChar = 'Dollar';
+                else if (char === '@') idChar = 'AtSign';
+                else if (char === ' ') idChar = 'Space';
+                // No generic fallback needed as we only use valid chars from morseCode keys
 
-        let idChar1 = char1;
-        if (char1 === '.') idChar1 = 'Period'; else if (char1 === ',') idChar1 = 'Comma'; else if (char1 === '?') idChar1 = 'QuestionMark'; else if (char1 === "'") idChar1 = 'Apostrophe'; else if (char1 === '!') idChar1 = 'ExclamationMark'; else if (char1 === '/') idChar1 = 'Slash'; else if (char1 === '(') idChar1 = 'ParenthesisOpen'; else if (char1 === ')') idChar1 = 'ParenthesisClose'; else if (char1 === '&') idChar1 = 'Ampersand'; else if (char1 === ':') idChar1 = 'Colon'; else if (char1 === ';') idChar1 = 'Semicolon'; else if (char1 === '=') idChar1 = 'Equals'; else if (char1 === '+') idChar1 = 'Plus'; else if (char1 === '-') idChar1 = 'Hyphen'; else if (char1 === '_') idChar1 = 'Underscore'; else if (char1 === '"') idChar1 = 'Quote'; else if (char1 === '$') idChar1 = 'Dollar'; else if (char1 === '@') idChar1 = 'AtSign'; else if (char1 === ' ') idChar1 = 'Space';
+                const tdChar = document.createElement('td');
+                tdChar.textContent = char;
+                tdChar.id = `ref-char-${idChar}`;
+                tr.appendChild(tdChar);
+                // console.log(`  Added Char: ${char} (id: ref-char-${idChar}) to row ${i}, pair index j=${j}`); // Log removed
 
-
-        const tdChar1 = document.createElement('td');
-        tdChar1.textContent = char1;
-        tdChar1.id = `ref-char-${idChar1}`;
-        tr.appendChild(tdChar1);
-
-        const tdMorse1 = document.createElement('td');
-        tdMorse1.textContent = code1;
-        tdMorse1.id = `ref-morse-${idChar1}`;
-        tdMorse1.classList.add('font-mono'); // Keep morse code monospaced
-        tr.appendChild(tdMorse1);
-
-        // Second pair: Character and Morse (if exists)
-        if (i + 1 < numEntries) {
-            const char2 = entries[i+1][0];
-            const code2 = entries[i+1][1];
-
-            let idChar2 = char2;
-            if (char2 === '.') idChar2 = 'Period'; else if (char2 === ',') idChar2 = 'Comma'; else if (char2 === '?') idChar2 = 'QuestionMark'; else if (char2 === "'") idChar2 = 'Apostrophe'; else if (char2 === '!') idChar2 = 'ExclamationMark'; else if (char2 === '/') idChar2 = 'Slash'; else if (char2 === '(') idChar2 = 'ParenthesisOpen'; else if (char2 === ')') idChar2 = 'ParenthesisClose'; else if (char2 === '&') idChar2 = 'Ampersand'; else if (char2 === ':') idChar2 = 'Colon'; else if (char2 === ';') idChar2 = 'Semicolon'; else if (char2 === '=') idChar2 = 'Equals'; else if (char2 === '+') idChar2 = 'Plus'; else if (char2 === '-') idChar2 = 'Hyphen'; else if (char2 === '_') idChar2 = 'Underscore'; else if (char2 === '"') idChar2 = 'Quote'; else if (char2 === '$') idChar2 = 'Dollar'; else if (char2 === '@') idChar2 = 'AtSign'; else if (char2 === ' ') idChar2 = 'Space';
-
-
-            const tdChar2 = document.createElement('td');
-            tdChar2.textContent = char2;
-            tdChar2.id = `ref-char-${idChar2}`;
-            tr.appendChild(tdChar2);
-
-            const tdMorse2 = document.createElement('td');
-            tdMorse2.textContent = code2;
-            tdMorse2.id = `ref-morse-${idChar2}`;
-            tdMorse2.classList.add('font-mono');
-            tr.appendChild(tdMorse2);
-        } else {
-            // If there's an odd number of entries, add empty cells for the second pair
-            const tdChar2 = document.createElement('td');
-            tdChar2.innerHTML = '&nbsp;'; // Non-breaking space to maintain cell structure
-            tr.appendChild(tdChar2);
-            const tdMorse2 = document.createElement('td');
-            tdMorse2.innerHTML = '&nbsp;';
-            tr.appendChild(tdMorse2);
+                const tdMorse = document.createElement('td');
+                tdMorse.textContent = code;
+                tdMorse.id = `ref-morse-${idChar}`;
+                tdMorse.classList.add('font-mono');
+                tr.appendChild(tdMorse);
+                // console.log(`  Added Morse: ${code} (id: ref-morse-${idChar}) for char ${char}`); // Log removed
+            } else {
+                // Add two empty cells for each missing pair to maintain table structure
+                // console.log(`  Adding empty cells for pair index j=${j} in row i=${i} as entryIndex ${entryIndex} >= numEntries`); // Log removed
+                const tdCharEmpty = document.createElement('td');
+                tdCharEmpty.innerHTML = '&nbsp;';
+                tr.appendChild(tdCharEmpty);
+                const tdMorseEmpty = document.createElement('td');
+                tdMorseEmpty.innerHTML = '&nbsp;';
+                tr.appendChild(tdMorseEmpty);
+            }
         }
         morseReferenceBody.appendChild(tr);
+        // console.log(`Finished row (i=${i}), appended to table body.`); // Log removed
     }
+    // console.log("Finished populating Morse Reference Table."); // Log removed
     // applySavedTheme will be called by showTab or initial load, or by theme toggle.
     // We might need to explicitly call it here if the table borders are not themed correctly initially.
     // However, the cell content theming (text color) should be inherited.
@@ -706,3 +721,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ensure durations are correct based on potentially loaded slider values
     updateDurations();
 });
+
+// Make functions globally available for other scripts if not using modules for everything
+window.textToMorse = textToMorse;
+window.playMorseSequence = playMorseSequence;
+window.initAudio = initAudio;
+// morseToText is already on window, morseCode and reversedMorseCode are also already on window.
