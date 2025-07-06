@@ -88,6 +88,17 @@ const reversedMorseCode = {};
 for (const key in morseCode) { reversedMorseCode[morseCode[key]] = key; }
 window.reversedMorseCode = reversedMorseCode;
 
+// Function to convert a single Morse code string to its text equivalent
+function morseToText(morse) {
+    if (typeof reversedMorseCode !== 'undefined' && reversedMorseCode.hasOwnProperty(morse)) {
+        return reversedMorseCode[morse];
+    }
+    // Return empty string or a placeholder for unknown Morse code.
+    // An empty string is often less disruptive for display purposes.
+    return '';
+}
+window.morseToText = morseToText;
+
 let audioContext;
 let oscillator;
 let gainNode;
@@ -171,7 +182,7 @@ if(playMorseBtn) playMorseBtn.addEventListener('click', async () => {
     initAudio();
     const morse = morseOutput ? morseOutput.value : "";
     if (morse) {
-        await playMorseSequence(morse);
+        await playMorseSequence(morse, null, null, 'tapper', 'playMorseBtn');
     }
 });
 
@@ -298,9 +309,19 @@ function showTab(tabIdToShow) {
     applySavedTheme();
 
     if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') startNewChallenge();
-    if (tabIdToShow === 'book-cipher-tab' && sharedVisualTapperWrapper) attachTapperToArea('bookCipherTapperArea');
-    else if (tabIdToShow === 'learn-practice-tab' && sharedVisualTapperWrapper) attachTapperToArea('tapper-placeholder');
-    else if (tabIdToShow === 'introduction-tab' && sharedVisualTapperWrapper) attachTapperToArea('introTapperArea');
+
+    // Attach tapper to relevant areas based on the active tab
+    if (sharedVisualTapperWrapper) {
+        if (tabIdToShow === 'book-cipher-tab') {
+            attachTapperToArea('bookCipherTapperArea');
+        } else if (tabIdToShow === 'learn-practice-tab') {
+            attachTapperToArea('tapper-placeholder');
+        } else if (tabIdToShow === 'introduction-tab') {
+            attachTapperToArea('introTapperArea');
+        } else if (tabIdToShow === 'morse-io-tab') {
+            attachTapperToArea('ioTabTapperPlaceholder');
+        }
+    }
     localStorage.setItem('lastTab', tabIdToShow);
 }
 
@@ -312,12 +333,30 @@ function textToMorse(text) {
     return text.toUpperCase().split('').map(char => morseCode[char] || (char === ' ' ? '/' : '')).join(' ');
 }
 
-async function playMorseSequence(morse, customDotDur, customFreq) {
+async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowId, initiatingButtonId) { // Added initiatingButtonId
     if (isPlaying) return;
     isPlaying = true;
     stopMorseCode = false;
-    if(playMorseBtn) playMorseBtn.disabled = true;
-    if(stopMorseBtn) stopMorseBtn.disabled = false;
+
+    let actualButtonToDisable = null;
+    const learnPracticePlayBtn = document.getElementById('play-tapped-morse-btn');
+    const ioTapperPlayBtn = document.getElementById('play-io-tapped-morse-btn');
+    // playMorseBtn is global (for main I/O textarea playback)
+
+    if (initiatingButtonId === 'playMorseBtn') {
+        actualButtonToDisable = playMorseBtn;
+    } else if (initiatingButtonId === 'play-tapped-morse-btn') {
+        actualButtonToDisable = learnPracticePlayBtn;
+    } else if (initiatingButtonId === 'play-io-tapped-morse-btn') {
+        actualButtonToDisable = ioTapperPlayBtn;
+    }
+    // If initiatingButtonId is something else or null, actualButtonToDisable remains null.
+    // This logic prioritizes the initiatingButtonId for disabling.
+
+    if (actualButtonToDisable) actualButtonToDisable.disabled = true;
+    if (stopMorseBtn) stopMorseBtn.disabled = false; // Stop button is global for any playback
+
+    const elementToGlow = elementToGlowId ? document.getElementById(elementToGlowId) : null;
 
     const charSpeedWpm = wpm; // Speed of individual dits and dahs
     const overallSpeedWpm = (farnsworthWpm < charSpeedWpm && farnsworthWpm > 0) ? farnsworthWpm : charSpeedWpm;
@@ -408,7 +447,9 @@ async function playMorseSequence(morse, customDotDur, customFreq) {
         }
 
         if (durationToPlay > 0) {
+            if (elementToGlow) elementToGlow.classList.add('active');
             await playTone(currentFreq, durationToPlay);
+            if (elementToGlow) elementToGlow.classList.remove('active');
         }
 
         // Determine if it's the last element of a character or word
@@ -428,10 +469,11 @@ async function playMorseSequence(morse, customDotDur, customFreq) {
     }
 
     if (!stopMorseCode) {
-      if(playMorseBtn) playMorseBtn.disabled = false;
+      if(actualButtonToDisable) actualButtonToDisable.disabled = false;
       if(stopMorseBtn) stopMorseBtn.disabled = true;
     }
     isPlaying = false;
+    if (elementToGlow) elementToGlow.classList.remove('active'); // Ensure glow is off if stopped early
     if (oscillator && !stopMorseCode) {
         try { oscillator.stop(); } catch(e) {/* ignore */}
         oscillator.disconnect();
@@ -488,29 +530,85 @@ function delay(durationSeconds) {
 }
 
 function populateMorseReference() {
-    if (!morseReferenceBody) return;
-    morseReferenceBody.innerHTML = '';
-    let firstHalfContent = '<div class="w-1/2 pr-2 text-sm">';
-    let secondHalfContent = '<div class="w-1/2 pl-2 text-sm">';
+    if (!morseReferenceBody) {
+        // console.error("Morse reference body not found!"); // Log removed
+        return;
+    }
+    morseReferenceBody.innerHTML = ''; // Clear existing content
+    // console.log("Populating Morse Reference Table..."); // Log removed
 
     const entries = Object.entries(morseCode);
-    const half = Math.ceil(entries.length / 2);
+    const numEntries = entries.length;
+    // console.log(`Total Morse code entries: ${numEntries}`); // Log removed
 
-    entries.forEach(([char, code], index) => {
-        const div = `<div class="flex justify-between py-1 border-b border-gray-300 dark:border-gray-700"><span>${char}</span><span class="font-mono">${code}</span></div>`;
-        if (index < half) {
-            firstHalfContent += div;
-        } else {
-            secondHalfContent += div;
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+    const pairsPerRow = isDesktop ? 4 : 2; // Number of (Char, Morse) pairs per row
+    // console.log(`Screen isDesktop: ${isDesktop}, Pairs per row: ${pairsPerRow}`); // Log removed
+
+    for (let i = 0; i < numEntries; i += pairsPerRow) {
+        const tr = document.createElement('tr');
+        // console.log(`Starting new row (i=${i})`); // Log removed
+        for (let j = 0; j < pairsPerRow; j++) {
+            const entryIndex = i + j;
+            if (entryIndex < numEntries) {
+                const char = entries[entryIndex][0];
+                const code = entries[entryIndex][1];
+
+                let idChar = char;
+                if (char === '.') idChar = 'Period';
+                else if (char === ',') idChar = 'Comma';
+                else if (char === '?') idChar = 'QuestionMark';
+                else if (char === "'") idChar = 'Apostrophe';
+                else if (char === '!') idChar = 'ExclamationMark';
+                else if (char === '/') idChar = 'Slash';
+                else if (char === '(') idChar = 'ParenthesisOpen';
+                else if (char === ')') idChar = 'ParenthesisClose';
+                else if (char === '&') idChar = 'Ampersand';
+                else if (char === ':') idChar = 'Colon';
+                else if (char === ';') idChar = 'Semicolon';
+                else if (char === '=') idChar = 'Equals';
+                else if (char === '+') idChar = 'Plus';
+                else if (char === '-') idChar = 'Hyphen';
+                else if (char === '_') idChar = 'Underscore';
+                else if (char === '"') idChar = 'Quote';
+                else if (char === '$') idChar = 'Dollar';
+                else if (char === '@') idChar = 'AtSign';
+                else if (char === ' ') idChar = 'Space';
+                // No generic fallback needed as we only use valid chars from morseCode keys
+
+                const tdChar = document.createElement('td');
+                tdChar.textContent = char;
+                tdChar.id = `ref-char-${idChar}`;
+                tr.appendChild(tdChar);
+                // console.log(`  Added Char: ${char} (id: ref-char-${idChar}) to row ${i}, pair index j=${j}`); // Log removed
+
+                const tdMorse = document.createElement('td');
+                tdMorse.textContent = code;
+                tdMorse.id = `ref-morse-${idChar}`;
+                tdMorse.classList.add('font-mono');
+                tr.appendChild(tdMorse);
+                // console.log(`  Added Morse: ${code} (id: ref-morse-${idChar}) for char ${char}`); // Log removed
+            } else {
+                // Add two empty cells for each missing pair to maintain table structure
+                // console.log(`  Adding empty cells for pair index j=${j} in row i=${i} as entryIndex ${entryIndex} >= numEntries`); // Log removed
+                const tdCharEmpty = document.createElement('td');
+                tdCharEmpty.innerHTML = '&nbsp;';
+                tr.appendChild(tdCharEmpty);
+                const tdMorseEmpty = document.createElement('td');
+                tdMorseEmpty.innerHTML = '&nbsp;';
+                tr.appendChild(tdMorseEmpty);
+            }
         }
-    });
-
-    firstHalfContent += '</div>';
-    secondHalfContent += '</div>';
-    morseReferenceBody.innerHTML = `<div class="flex">${firstHalfContent}${secondHalfContent}</div>`;
-    // applySavedTheme will be called by showTab or initial load, ensuring styles are correct.
+        morseReferenceBody.appendChild(tr);
+        // console.log(`Finished row (i=${i}), appended to table body.`); // Log removed
+    }
+    // console.log("Finished populating Morse Reference Table."); // Log removed
+    // applySavedTheme will be called by showTab or initial load, or by theme toggle.
+    // We might need to explicitly call it here if the table borders are not themed correctly initially.
+    // However, the cell content theming (text color) should be inherited.
+    // The borders are on .reference-table th, .reference-table td in CSS, so they should be fine.
+    // Let's test without explicit applySavedTheme here first.
 }
-
 
 function applySavedTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -653,4 +751,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Ensure durations are correct based on potentially loaded slider values
     updateDurations();
+});
+
+// Make functions globally available for other scripts if not using modules for everything
+window.textToMorse = textToMorse;
+window.playMorseSequence = playMorseSequence;
+window.initAudio = initAudio;
+// morseToText is already on window, morseCode and reversedMorseCode are also already on window.
+
+// Event Listeners for I/O Tab Tapper Controls
+document.addEventListener('DOMContentLoaded', () => {
+    const playIoTappedMorseBtn = document.getElementById('play-io-tapped-morse-btn');
+    const clearIoTapperInputBtn = document.getElementById('clear-io-tapper-input-btn');
+    const tapperMorseOutput = document.getElementById('tapperMorseOutput'); // Shared tapper output
+
+    if (playIoTappedMorseBtn) {
+        playIoTappedMorseBtn.addEventListener('click', async () => {
+            const morseOutputOnTapper = tapperMorseOutput ? tapperMorseOutput.textContent : "";
+            if (morseOutputOnTapper && morseOutputOnTapper.trim() !== '') {
+                // We don't need to convert to Morse, it's already Morse.
+                // We need to ensure it's in the correct spaced format for playMorseSequence.
+                // VisualTapper's tapperMorseOutput is already character-by-character Morse, spaces between.
+                // If it's from "decoded" text, it would need conversion.
+                // For now, assume tapperMorseOutput.textContent is playable Morse.
+                initAudio(); // Ensure audio context is ready
+                await playMorseSequence(morseOutputOnTapper.trim(), null, null, 'tapper', 'play-io-tapped-morse-btn');
+            }
+        });
+    }
+
+    if (clearIoTapperInputBtn) {
+        clearIoTapperInputBtn.addEventListener('click', () => {
+            if (typeof resetVisualTapperState === 'function') {
+                resetVisualTapperState(); // This should clear tapperMorseOutput and internal states
+            }
+            // Also explicitly disable the play button for I/O tapper
+            if (playIoTappedMorseBtn) {
+                playIoTappedMorseBtn.disabled = true;
+            }
+        });
+    }
+
+    // Observer to enable/disable the play-io-tapped-morse-btn based on tapperMorseOutput content
+    if (tapperMorseOutput && playIoTappedMorseBtn) {
+        const observer = new MutationObserver(() => {
+            if (tapperMorseOutput.textContent && tapperMorseOutput.textContent.trim() !== '') {
+                playIoTappedMorseBtn.disabled = false;
+            } else {
+                playIoTappedMorseBtn.disabled = true;
+            }
+        });
+        observer.observe(tapperMorseOutput, { childList: true, characterData: true, subtree: true });
+        // Initial check
+        if (tapperMorseOutput.textContent && tapperMorseOutput.textContent.trim() !== '') {
+            playIoTappedMorseBtn.disabled = false;
+        } else {
+            playIoTappedMorseBtn.disabled = true;
+        }
+    }
 });
