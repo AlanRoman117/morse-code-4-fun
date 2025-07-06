@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (morseToPlay) {
                 try {
                     // console.log("[LearnPracticeGame] Calling playMorseSequence for tapper playback..."); // Log removed
-                    await playMorseSequence(morseToPlay, null, null, 'tapper'); // Pass 'tapper' as elementToGlowId
+                    await playMorseSequence(morseToPlay, null, null, 'tapper', 'play-tapped-morse-btn');
                     // console.log("[LearnPracticeGame] playMorseSequence for tapper finished."); // Log removed
                 } catch (error) {
                     console.error("[LearnPracticeGame] Error during playMorseSequence for tapper:", error); // Keep this error log

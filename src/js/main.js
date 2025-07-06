@@ -182,7 +182,7 @@ if(playMorseBtn) playMorseBtn.addEventListener('click', async () => {
     initAudio();
     const morse = morseOutput ? morseOutput.value : "";
     if (morse) {
-        await playMorseSequence(morse); // No elementToGlowId, so no glow from this button
+        await playMorseSequence(morse, null, null, 'tapper', 'playMorseBtn');
     }
 });
 
@@ -333,7 +333,7 @@ function textToMorse(text) {
     return text.toUpperCase().split('').map(char => morseCode[char] || (char === ' ' ? '/' : '')).join(' ');
 }
 
-async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowId) { // Added elementToGlowId
+async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowId, initiatingButtonId) { // Added initiatingButtonId
     if (isPlaying) return;
     isPlaying = true;
     stopMorseCode = false;
@@ -341,22 +341,17 @@ async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowI
     let actualButtonToDisable = null;
     const learnPracticePlayBtn = document.getElementById('play-tapped-morse-btn');
     const ioTapperPlayBtn = document.getElementById('play-io-tapped-morse-btn');
-    // playMorseBtn is global, for the main I/O textarea playback
+    // playMorseBtn is global (for main I/O textarea playback)
 
-    if (elementToGlowId === 'tapper') {
-        const tapperWrapper = document.getElementById('sharedVisualTapperWrapper');
-        const tapperParentId = tapperWrapper ? tapperWrapper.parentNode ? tapperWrapper.parentNode.id : null : null;
-
-        if (tapperParentId === 'ioTabTapperPlaceholder') {
-            actualButtonToDisable = ioTapperPlayBtn;
-        } else if (tapperParentId === 'tapper-placeholder') { // Learn & Practice tab
-            actualButtonToDisable = learnPracticePlayBtn;
-        }
-        // If tapper is on another tab (e.g. Intro, Book Cipher) without a dedicated play button, actualButtonToDisable remains null.
-    } else if (!elementToGlowId) { // This means main playback from I/O tab's textarea
+    if (initiatingButtonId === 'playMorseBtn') {
         actualButtonToDisable = playMorseBtn;
+    } else if (initiatingButtonId === 'play-tapped-morse-btn') {
+        actualButtonToDisable = learnPracticePlayBtn;
+    } else if (initiatingButtonId === 'play-io-tapped-morse-btn') {
+        actualButtonToDisable = ioTapperPlayBtn;
     }
-    // In other cases (e.g., elementToGlowId is something else), actualButtonToDisable remains null.
+    // If initiatingButtonId is something else or null, actualButtonToDisable remains null.
+    // This logic prioritizes the initiatingButtonId for disabling.
 
     if (actualButtonToDisable) actualButtonToDisable.disabled = true;
     if (stopMorseBtn) stopMorseBtn.disabled = false; // Stop button is global for any playback
@@ -780,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // If it's from "decoded" text, it would need conversion.
                 // For now, assume tapperMorseOutput.textContent is playable Morse.
                 initAudio(); // Ensure audio context is ready
-                await playMorseSequence(morseOutputOnTapper.trim(), null, null, 'tapper');
+                await playMorseSequence(morseOutputOnTapper.trim(), null, null, 'tapper', 'play-io-tapped-morse-btn');
             }
         });
     }
