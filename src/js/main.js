@@ -505,21 +505,18 @@ function populateMorseReference() {
     const entries = Object.entries(morseCode);
     const numEntries = entries.length;
 
-    // Determine items per row based on screen width
     const isDesktop = window.matchMedia('(min-width: 768px)').matches;
-    const itemsPerRow = isDesktop ? 4 : 2; // 4 pairs for desktop (8 cols), 2 for mobile (4 cols)
+    const pairsPerRow = isDesktop ? 4 : 2; // Number of (Char, Morse) pairs per row
 
-    for (let i = 0; i < numEntries; i += itemsPerRow) {
+    for (let i = 0; i < numEntries; i += pairsPerRow) {
         const tr = document.createElement('tr');
-
-        for (let j = 0; j < itemsPerRow; j++) {
+        for (let j = 0; j < pairsPerRow; j++) {
             const entryIndex = i + j;
             if (entryIndex < numEntries) {
                 const char = entries[entryIndex][0];
                 const code = entries[entryIndex][1];
 
                 let idChar = char;
-                // Simplified ID generation for brevity, full list was present before
                 if (char === '.') idChar = 'Period';
                 else if (char === ',') idChar = 'Comma';
                 else if (char === '?') idChar = 'QuestionMark';
@@ -539,7 +536,7 @@ function populateMorseReference() {
                 else if (char === '$') idChar = 'Dollar';
                 else if (char === '@') idChar = 'AtSign';
                 else if (char === ' ') idChar = 'Space';
-                // Ensure other special characters are handled or add a generic fallback if necessary
+                // No generic fallback needed as we only use valid chars from morseCode keys
 
                 const tdChar = document.createElement('td');
                 tdChar.textContent = char;
@@ -552,7 +549,7 @@ function populateMorseReference() {
                 tdMorse.classList.add('font-mono');
                 tr.appendChild(tdMorse);
             } else {
-                // Add empty cells if numEntries is not a multiple of itemsPerDesktopRow
+                // Add two empty cells for each missing pair to maintain table structure
                 const tdCharEmpty = document.createElement('td');
                 tdCharEmpty.innerHTML = '&nbsp;';
                 tr.appendChild(tdCharEmpty);
