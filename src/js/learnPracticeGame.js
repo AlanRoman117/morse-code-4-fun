@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             practiceMessage.style.color = 'lightgreen';
             tapperDecodedOutput.classList.add('glow-green');
             setTimeout(() => tapperDecodedOutput.classList.remove('glow-green'), 800);
-
+            
             // Trigger confetti
             if (typeof confetti === 'function') {
                 confetti({
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("[LearnPracticeGame] textToMorse or playMorseSequence function is not available."); // Keep this error log
                 return;
             }
-
+            
             // Ensure audio context is ready
             if (typeof initAudio === 'function') {
                 initAudio();
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (morseToPlay) {
                 try {
                     // console.log("[LearnPracticeGame] Calling playMorseSequence..."); // Log removed
-                    await playMorseSequence(morseToPlay);
+                    await playMorseSequence(morseToPlay); 
                     // console.log("[LearnPracticeGame] playMorseSequence finished."); // Log removed
                 } catch (error) {
                     console.error("[LearnPracticeGame] Error during playMorseSequence:", error); // Keep this error log
