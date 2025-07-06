@@ -182,6 +182,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // if (currentTappedString.trim() === currentChallengeWord.substring(0, currentTappedString.length).trim() && currentTappedString.endsWith(' ')) {
             //     // Potentially part of a multi-word challenge, or just confirming space.
             // }
+        } else if (detail.type === 'delete_char') {
+            currentTappedString = detail.newFullText !== undefined ? detail.newFullText : currentTappedString.slice(0, -1); // Fallback if newFullText is not provided
+            tapperDecodedOutput.textContent = currentTappedString;
+            updatePlayTappedMorseButtonState();
+
+            // Re-evaluate practice message based on the new string
+            if (currentTappedString === "") { // If string is empty, clear message
+                practiceMessage.textContent = "";
+            } else if (currentChallengeWord.startsWith(currentTappedString)) {
+                practiceMessage.textContent = "Correct!";
+                practiceMessage.style.color = 'lightblue';
+            } else {
+                // This case might be complex if the string becomes incorrect *after* a delete.
+                // For simplicity, if it's not empty and not a prefix, it's likely a mistake state.
+                // Or, we can clear the message to avoid confusion. Let's clear it for now.
+                // practiceMessage.textContent = "Mistake. Tap 'End Ltr' then try the correct letter.";
+                // practiceMessage.style.color = '#DC2626';
+                practiceMessage.textContent = ""; // Clear message on delete if not perfectly correct start
+            }
+            console.log("LearnPracticeGame: Deleted char. New currentTappedString:", currentTappedString);
         }
     });
 
