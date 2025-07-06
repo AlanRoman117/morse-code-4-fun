@@ -101,16 +101,73 @@ document.addEventListener('DOMContentLoaded', () => {
         tapperDecodedOutput.textContent = currentTappedString;
         updatePlayTappedMorseButtonState(); // Update button state
 
+        // Clear previous feedback classes
+        tapperDecodedOutput.classList.remove('glow-green', 'shake-red');
+
         if (currentTappedString === currentChallengeWord) {
             practiceMessage.textContent = "Challenge Complete!";
             practiceMessage.style.color = 'lightgreen';
+            tapperDecodedOutput.classList.add('glow-green');
+            setTimeout(() => tapperDecodedOutput.classList.remove('glow-green'), 800);
+
+            // Trigger confetti
+            if (typeof confetti === 'function') {
+                // Burst 1: Central, wide, main effect
+                confetti({
+                    particleCount: 200,
+                    spread: 100, // Increased spread a bit
+                    origin: { y: 0.5 },
+                    drift: 0.5,
+                    gravity: 0.8
+                });
+
+                // Burst 2 & 3: Side bursts
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 150,
+                        angle: 60,
+                        spread: 70, // Slightly wider
+                        origin: { x: 0, y: 0.6 },
+                        colors: ['#FF69B4', '#FFD700', '#ADFF2F'] // Hot pink, Gold, GreenYellow
+                    });
+                    confetti({
+                        particleCount: 150,
+                        angle: 120,
+                        spread: 70, // Slightly wider
+                        origin: { x: 1, y: 0.6 },
+                        colors: ['#00BFFF', '#BA55D3', '#FF4500'] // DeepSkyBlue, MediumOrchid, OrangeRed
+                    });
+                }, 150); // Slightly earlier for a quicker follow-up
+
+                // Burst 4 & 5: Additional bursts
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 100,
+                        angle: 45,
+                        spread: 50,
+                        origin: { x: 0.2, y: 0.7 }, // Lower left-ish
+                        gravity: 0.7
+                    });
+                    confetti({
+                        particleCount: 100,
+                        angle: 135,
+                        spread: 50,
+                        origin: { x: 0.8, y: 0.7 }, // Lower right-ish
+                        gravity: 0.7
+                    });
+                }, 400); // A bit later for a final flourish
+            }
             // Optionally, disable further tapper input until "New Challenge"
         } else if (currentChallengeWord.startsWith(currentTappedString)) {
             practiceMessage.textContent = "Correct!";
             practiceMessage.style.color = 'lightblue';
+            tapperDecodedOutput.classList.add('glow-green');
+            setTimeout(() => tapperDecodedOutput.classList.remove('glow-green'), 800);
         } else {
             practiceMessage.textContent = "Mistake. Tap 'End Ltr' then try the correct letter.";
             practiceMessage.style.color = '#DC2626'; // Tailwind red-600 for better contrast
+            tapperDecodedOutput.classList.add('shake-red');
+            setTimeout(() => tapperDecodedOutput.classList.remove('shake-red'), 500);
             // To handle the "mistake" more gracefully:
             // The user has tapped a full character, and it's wrong in the sequence.
             // We should clear the last attempted character from currentTappedString
@@ -182,6 +239,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // if (currentTappedString.trim() === currentChallengeWord.substring(0, currentTappedString.length).trim() && currentTappedString.endsWith(' ')) {
             //     // Potentially part of a multi-word challenge, or just confirming space.
             // }
+        } else if (detail.type === 'delete_char') {
+            currentTappedString = detail.newFullText !== undefined ? detail.newFullText : currentTappedString.slice(0, -1); // Fallback if newFullText is not provided
+            tapperDecodedOutput.textContent = currentTappedString;
+            updatePlayTappedMorseButtonState();
+
+            // Re-evaluate practice message based on the new string
+            if (currentTappedString === "") { // If string is empty, clear message
+                practiceMessage.textContent = "";
+            } else if (currentChallengeWord.startsWith(currentTappedString)) {
+                practiceMessage.textContent = "Correct!";
+                practiceMessage.style.color = 'lightblue';
+            } else {
+                // This case might be complex if the string becomes incorrect *after* a delete.
+                // For simplicity, if it's not empty and not a prefix, it's likely a mistake state.
+                // Or, we can clear the message to avoid confusion. Let's clear it for now.
+                // practiceMessage.textContent = "Mistake. Tap 'End Ltr' then try the correct letter.";
+                // practiceMessage.style.color = '#DC2626';
+                practiceMessage.textContent = ""; // Clear message on delete if not perfectly correct start
+            }
+            // console.log("LearnPracticeGame: Deleted char. New currentTappedString:", currentTappedString); // Log removed
         }
     });
 
@@ -196,5 +273,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     // updateTableHighlight was moved to global scope
+
+    // updateTableHighlight was moved to global scope
+
+    if (playTappedMorseBtn) {
+        playTappedMorseBtn.addEventListener('click', async () => {
+            // console.log("[LearnPracticeGame] 'Play My Tapped Morse' button clicked."); // Log removed
+            const textToPlay = tapperDecodedOutput.textContent;
+            // console.log("[LearnPracticeGame] Text to play:", textToPlay); // Log removed
+
+            if (textToPlay.trim() === '') {
+                // console.log("[LearnPracticeGame] No text to play."); // Log removed
+                return;
+            }
+
+            if (typeof textToMorse !== 'function' || typeof playMorseSequence !== 'function') {
+                console.error("[LearnPracticeGame] textToMorse or playMorseSequence function is not available."); // Keep this error log
+                return;
+            }
+
+            // Ensure audio context is ready
+            if (typeof initAudio === 'function') {
+                initAudio();
+            } else {
+                console.warn("[LearnPracticeGame] initAudio function not available. Audio might not play reliably."); // Keep this warning
+            }
+             // It's also good practice to ensure Tone.js is started by a user gesture if relying on it.
+            // However, playMorseSequence in main.js should handle its own Tone.js context if it uses it.
+
+            const morseToPlay = textToMorse(textToPlay);
+            // console.log("[LearnPracticeGame] Morse to play:", morseToPlay); // Log removed
+
+            if (morseToPlay) {
+                try {
+                    // console.log("[LearnPracticeGame] Calling playMorseSequence..."); // Log removed
+                    await playMorseSequence(morseToPlay);
+                    // console.log("[LearnPracticeGame] playMorseSequence finished."); // Log removed
+                } catch (error) {
+                    console.error("[LearnPracticeGame] Error during playMorseSequence:", error); // Keep this error log
+                }
+            } else {
+                // console.log("[LearnPracticeGame] Nothing to play (text converted to empty Morse)."); // Log removed
+            }
+        });
+    }
 
 });
