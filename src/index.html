@@ -74,19 +74,31 @@
         <div id="learn-practice-tab" class="tab-content hidden"> <!-- Hide other tabs initially -->
             <div class="app-container">
                 <!-- NEW TOP CONTAINER STARTS HERE -->
-                <div class="w-full flex flex-col space-y-4 md:grid md:grid-cols-3 md:gap-4 md:items-start mb-3 md:mb-4">
+                <div class="w-full flex flex-col space-y-4 md:grid md:grid-cols-4 md:gap-4 md:items-start mb-3 md:mb-4">
                     <!-- Left column for Morse reference -->
-                    <div class="w-full p-2 md:col-span-2">
+                    <div class="w-full p-2 md:col-span-3">
                         <button id="toggle-reference-btn" class="md:hidden w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 md:py-2 px-3 md:px-4 rounded-md mb-2 md:mb-4">Show Morse Reference</button>
                         <div class="morse-reference hidden md:block" id="morse-reference-container">
                             <h2 class="section-title text-xl md:text-2xl font-semibold mb-2 md:mb-3 text-center">Morse Code Reference</h2>
                             <div class="">
                                 <table class="reference-table mx-auto">
-                                    <thead>
+                                    <thead class="hidden md:table-header-group"> <!-- Desktop header (8 columns) -->
                                         <tr>
-                                            <th>Character</th>
+                                            <th>Char</th>
                                             <th>Morse</th>
-                                            <th>Character</th>
+                                            <th>Char</th>
+                                            <th>Morse</th>
+                                            <th>Char</th>
+                                            <th>Morse</th>
+                                            <th>Char</th>
+                                            <th>Morse</th>
+                                        </tr>
+                                    </thead>
+                                    <thead class="md:hidden"> <!-- Mobile header (4 columns) -->
+                                        <tr>
+                                            <th>Char</th>
+                                            <th>Morse</th>
+                                            <th>Char</th>
                                             <th>Morse</th>
                                         </tr>
                                     </thead>
