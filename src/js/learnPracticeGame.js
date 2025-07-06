@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             practiceMessage.style.color = 'lightgreen';
             tapperDecodedOutput.classList.add('glow-green');
             setTimeout(() => tapperDecodedOutput.classList.remove('glow-green'), 800);
-
+            
             // Trigger confetti
             if (typeof confetti === 'function') {
                 // Burst 1: Central, wide, main effect
@@ -127,14 +127,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         particleCount: 150,
                         angle: 60,
                         spread: 70, // Slightly wider
-                        origin: { x: 0, y: 0.6 },
+                        origin: { x: 0, y: 0.6 }, 
                         colors: ['#FF69B4', '#FFD700', '#ADFF2F'] // Hot pink, Gold, GreenYellow
                     });
                     confetti({
                         particleCount: 150,
                         angle: 120,
                         spread: 70, // Slightly wider
-                        origin: { x: 1, y: 0.6 },
+                        origin: { x: 1, y: 0.6 }, 
                         colors: ['#00BFFF', '#BA55D3', '#FF4500'] // DeepSkyBlue, MediumOrchid, OrangeRed
                     });
                 }, 150); // Slightly earlier for a quicker follow-up
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     confetti({
                         particleCount: 100,
-                        angle: 45,
+                        angle: 45, 
                         spread: 50,
                         origin: { x: 0.2, y: 0.7 }, // Lower left-ish
                         gravity: 0.7
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("[LearnPracticeGame] textToMorse or playMorseSequence function is not available."); // Keep this error log
                 return;
             }
-
+            
             // Ensure audio context is ready
             if (typeof initAudio === 'function') {
                 initAudio();
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (morseToPlay) {
                 try {
                     // console.log("[LearnPracticeGame] Calling playMorseSequence..."); // Log removed
-                    await playMorseSequence(morseToPlay);
+                    await playMorseSequence(morseToPlay); 
                     // console.log("[LearnPracticeGame] playMorseSequence finished."); // Log removed
                 } catch (error) {
                     console.error("[LearnPracticeGame] Error during playMorseSequence:", error); // Keep this error log
