@@ -626,6 +626,13 @@ body:not(.light-theme) #upsell-modal .text-xs.text-gray-500 { /* Placeholder pay
   /* min-height: 50px; */
 }
 
+/* Glow effect for the play-morse-btn when active */
+#play-morse-btn.active {
+    box-shadow: 0 0 20px #f6e05e, 0 0 30px #f6e05e; /* Similar to .tapper.active glow */
+    /* The existing .active:bg-blue-800 from Tailwind will still apply for background color,
+       which is fine. We're just adding the glow. */
+}
+
 /* --- Privacy Policy Page Styles --- */
 /* Default (Light Theme) Styles for Privacy Page */
 body.privacy-page {
