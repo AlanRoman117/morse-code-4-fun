@@ -182,6 +182,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // if (currentTappedString.trim() === currentChallengeWord.substring(0, currentTappedString.length).trim() && currentTappedString.endsWith(' ')) {
             //     // Potentially part of a multi-word challenge, or just confirming space.
             // }
+        } else if (detail.type === 'delete_char') {
+            currentTappedString = detail.newFullText !== undefined ? detail.newFullText : currentTappedString.slice(0, -1); // Fallback if newFullText is not provided
+            tapperDecodedOutput.textContent = currentTappedString;
+            updatePlayTappedMorseButtonState();
+
+            // Re-evaluate practice message based on the new string
+            if (currentTappedString === "") { // If string is empty, clear message
+                practiceMessage.textContent = "";
+            } else if (currentChallengeWord.startsWith(currentTappedString)) {
+                practiceMessage.textContent = "Correct!";
+                practiceMessage.style.color = 'lightblue';
+            } else {
+                // This case might be complex if the string becomes incorrect *after* a delete.
+                // For simplicity, if it's not empty and not a prefix, it's likely a mistake state.
+                // Or, we can clear the message to avoid confusion. Let's clear it for now.
+                // practiceMessage.textContent = "Mistake. Tap 'End Ltr' then try the correct letter.";
+                // practiceMessage.style.color = '#DC2626';
+                practiceMessage.textContent = ""; // Clear message on delete if not perfectly correct start
+            }
+            // console.log("LearnPracticeGame: Deleted char. New currentTappedString:", currentTappedString); // Log removed
         }
     });
 
@@ -196,5 +216,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     // updateTableHighlight was moved to global scope
+
+    // updateTableHighlight was moved to global scope
+
+    if (playTappedMorseBtn) {
+        playTappedMorseBtn.addEventListener('click', async () => {
+            // console.log("[LearnPracticeGame] 'Play My Tapped Morse' button clicked."); // Log removed
+            const textToPlay = tapperDecodedOutput.textContent;
+            // console.log("[LearnPracticeGame] Text to play:", textToPlay); // Log removed
+
+            if (textToPlay.trim() === '') {
+                // console.log("[LearnPracticeGame] No text to play."); // Log removed
+                return;
+            }
+
+            if (typeof textToMorse !== 'function' || typeof playMorseSequence !== 'function') {
+                console.error("[LearnPracticeGame] textToMorse or playMorseSequence function is not available."); // Keep this error log
+                return;
+            }
+
+            // Ensure audio context is ready
+            if (typeof initAudio === 'function') {
+                initAudio();
+            } else {
+                console.warn("[LearnPracticeGame] initAudio function not available. Audio might not play reliably."); // Keep this warning
+            }
+             // It's also good practice to ensure Tone.js is started by a user gesture if relying on it.
+            // However, playMorseSequence in main.js should handle its own Tone.js context if it uses it.
+
+            const morseToPlay = textToMorse(textToPlay);
+            // console.log("[LearnPracticeGame] Morse to play:", morseToPlay); // Log removed
+
+            if (morseToPlay) {
+                try {
+                    // console.log("[LearnPracticeGame] Calling playMorseSequence..."); // Log removed
+                    await playMorseSequence(morseToPlay);
+                    // console.log("[LearnPracticeGame] playMorseSequence finished."); // Log removed
+                } catch (error) {
+                    console.error("[LearnPracticeGame] Error during playMorseSequence:", error); // Keep this error log
+                }
+            } else {
+                // console.log("[LearnPracticeGame] Nothing to play (text converted to empty Morse)."); // Log removed
+            }
+        });
+    }
 
 });
