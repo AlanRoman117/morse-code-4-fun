@@ -338,22 +338,28 @@ async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowI
     isPlaying = true;
     stopMorseCode = false;
 
-    const buttonToDisable = document.getElementById('play-tapped-morse-btn'); // Default to tapper's play button
-    const ioTapperPlayButton = document.getElementById('play-io-tapped-morse-btn');
-    let actualButtonToDisable = buttonToDisable;
+    let actualButtonToDisable = null;
+    const learnPracticePlayBtn = document.getElementById('play-tapped-morse-btn');
+    const ioTapperPlayBtn = document.getElementById('play-io-tapped-morse-btn');
+    // playMorseBtn is global, for the main I/O textarea playback
 
-    if (elementToGlowId) { // If an element is supposed to glow, assume its play button triggered this.
-      if (elementToGlowId === 'tapper' && document.getElementById('sharedVisualTapperWrapper').parentNode.id === 'ioTabTapperPlaceholder'){
-        actualButtonToDisable = ioTapperPlayButton;
-      } else if (elementToGlowId === 'tapper' && document.getElementById('sharedVisualTapperWrapper').parentNode.id === 'tapper-placeholder'){
-        actualButtonToDisable = buttonToDisable; // This is the learnPractice one
-      }
-    } else { // If no element to glow, it's the main I/O play button
+    if (elementToGlowId === 'tapper') {
+        const tapperWrapper = document.getElementById('sharedVisualTapperWrapper');
+        const tapperParentId = tapperWrapper ? tapperWrapper.parentNode ? tapperWrapper.parentNode.id : null : null;
+
+        if (tapperParentId === 'ioTabTapperPlaceholder') {
+            actualButtonToDisable = ioTapperPlayBtn;
+        } else if (tapperParentId === 'tapper-placeholder') { // Learn & Practice tab
+            actualButtonToDisable = learnPracticePlayBtn;
+        }
+        // If tapper is on another tab (e.g. Intro, Book Cipher) without a dedicated play button, actualButtonToDisable remains null.
+    } else if (!elementToGlowId) { // This means main playback from I/O tab's textarea
         actualButtonToDisable = playMorseBtn;
     }
+    // In other cases (e.g., elementToGlowId is something else), actualButtonToDisable remains null.
 
-    if(actualButtonToDisable) actualButtonToDisable.disabled = true;
-    if(stopMorseBtn) stopMorseBtn.disabled = false; // Stop button is global for any playback
+    if (actualButtonToDisable) actualButtonToDisable.disabled = true;
+    if (stopMorseBtn) stopMorseBtn.disabled = false; // Stop button is global for any playback
 
     const elementToGlow = elementToGlowId ? document.getElementById(elementToGlowId) : null;
 
