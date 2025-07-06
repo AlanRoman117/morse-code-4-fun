@@ -21,7 +21,7 @@ function updateVisualTapperUnitTime(newUnitTime) {
   DOT_THRESHOLD_MS = UNIT_TIME_MS * 1.5;
   LETTER_SPACE_SILENCE_MS = UNIT_TIME_MS * 3;
   localStorage.setItem('visualTapperUnitTime', UNIT_TIME_MS.toString());
-  console.log("Visual Tapper UNIT_TIME_MS updated to:", UNIT_TIME_MS, "Derived DOT_THRESHOLD_MS:", DOT_THRESHOLD_MS, "LETTER_SPACE_SILENCE_MS:", LETTER_SPACE_SILENCE_MS);
+  // console.log("Visual Tapper UNIT_TIME_MS updated to:", UNIT_TIME_MS, "Derived DOT_THRESHOLD_MS:", DOT_THRESHOLD_MS, "LETTER_SPACE_SILENCE_MS:", LETTER_SPACE_SILENCE_MS); // Log removed
 }
 
 // Add this new getter function
@@ -45,23 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const morseToChar = {};
     if (typeof morseCode === 'undefined' || morseCode === null) {
         console.error('visualTapper.js Error: morseCode global object not found or is null. This script should be loaded after the script defining morseCode.');
-        // Depending on requirements, could try to load it or fail gracefully.
-        // For now, tapper will operate without morseToChar, meaning decodeMorse will not find characters.
     } else {
         for (const char in morseCode) {
             morseToChar[morseCode[char]] = char.toUpperCase();
         }
     }
     
-    const TAP_SOUND_FREQ = 770; // Frequency for tap sound
+    const TAP_SOUND_FREQ = 770;
     let isPlayingBack = false;
     let tapperTone = null;
 
     function checkPractice() { 
-        // console.log('Tapper: checkPractice called'); 
     }
     function showMessage(message, type, duration) {
-        console.log(`Tapper Message: ${message} (Type: ${type}, Duration: ${duration})`);
+        // console.log(`Tapper Message: ${message} (Type: ${type}, Duration: ${duration})`); // Kept for now if it's not purely diagnostic
     }
 
     function playTapSound() {
@@ -153,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tapper.classList.remove('active');
             stopTapSound();
             tapStartTime = 0;
-            console.log("Mouse left tapper while active, tap cancelled/reset.");
+            // console.log("Mouse left tapper while active, tap cancelled/reset."); // Log removed
         }
     });
 
@@ -164,9 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     deleteLastCharButton.addEventListener('click', () => {
-        console.log("[VisualTapper] Delete Last Char Button clicked.");
+        // console.log("[VisualTapper] Delete Last Char Button clicked."); // Log removed
         if (isPlayingBack) {
-            console.log("[VisualTapper] Delete ignored: isPlayingBack is true.");
+            // console.log("[VisualTapper] Delete ignored: isPlayingBack is true."); // Log removed
             return;
         }
         deleteLastDecodedChar();
@@ -211,17 +208,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function deleteLastDecodedChar() {
-        console.log("[VisualTapper] deleteLastDecodedChar called. currentText before delete:", currentText);
+        // console.log("[VisualTapper] deleteLastDecodedChar called. currentText before delete:", currentText); // Log removed
         if (currentText.length > 0) {
             currentText = currentText.slice(0, -1);
-            console.log("[VisualTapper] currentText after delete:", currentText);
+            // console.log("[VisualTapper] currentText after delete:", currentText); // Log removed
             const event = new CustomEvent('visualTapperInput', {
                 detail: { type: 'delete_char', newFullText: currentText }
             });
             document.dispatchEvent(event);
-            console.log("[VisualTapper] Dispatched visualTapperInput (delete_char) with newFullText:", currentText);
+            // console.log("[VisualTapper] Dispatched visualTapperInput (delete_char) with newFullText:", currentText); // Log removed
         } else {
-            console.log("[VisualTapper] No characters to delete from currentText.");
+            // console.log("[VisualTapper] No characters to delete from currentText."); // Log removed
         }
     }
 
@@ -236,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn(`VisualTapper: Unknown Morse sequence: ${currentMorse}`);
             }
         } else if (isExplicitAction) {
-            console.log("VisualTapper: Space button pressed with no pending Morse signals.");
+            // console.log("VisualTapper: Space button pressed with no pending Morse signals."); // Log removed (or keep if useful for non-debug)
         }
         let eventDetail = null;
         if (morseStringForEvent && morseStringForEvent.length > 0) {
@@ -256,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     tapper.addEventListener('touchcancel', (e) => {
-        console.log("Touch cancelled, resetting tapper state.");
+        // console.log("Touch cancelled, resetting tapper state.");  // Log removed
         if (tapper.classList.contains('active')) {
             tapper.classList.remove('active');
             stopTapSound();
@@ -270,10 +267,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const savedUnitTime = localStorage.getItem('visualTapperUnitTime');
     if (savedUnitTime) {
-        console.log("Found saved unit time in localStorage:", savedUnitTime);
+        // console.log("Found saved unit time in localStorage:", savedUnitTime); // Log removed
         updateVisualTapperUnitTime(parseInt(savedUnitTime)); 
     } else {
-        console.log("No saved unit time in localStorage, ensuring default configuration is applied via updateVisualTapperUnitTime.");
+        // console.log("No saved unit time in localStorage, ensuring default configuration is applied via updateVisualTapperUnitTime."); // Log removed
         updateVisualTapperUnitTime(UNIT_TIME_MS);
     }
 
@@ -281,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (predictiveDisplayElement) {
         const interactionHandler = () => {
             if (predictiveDisplayTimeout && !predictiveDisplayElement.classList.contains('hidden') && !predictiveDisplayElement.classList.contains('opacity-0')) {
-                console.log('User interaction with predictive display detected. Resetting hide timer.');
+                // console.log('User interaction with predictive display detected. Resetting hide timer.'); // Log removed
                 resetPredictiveDisplayHideTimer(); 
             }
         };
@@ -296,21 +293,21 @@ document.addEventListener('DOMContentLoaded', () => {
 function resetPredictiveDisplayHideTimer() {
     const displayElement = document.getElementById('predictive-taps-display');
     if (!displayElement || displayElement.classList.contains('hidden') || displayElement.classList.contains('opacity-0')) {
-        console.log('resetPredictiveDisplayHideTimer called, but display not in a state to reset timer.');
+        // console.log('resetPredictiveDisplayHideTimer called, but display not in a state to reset timer.'); // Log removed
         return;
     }
-    console.log('Resetting predictive display hide timer. Current timer ID:', predictiveDisplayTimeout);
+    // console.log('Resetting predictive display hide timer. Current timer ID:', predictiveDisplayTimeout); // Log removed
     if (predictiveDisplayTimeout) {
         clearTimeout(predictiveDisplayTimeout);
     }
     predictiveDisplayTimeout = setTimeout(() => {
-        console.log('6s timeout expired after user interaction. Hiding.');
+        // console.log('6s timeout expired after user interaction. Hiding.'); // Log removed
         displayElement.classList.remove('opacity-100');
         displayElement.classList.add('opacity-0');
         predictiveDisplayTimeout = null; 
         setTimeout(() => { displayElement.classList.add('hidden'); }, 500);
     }, 6000);
-    console.log('New predictive display hide timer set with ID:', predictiveDisplayTimeout);
+    // console.log('New predictive display hide timer set with ID:', predictiveDisplayTimeout); // Log removed
 }
 
 function updatePredictiveDisplay(morseString) {
@@ -329,7 +326,7 @@ function updatePredictiveDisplay(morseString) {
         }
         return;
     }
-    console.log('updatePredictiveDisplay CALLED - Time:', Date.now(), '| Morse:', morseString, '| Current Timeout ID before logic:', predictiveDisplayTimeout);
+    // console.log('updatePredictiveDisplay CALLED - Time:', Date.now(), '| Morse:', morseString, '| Current Timeout ID before logic:', predictiveDisplayTimeout); // Log removed
     const displayElement = document.getElementById('predictive-taps-display');
     if (!displayElement) return;
 
@@ -337,7 +334,7 @@ function updatePredictiveDisplay(morseString) {
         if (predictiveDisplayTimeout) {
             clearTimeout(predictiveDisplayTimeout);
             predictiveDisplayTimeout = null;
-            console.log('Cleared existing timeout due to new morseString:', morseString);
+            // console.log('Cleared existing timeout due to new morseString:', morseString); // Log removed
         }
         let exactMatchHtml = "";
         let partialMatchesHtml = [];
@@ -348,7 +345,7 @@ function updatePredictiveDisplay(morseString) {
             void displayElement.offsetWidth;
             displayElement.classList.add('opacity-100');
             predictiveDisplayTimeout = setTimeout(() => {
-                console.log('6s timeout for error message expired. Hiding.');
+                // console.log('6s timeout for error message expired. Hiding.'); // Log removed
                 displayElement.classList.remove('opacity-100');
                 displayElement.classList.add('opacity-0');
                 predictiveDisplayTimeout = null; 
@@ -359,7 +356,7 @@ function updatePredictiveDisplay(morseString) {
         for (const char in morseCode) {
             const currentMorseValue = morseCode[char];
             if (currentMorseValue === morseString) {
-                console.log('Exact match found for:', char, morseString, 'Applying highlight class.');
+                // console.log('Exact match found for:', char, morseString, 'Applying highlight class.');  // Log removed
                 exactMatchHtml = `<span class="char-badge exact-match-highlight text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${currentMorseValue})</span>`;
             } else if (currentMorseValue.startsWith(morseString)) {
                 partialMatchesHtml.push(`<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${currentMorseValue})</span>`);
@@ -371,9 +368,9 @@ function updatePredictiveDisplay(morseString) {
             displayElement.classList.remove('hidden', 'opacity-0');
             void displayElement.offsetWidth;
             displayElement.classList.add('opacity-100');
-            console.log('Displaying predictions. Setting 6s timeout.');
+            // console.log('Displaying predictions. Setting 6s timeout.'); // Log removed
             predictiveDisplayTimeout = setTimeout(() => {
-                console.log('6s timeout for predictions expired. Hiding.');
+                // console.log('6s timeout for predictions expired. Hiding.'); // Log removed
                 displayElement.classList.remove('opacity-100');
                 displayElement.classList.add('opacity-0');
                 predictiveDisplayTimeout = null; 
@@ -384,9 +381,9 @@ function updatePredictiveDisplay(morseString) {
             displayElement.classList.remove('hidden', 'opacity-0');
             void displayElement.offsetWidth;
             displayElement.classList.add('opacity-100');
-            console.log('Displaying "No match". Setting 6s timeout.');
+            // console.log('Displaying "No match". Setting 6s timeout.'); // Log removed
             predictiveDisplayTimeout = setTimeout(() => {
-                console.log('6s timeout for "No match" expired. Hiding.');
+                // console.log('6s timeout for "No match" expired. Hiding.'); // Log removed
                 displayElement.classList.remove('opacity-100');
                 displayElement.classList.add('opacity-0');
                 predictiveDisplayTimeout = null; 
@@ -396,9 +393,9 @@ function updatePredictiveDisplay(morseString) {
     } 
     else { 
         if (predictiveDisplayTimeout) {
-            console.log('Empty morseString received, but a timeout (ID:', predictiveDisplayTimeout, ') is active. Letting it run.');
+            // console.log('Empty morseString received, but a timeout (ID:', predictiveDisplayTimeout, ') is active. Letting it run.'); // Log removed
         } else {
-            console.log('Empty morseString and NO active timeout. Hiding now.');
+            // console.log('Empty morseString and NO active timeout. Hiding now.'); // Log removed
             displayElement.classList.remove('opacity-100');
             displayElement.classList.add('opacity-0');
             setTimeout(() => {
@@ -425,7 +422,7 @@ function resetVisualTapperState() {
     if (tapperElement) {
         tapperElement.classList.remove('active');
     }
-    console.log("VisualTapper state reset. (updateTableHighlight call commented out for testing)");
+    // console.log("VisualTapper state reset. (updateTableHighlight call commented out for testing)"); // Log removed
     updatePredictiveDisplay("");
     const toggleReferenceBtn = document.getElementById('toggle-reference-btn');
     const morseReferenceContainer = document.getElementById('morse-reference-container');

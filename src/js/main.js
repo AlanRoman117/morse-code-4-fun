@@ -500,23 +500,23 @@ function delay(durationSeconds) {
 
 function populateMorseReference() {
     if (!morseReferenceBody) {
-        console.error("Morse reference body not found!");
+        // console.error("Morse reference body not found!"); // Log removed
         return;
     }
     morseReferenceBody.innerHTML = ''; // Clear existing content
-    console.log("Populating Morse Reference Table...");
+    // console.log("Populating Morse Reference Table..."); // Log removed
 
     const entries = Object.entries(morseCode);
     const numEntries = entries.length;
-    console.log(`Total Morse code entries: ${numEntries}`);
+    // console.log(`Total Morse code entries: ${numEntries}`); // Log removed
 
     const isDesktop = window.matchMedia('(min-width: 768px)').matches;
     const pairsPerRow = isDesktop ? 4 : 2; // Number of (Char, Morse) pairs per row
-    console.log(`Screen isDesktop: ${isDesktop}, Pairs per row: ${pairsPerRow}`);
+    // console.log(`Screen isDesktop: ${isDesktop}, Pairs per row: ${pairsPerRow}`); // Log removed
 
     for (let i = 0; i < numEntries; i += pairsPerRow) {
         const tr = document.createElement('tr');
-        console.log(`Starting new row (i=${i})`);
+        // console.log(`Starting new row (i=${i})`); // Log removed
         for (let j = 0; j < pairsPerRow; j++) {
             const entryIndex = i + j;
             if (entryIndex < numEntries) {
@@ -549,17 +549,17 @@ function populateMorseReference() {
                 tdChar.textContent = char;
                 tdChar.id = `ref-char-${idChar}`;
                 tr.appendChild(tdChar);
-                console.log(`  Added Char: ${char} (id: ref-char-${idChar}) to row ${i}, pair index j=${j}`);
+                // console.log(`  Added Char: ${char} (id: ref-char-${idChar}) to row ${i}, pair index j=${j}`); // Log removed
 
                 const tdMorse = document.createElement('td');
                 tdMorse.textContent = code;
                 tdMorse.id = `ref-morse-${idChar}`;
                 tdMorse.classList.add('font-mono');
                 tr.appendChild(tdMorse);
-                console.log(`  Added Morse: ${code} (id: ref-morse-${idChar}) for char ${char}`);
+                // console.log(`  Added Morse: ${code} (id: ref-morse-${idChar}) for char ${char}`); // Log removed
             } else {
                 // Add two empty cells for each missing pair to maintain table structure
-                console.log(`  Adding empty cells for pair index j=${j} in row i=${i} as entryIndex ${entryIndex} >= numEntries`);
+                // console.log(`  Adding empty cells for pair index j=${j} in row i=${i} as entryIndex ${entryIndex} >= numEntries`); // Log removed
                 const tdCharEmpty = document.createElement('td');
                 tdCharEmpty.innerHTML = '&nbsp;';
                 tr.appendChild(tdCharEmpty);
@@ -569,9 +569,9 @@ function populateMorseReference() {
             }
         }
         morseReferenceBody.appendChild(tr);
-        console.log(`Finished row (i=${i}), appended to table body.`);
+        // console.log(`Finished row (i=${i}), appended to table body.`); // Log removed
     }
-    console.log("Finished populating Morse Reference Table.");
+    // console.log("Finished populating Morse Reference Table."); // Log removed
     // applySavedTheme will be called by showTab or initial load, or by theme toggle.
     // We might need to explicitly call it here if the table borders are not themed correctly initially.
     // However, the cell content theming (text color) should be inherited.
