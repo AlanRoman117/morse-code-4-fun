@@ -101,16 +101,34 @@ document.addEventListener('DOMContentLoaded', () => {
         tapperDecodedOutput.textContent = currentTappedString;
         updatePlayTappedMorseButtonState(); // Update button state
 
+        // Clear previous feedback classes
+        tapperDecodedOutput.classList.remove('glow-green', 'shake-red');
+
         if (currentTappedString === currentChallengeWord) {
             practiceMessage.textContent = "Challenge Complete!";
             practiceMessage.style.color = 'lightgreen';
+            tapperDecodedOutput.classList.add('glow-green');
+            setTimeout(() => tapperDecodedOutput.classList.remove('glow-green'), 800);
+            
+            // Trigger confetti
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 120,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
             // Optionally, disable further tapper input until "New Challenge"
         } else if (currentChallengeWord.startsWith(currentTappedString)) {
             practiceMessage.textContent = "Correct!";
             practiceMessage.style.color = 'lightblue';
+            tapperDecodedOutput.classList.add('glow-green');
+            setTimeout(() => tapperDecodedOutput.classList.remove('glow-green'), 800);
         } else {
             practiceMessage.textContent = "Mistake. Tap 'End Ltr' then try the correct letter.";
             practiceMessage.style.color = '#DC2626'; // Tailwind red-600 for better contrast
+            tapperDecodedOutput.classList.add('shake-red');
+            setTimeout(() => tapperDecodedOutput.classList.remove('shake-red'), 500);
             // To handle the "mistake" more gracefully:
             // The user has tapped a full character, and it's wrong in the sequence.
             // We should clear the last attempted character from currentTappedString
