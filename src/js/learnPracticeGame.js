@@ -112,11 +112,50 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Trigger confetti
             if (typeof confetti === 'function') {
+                // Burst 1: Central, wide, main effect
                 confetti({
-                    particleCount: 120,
-                    spread: 70,
-                    origin: { y: 0.6 }
+                    particleCount: 200,
+                    spread: 100, // Increased spread a bit
+                    origin: { y: 0.5 },
+                    drift: 0.5,
+                    gravity: 0.8
                 });
+
+                // Burst 2 & 3: Side bursts
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 150,
+                        angle: 60,
+                        spread: 70, // Slightly wider
+                        origin: { x: 0, y: 0.6 }, 
+                        colors: ['#FF69B4', '#FFD700', '#ADFF2F'] // Hot pink, Gold, GreenYellow
+                    });
+                    confetti({
+                        particleCount: 150,
+                        angle: 120,
+                        spread: 70, // Slightly wider
+                        origin: { x: 1, y: 0.6 }, 
+                        colors: ['#00BFFF', '#BA55D3', '#FF4500'] // DeepSkyBlue, MediumOrchid, OrangeRed
+                    });
+                }, 150); // Slightly earlier for a quicker follow-up
+
+                // Burst 4 & 5: Additional bursts
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 100,
+                        angle: 45, 
+                        spread: 50,
+                        origin: { x: 0.2, y: 0.7 }, // Lower left-ish
+                        gravity: 0.7
+                    });
+                    confetti({
+                        particleCount: 100,
+                        angle: 135,
+                        spread: 50,
+                        origin: { x: 0.8, y: 0.7 }, // Lower right-ish
+                        gravity: 0.7
+                    });
+                }, 400); // A bit later for a final flourish
             }
             // Optionally, disable further tapper input until "New Challenge"
         } else if (currentChallengeWord.startsWith(currentTappedString)) {
