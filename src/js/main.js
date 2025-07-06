@@ -327,6 +327,8 @@ async function playMorseSequence(morse, customDotDur, customFreq) {
     if (isPlaying) return;
     isPlaying = true;
     stopMorseCode = false;
+    // playMorseBtn is already declared in the global scope of main.js
+    // const playMorseBtn = document.getElementById('play-morse-btn');
     if(playMorseBtn) playMorseBtn.disabled = true;
     if(stopMorseBtn) stopMorseBtn.disabled = false;
 
@@ -419,7 +421,9 @@ async function playMorseSequence(morse, customDotDur, customFreq) {
         }
 
         if (durationToPlay > 0) {
+            if(playMorseBtn) playMorseBtn.classList.add('active');
             await playTone(currentFreq, durationToPlay);
+            if(playMorseBtn) playMorseBtn.classList.remove('active');
         }
 
         // Determine if it's the last element of a character or word
