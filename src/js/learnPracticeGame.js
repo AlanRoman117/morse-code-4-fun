@@ -217,4 +217,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // updateTableHighlight was moved to global scope
 
+    if (playTappedMorseBtn) {
+        playTappedMorseBtn.addEventListener('click', async () => {
+            console.log("[LearnPracticeGame] 'Play My Tapped Morse' button clicked.");
+            const textToPlay = tapperDecodedOutput.textContent;
+            console.log("[LearnPracticeGame] Text to play:", textToPlay);
+
+            if (textToPlay.trim() === '') {
+                console.log("[LearnPracticeGame] No text to play.");
+                return;
+            }
+
+            if (typeof textToMorse !== 'function' || typeof playMorseSequence !== 'function') {
+                console.error("[LearnPracticeGame] textToMorse or playMorseSequence function is not available.");
+                return;
+            }
+
+            // Ensure audio context is ready
+            if (typeof initAudio === 'function') {
+                initAudio();
+            } else {
+                console.warn("[LearnPracticeGame] initAudio function not available. Audio might not play reliably.");
+            }
+             // It's also good practice to ensure Tone.js is started by a user gesture if relying on it.
+            // However, playMorseSequence in main.js should handle its own Tone.js context if it uses it.
+
+            const morseToPlay = textToMorse(textToPlay);
+            console.log("[LearnPracticeGame] Morse to play:", morseToPlay);
+
+            if (morseToPlay) {
+                try {
+                    console.log("[LearnPracticeGame] Calling playMorseSequence...");
+                    // playMorseSequence is async, so await it.
+                    // It uses settings from main.js (WPM, Farnsworth, Freq)
+                    await playMorseSequence(morseToPlay);
+                    console.log("[LearnPracticeGame] playMorseSequence finished.");
+                } catch (error) {
+                    console.error("[LearnPracticeGame] Error during playMorseSequence:", error);
+                }
+            } else {
+                console.log("[LearnPracticeGame] Nothing to play (text converted to empty Morse).");
+            }
+        });
+    }
+
 });
