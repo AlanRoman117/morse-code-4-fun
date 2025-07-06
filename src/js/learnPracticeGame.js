@@ -306,11 +306,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (morseToPlay) {
                 try {
-                    // console.log("[LearnPracticeGame] Calling playMorseSequence..."); // Log removed
-                    await playMorseSequence(morseToPlay); 
-                    // console.log("[LearnPracticeGame] playMorseSequence finished."); // Log removed
+                    // console.log("[LearnPracticeGame] Calling playMorseSequence for tapper playback..."); // Log removed
+                    await playMorseSequence(morseToPlay, null, null, 'tapper'); // Pass 'tapper' as elementToGlowId
+                    // console.log("[LearnPracticeGame] playMorseSequence for tapper finished."); // Log removed
                 } catch (error) {
-                    console.error("[LearnPracticeGame] Error during playMorseSequence:", error); // Keep this error log
+                    console.error("[LearnPracticeGame] Error during playMorseSequence for tapper:", error); // Keep this error log
                 }
             } else {
                 // console.log("[LearnPracticeGame] Nothing to play (text converted to empty Morse)."); // Log removed

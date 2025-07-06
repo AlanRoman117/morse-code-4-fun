@@ -182,7 +182,7 @@ if(playMorseBtn) playMorseBtn.addEventListener('click', async () => {
     initAudio();
     const morse = morseOutput ? morseOutput.value : "";
     if (morse) {
-        await playMorseSequence(morse);
+        await playMorseSequence(morse); // No elementToGlowId, so no glow from this button
     }
 });
 
@@ -309,9 +309,19 @@ function showTab(tabIdToShow) {
     applySavedTheme();
 
     if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') startNewChallenge();
-    if (tabIdToShow === 'book-cipher-tab' && sharedVisualTapperWrapper) attachTapperToArea('bookCipherTapperArea');
-    else if (tabIdToShow === 'learn-practice-tab' && sharedVisualTapperWrapper) attachTapperToArea('tapper-placeholder');
-    else if (tabIdToShow === 'introduction-tab' && sharedVisualTapperWrapper) attachTapperToArea('introTapperArea');
+
+    // Attach tapper to relevant areas based on the active tab
+    if (sharedVisualTapperWrapper) {
+        if (tabIdToShow === 'book-cipher-tab') {
+            attachTapperToArea('bookCipherTapperArea');
+        } else if (tabIdToShow === 'learn-practice-tab') {
+            attachTapperToArea('tapper-placeholder');
+        } else if (tabIdToShow === 'introduction-tab') {
+            attachTapperToArea('introTapperArea');
+        } else if (tabIdToShow === 'morse-io-tab') {
+            attachTapperToArea('ioTabTapperPlaceholder');
+        }
+    }
     localStorage.setItem('lastTab', tabIdToShow);
 }
 
@@ -323,14 +333,29 @@ function textToMorse(text) {
     return text.toUpperCase().split('').map(char => morseCode[char] || (char === ' ' ? '/' : '')).join(' ');
 }
 
-async function playMorseSequence(morse, customDotDur, customFreq) {
+async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowId) { // Added elementToGlowId
     if (isPlaying) return;
     isPlaying = true;
     stopMorseCode = false;
-    // playMorseBtn is already declared in the global scope of main.js
-    // const playMorseBtn = document.getElementById('play-morse-btn');
-    if(playMorseBtn) playMorseBtn.disabled = true;
-    if(stopMorseBtn) stopMorseBtn.disabled = false;
+
+    const buttonToDisable = document.getElementById('play-tapped-morse-btn'); // Default to tapper's play button
+    const ioTapperPlayButton = document.getElementById('play-io-tapped-morse-btn');
+    let actualButtonToDisable = buttonToDisable;
+
+    if (elementToGlowId) { // If an element is supposed to glow, assume its play button triggered this.
+      if (elementToGlowId === 'tapper' && document.getElementById('sharedVisualTapperWrapper').parentNode.id === 'ioTabTapperPlaceholder'){
+        actualButtonToDisable = ioTapperPlayButton;
+      } else if (elementToGlowId === 'tapper' && document.getElementById('sharedVisualTapperWrapper').parentNode.id === 'tapper-placeholder'){
+        actualButtonToDisable = buttonToDisable; // This is the learnPractice one
+      }
+    } else { // If no element to glow, it's the main I/O play button
+        actualButtonToDisable = playMorseBtn;
+    }
+
+    if(actualButtonToDisable) actualButtonToDisable.disabled = true;
+    if(stopMorseBtn) stopMorseBtn.disabled = false; // Stop button is global for any playback
+
+    const elementToGlow = elementToGlowId ? document.getElementById(elementToGlowId) : null;
 
     const charSpeedWpm = wpm; // Speed of individual dits and dahs
     const overallSpeedWpm = (farnsworthWpm < charSpeedWpm && farnsworthWpm > 0) ? farnsworthWpm : charSpeedWpm;
@@ -421,9 +446,9 @@ async function playMorseSequence(morse, customDotDur, customFreq) {
         }
 
         if (durationToPlay > 0) {
-            if(playMorseBtn) playMorseBtn.classList.add('active');
+            if (elementToGlow) elementToGlow.classList.add('active');
             await playTone(currentFreq, durationToPlay);
-            if(playMorseBtn) playMorseBtn.classList.remove('active');
+            if (elementToGlow) elementToGlow.classList.remove('active');
         }
 
         // Determine if it's the last element of a character or word
@@ -443,10 +468,11 @@ async function playMorseSequence(morse, customDotDur, customFreq) {
     }
 
     if (!stopMorseCode) {
-      if(playMorseBtn) playMorseBtn.disabled = false;
+      if(actualButtonToDisable) actualButtonToDisable.disabled = false;
       if(stopMorseBtn) stopMorseBtn.disabled = true;
     }
     isPlaying = false;
+    if (elementToGlow) elementToGlow.classList.remove('active'); // Ensure glow is off if stopped early
     if (oscillator && !stopMorseCode) {
         try { oscillator.stop(); } catch(e) {/* ignore */}
         oscillator.disconnect();
@@ -731,3 +757,55 @@ window.textToMorse = textToMorse;
 window.playMorseSequence = playMorseSequence;
 window.initAudio = initAudio;
 // morseToText is already on window, morseCode and reversedMorseCode are also already on window.
+
+// Event Listeners for I/O Tab Tapper Controls
+document.addEventListener('DOMContentLoaded', () => {
+    const playIoTappedMorseBtn = document.getElementById('play-io-tapped-morse-btn');
+    const clearIoTapperInputBtn = document.getElementById('clear-io-tapper-input-btn');
+    const tapperMorseOutput = document.getElementById('tapperMorseOutput'); // Shared tapper output
+
+    if (playIoTappedMorseBtn) {
+        playIoTappedMorseBtn.addEventListener('click', async () => {
+            const morseOutputOnTapper = tapperMorseOutput ? tapperMorseOutput.textContent : "";
+            if (morseOutputOnTapper && morseOutputOnTapper.trim() !== '') {
+                // We don't need to convert to Morse, it's already Morse.
+                // We need to ensure it's in the correct spaced format for playMorseSequence.
+                // VisualTapper's tapperMorseOutput is already character-by-character Morse, spaces between.
+                // If it's from "decoded" text, it would need conversion.
+                // For now, assume tapperMorseOutput.textContent is playable Morse.
+                initAudio(); // Ensure audio context is ready
+                await playMorseSequence(morseOutputOnTapper.trim(), null, null, 'tapper');
+            }
+        });
+    }
+
+    if (clearIoTapperInputBtn) {
+        clearIoTapperInputBtn.addEventListener('click', () => {
+            if (typeof resetVisualTapperState === 'function') {
+                resetVisualTapperState(); // This should clear tapperMorseOutput and internal states
+            }
+            // Also explicitly disable the play button for I/O tapper
+            if (playIoTappedMorseBtn) {
+                playIoTappedMorseBtn.disabled = true;
+            }
+        });
+    }
+
+    // Observer to enable/disable the play-io-tapped-morse-btn based on tapperMorseOutput content
+    if (tapperMorseOutput && playIoTappedMorseBtn) {
+        const observer = new MutationObserver(() => {
+            if (tapperMorseOutput.textContent && tapperMorseOutput.textContent.trim() !== '') {
+                playIoTappedMorseBtn.disabled = false;
+            } else {
+                playIoTappedMorseBtn.disabled = true;
+            }
+        });
+        observer.observe(tapperMorseOutput, { childList: true, characterData: true, subtree: true });
+        // Initial check
+        if (tapperMorseOutput.textContent && tapperMorseOutput.textContent.trim() !== '') {
+            playIoTappedMorseBtn.disabled = false;
+        } else {
+            playIoTappedMorseBtn.disabled = true;
+        }
+    }
+});
