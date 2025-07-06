@@ -776,3 +776,10 @@ body.privacy-page.dark-theme {
     transform: translateX(20px); /* Move circle to the right */
     /* border-color will be handled by peer-checked:after:border-white in HTML or light theme override */
 }
+
+/* Hide predictive text display in Learn & Practice tab on desktop */
+@media (min-width: 768px) { /* md breakpoint */
+    #learnPracticeTapperArea #predictive-taps-display {
+        display: none !important;
+    }
+}
