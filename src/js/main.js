@@ -277,17 +277,33 @@ const hiddenTapperStorage = document.getElementById('hiddenTapperStorage');
 
 function attachTapperToArea(targetAreaId) {
     const targetElement = document.getElementById(targetAreaId);
+    const tapperItself = document.getElementById('tapper'); // Get the tapper element itself
+
     if (sharedVisualTapperWrapper && targetElement) {
         targetElement.appendChild(sharedVisualTapperWrapper);
         sharedVisualTapperWrapper.style.display = 'block';
+
+        if (tapperItself) {
+            if (targetAreaId === 'bookCipherTapperArea') {
+                tapperItself.classList.add('tapper-book-cipher');
+            } else {
+                // Ensure the class is removed if attached to any other area
+                tapperItself.classList.remove('tapper-book-cipher');
+            }
+        }
     }
 }
 
 function detachSharedTapper() {
     if (typeof resetVisualTapperState === 'function') resetVisualTapperState();
+    const tapperItself = document.getElementById('tapper'); // Get the tapper element itself
+
     if (sharedVisualTapperWrapper && hiddenTapperStorage && sharedVisualTapperWrapper.parentNode !== hiddenTapperStorage) {
         hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
         sharedVisualTapperWrapper.style.display = 'none';
+        if (tapperItself) {
+            tapperItself.classList.remove('tapper-book-cipher'); // Remove class when detaching
+        }
     }
 }
 

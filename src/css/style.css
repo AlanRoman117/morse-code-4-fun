@@ -93,6 +93,13 @@ body {
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             flex-shrink: 0; /* Added from original context if tapper was in flex */
         }
+
+        .tapper-book-cipher {
+            width: 100px !important; /* Smaller width for book cipher view */
+            height: 100px !important; /* Smaller height for book cipher view */
+            font-size: 1rem !important; /* Smaller font size */
+        }
+
         /* Add media query for larger screens */
         @media (min-width: 768px) { /* md breakpoint */
             .tapper {
