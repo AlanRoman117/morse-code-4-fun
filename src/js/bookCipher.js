@@ -729,6 +729,19 @@ if (typeof attachTapperToArea === 'function') {
                     console.log('[GameInit] play-unlocked-morse-on-game-btn NOT FOUND in DOM.');
                 }
 
+                const stopPlaybackBtn = document.getElementById('stop-morse-playback-btn');
+                console.log('[GameInit] stopPlaybackBtn element:', stopPlaybackBtn);
+                if (stopPlaybackBtn) {
+                    stopPlaybackBtn.addEventListener('click', () => {
+                        console.log('[StopButton] Clicked. Setting isPlayingStoryPlayback to false.');
+                        window.isPlayingStoryPlayback = false;
+                        // Playback functions' finally blocks will handle UI updates (hiding stop, showing play)
+                    });
+                } else {
+                    console.log('[GameInit] stop-morse-playback-btn NOT FOUND in DOM.');
+                }
+
+
             })
             .catch(error => {
                 console.error('Error fetching book content for game:', error);
@@ -1352,6 +1365,11 @@ async function startStoryPlayback(bookId) {
     const tapperMorseOutputEl = document.getElementById('tapperMorseOutput');
     const currentDecodedCharDisplayEl = document.getElementById('current-decoded-char');
     const fullBookMorseDisplayEl = document.getElementById('full-book-morse-display');
+    const playUnlockedBtnOnGame = document.getElementById('play-unlocked-morse-on-game-btn'); // Game screen's play button
+    const stopPlaybackBtn = document.getElementById('stop-morse-playback-btn');
+
+    if (playUnlockedBtnOnGame) playUnlockedBtnOnGame.classList.add('hidden'); // Hide other play button
+    if (stopPlaybackBtn) stopPlaybackBtn.classList.remove('hidden');
 
     try {
         const response = await fetch(bookData.filePath);
@@ -1469,14 +1487,17 @@ async function startStoryPlayback(bookId) {
         window.isPlayingStoryPlayback = false;
         if (currentDecodedCharDisplayEl) currentDecodedCharDisplayEl.textContent = "-";
         if (tapperMorseOutputEl) tapperMorseOutputEl.textContent = "";
-        // Re-enable tapper (handled by isPlayingStoryPlayback flag in visualTapper.js)
-        // Maybe refresh the display to its actual current state if needed
-        // For now, leave it as is, or re-initialize the game for the current book
-        // initializeAndStartBookGame(bookId); // This would reset to current progress
+
+        // Show/Hide buttons
+        // const playUnlockedBtnOnGame = document.getElementById('play-unlocked-morse-on-game-btn'); // Already defined above
+        // const stopPlaybackBtn = document.getElementById('stop-morse-playback-btn'); // Already defined above
+        if (stopPlaybackBtn) stopPlaybackBtn.classList.add('hidden');
+        if (playUnlockedBtnOnGame) playUnlockedBtnOnGame.classList.remove('hidden'); // Show the game's play button
+                                                                                 // (its disabled state will be set by initializeAndStartBookGame)
+
         const bookIsActuallyCompleted = isBookCompleted; // from global state
-        saveProgress(bookId, bookIsActuallyCompleted); // Save potentially "revealed" text if logic was different
-        // To ensure the display is correct after playback, re-run initialize to show actual state.
-        initializeAndStartBookGame(currentBookId);
+        saveProgress(bookId, bookIsActuallyCompleted);
+        initializeAndStartBookGame(bookId);
 
 
     }
@@ -1540,6 +1561,11 @@ async function playUnlockedMorse(bookId) {
 
     const tapperMorseOutputEl = document.getElementById('tapperMorseOutput');
     const currentDecodedCharDisplayEl = document.getElementById('current-decoded-char');
+    const playUnlockedBtn = document.getElementById('play-unlocked-morse-on-game-btn');
+    const stopPlaybackBtn = document.getElementById('stop-morse-playback-btn');
+
+    if (playUnlockedBtn) playUnlockedBtn.classList.add('hidden');
+    if (stopPlaybackBtn) stopPlaybackBtn.classList.remove('hidden');
     // fullBookMorseDisplayEl is not directly manipulated here per plan
 
     try {
@@ -1602,17 +1628,13 @@ async function playUnlockedMorse(bookId) {
         if (tapperMorseOutputEl) tapperMorseOutputEl.textContent = "";
         if (currentDecodedCharDisplayEl) currentDecodedCharDisplayEl.textContent = "-";
 
+        // Show/Hide buttons
+        if (playUnlockedBtn) playUnlockedBtn.classList.remove('hidden'); // playUnlockedBtn defined at start of function
+        if (stopPlaybackBtn) stopPlaybackBtn.classList.add('hidden'); // stopPlaybackBtn defined at start of function
+
         // Restore the game view to its normal state for the current book
         // This ensures the full-book-morse-display and other elements are correctly shown
-        if (currentBookId === bookId) { // only if playback was for the currently active book
-             initializeAndStartBookGame(bookId);
-        } else {
-            // If playback was for a book different than current main game,
-            // simply ensure the tapper is detached if we don't want game view to persist.
-            // However, the button is on details page, which implies currentBookId is set.
-            // For now, assume currentBookId is the one we played.
-            initializeAndStartBookGame(bookId);
-        }
+        initializeAndStartBookGame(bookId); // Use the bookId parameter from the function
     }
 }
 window.playUnlockedMorse = playUnlockedMorse;
