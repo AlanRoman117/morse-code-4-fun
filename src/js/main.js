@@ -307,10 +307,15 @@ function detachSharedTapper() {
         }
     }
 }
+window.detachSharedTapper = detachSharedTapper;
 
 function showTab(tabIdToShow) {
+    if (window.isPlayingStoryPlayback) {
+        console.log(`[showTab] Playback active while switching. Setting isPlayingStoryPlayback to false.`);
+        window.isPlayingStoryPlayback = false;
+    }
     // console.log(`[showTab] Called with tabIdToShow: ${tabIdToShow}`);
-    detachSharedTapper();
+    window.detachSharedTapper(); // Ensure using window. prefix
     tabContentDivs.forEach(div => div.classList.add('hidden'));
 
     const selectedTabContent = document.getElementById(tabIdToShow);

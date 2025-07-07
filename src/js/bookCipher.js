@@ -1064,13 +1064,22 @@ if (typeof attachTapperToArea === 'function') {
     if (returnToLibraryFromGameBtn) {
         returnToLibraryFromGameBtn.addEventListener('click', () => {
             console.log("'Return to Library' button clicked from game view.");
+
+            if (window.isPlayingStoryPlayback) {
+                console.log('[ReturnToLibraryButton] Playback active, setting isPlayingStoryPlayback to false.');
+                window.isPlayingStoryPlayback = false;
+                // The playback function's finally block should handle UI restoration (like hiding stop button)
+                // and calling initializeAndStartBookGame, which might be interrupted by immediate view change.
+                // For a cleaner stop, we might also need to directly manage button visibility here if the finally block doesn't run fully.
+            }
+
             if (currentBookId) { // currentBookId is a global in this file
                 // isBookCompleted is also a global in this file
                 saveProgress(currentBookId, isBookCompleted);
             }
             // detachSharedTapper is a global function from index.html
-            if (typeof detachSharedTapper === 'function') {
-                detachSharedTapper();
+            if (typeof window.detachSharedTapper === 'function') { // Ensure using window. prefix if it's global
+                window.detachSharedTapper();
             } else {
                 console.error("detachSharedTapper function not found. Tapper may not be handled correctly.");
             }
@@ -1497,8 +1506,8 @@ async function startStoryPlayback(bookId) {
         if (playUnlockedBtnOnGame) playUnlockedBtnOnGame.classList.remove('hidden'); // Show the game's play button
                                                                                  // (its disabled state will be set by initializeAndStartBookGame)
 
-        const bookIsActuallyCompleted = isBookCompleted; // from global state
-        saveProgress(bookId, bookIsActuallyCompleted);
+        // const bookIsActuallyCompleted = isBookCompleted; // Removed: Causes ReferenceError, and initializeAndStartBookGame handles state
+        // saveProgress(bookId, bookIsActuallyCompleted); // Removed: initializeAndStartBookGame will manage progress based on its own load.
         initializeAndStartBookGame(bookId);
 
 
