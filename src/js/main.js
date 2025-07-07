@@ -310,6 +310,16 @@ function showTab(tabIdToShow) {
 
     if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') startNewChallenge();
 
+    // If switching to book-cipher-tab, ensure its library is populated/refreshed
+    if (tabIdToShow === 'book-cipher-tab' && typeof populateBookLibrary === 'function') {
+        // It's important that populateBookLibrary also handles populating its own filters if needed.
+        // Assuming populateBookLibrary is comprehensive for the book cipher tab.
+        if (typeof populateFilterDropdowns === 'function') { // populateFilterDropdowns is in bookCipher.js
+            populateFilterDropdowns(); // Ensure filters are up-to-date if they depend on book data that might change (though they don't currently change based on pro status)
+        }
+        populateBookLibrary();
+    }
+
     // Attach tapper to relevant areas based on the active tab
     if (sharedVisualTapperWrapper) {
         if (tabIdToShow === 'book-cipher-tab') {
@@ -825,14 +835,18 @@ if (upgradeToProBtn) { // General upgrade button
     upgradeToProBtn.addEventListener('click', () => {
         window.isProUser = true;
         localStorage.setItem('isProUser', 'true');
-        if (typeof populateBookLibrary === 'function') populateBookLibrary();
-        if (typeof window.initializeKochMethod === 'function') window.initializeKochMethod();
-        updateGoProButtonUI();
+        // populateBookLibrary(); // Removed: showTab will handle this if book-cipher-tab is active
+        if (typeof window.initializeKochMethod === 'function') window.initializeKochMethod(); // For Koch method unlocks
+        updateGoProButtonUI(); // For settings tab button
         hideUpsellModal();
-        hideBookProUpsellModal(); // Also hide the book-specific one if it was somehow open
-        // Refresh current tab if it has pro features that are now unlocked.
+        hideBookProUpsellModal();
+
+        // Refresh current tab UI by calling showTab again.
+        // If it's book-cipher-tab, populateBookLibrary will be called by the modified showTab.
         const currentTab = localStorage.getItem('lastTab');
-        if(currentTab) showTab(currentTab);
+        if(currentTab) {
+            showTab(currentTab);
+        }
     });
 }
 
