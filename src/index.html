@@ -149,13 +149,6 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="filter-author" class="block text-xs font-medium text-gray-400 mb-1">Author</label>
-                                <select id="filter-author" class="filter-select w-full bg-gray-700 border border-gray-600 text-gray-300 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 p-1.5">
-                                    <option value="all">All Authors</option>
-                                    <!-- Options populated by JS -->
-                                </select>
-                            </div>
-                            <div>
                                 <label for="filter-length" class="block text-xs font-medium text-gray-400 mb-1">Length</label>
                                 <select id="filter-length" class="filter-select w-full bg-gray-700 border border-gray-600 text-gray-300 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 p-1.5">
                                     <option value="all">All Lengths</option>
@@ -505,18 +498,18 @@
     </div>
 
     <!-- Pro Upsell Modal (Book Cipher Specific) -->
-    <div id="pro-upsell-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full text-white">
+    <div id="pro-upsell-modal" class="fixed inset-0 bg-black bg-opacity-75 dark:bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full text-gray-700 dark:text-white">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-yellow-400">Unlock More Stories with Pro!</h2>
-                <button id="close-pro-upsell-modal-top" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                <h2 class="text-xl font-bold text-yellow-600 dark:text-yellow-400">Unlock More Stories with Pro!</h2>
+                <button id="close-pro-upsell-modal-top" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white text-2xl">&times;</button>
             </div>
-            <p class="mb-4 text-gray-300">
-                You've discovered a Pro story! To read this and access our full library of exclusive books, please upgrade to Morse Mania Pro.
+            <p class="mb-4 text-gray-600 dark:text-gray-300">
+                You've discovered a Pro story! To read this and access our full library of exclusive books, please upgrade to Morse Code 4 Fun Pro.
             </p>
             <div class="mb-6">
-                <h3 class="font-semibold mb-2 text-lg text-yellow-300">Pro Benefits:</h3>
-                <ul class="list-disc list-inside space-y-1 text-gray-300">
+                <h3 class="font-semibold mb-2 text-lg text-yellow-700 dark:text-yellow-300">Pro Benefits:</h3>
+                <ul class="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-300">
                     <li>Access all current and future Pro stories</li>
                     <li>Enjoy an ad-free experience across the app</li>
                     <li>Unlock all Koch method levels immediately</li>
@@ -524,10 +517,10 @@
                 </ul>
             </div>
             <div class="flex flex-col space-y-3">
-                <button id="go-pro-button" class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold rounded-lg shadow-md transition-colors">
+                <button id="go-pro-button" class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 active:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 dark:active:bg-green-800 text-white font-semibold rounded-lg shadow-md transition-colors">
                     Upgrade to Pro
                 </button>
-                <button id="return-to-library-button" class="w-full px-4 py-3 bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold rounded-lg shadow-md transition-colors">
+                <button id="return-to-library-button" class="w-full px-4 py-3 bg-gray-500 hover:bg-gray-600 active:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 dark:active:bg-gray-800 text-white font-semibold rounded-lg shadow-md transition-colors">
                     Return to Free Books
                 </button>
             </div>

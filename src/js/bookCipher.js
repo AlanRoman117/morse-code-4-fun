@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Filter Elements ---
     const filterGenreEl = document.getElementById('filter-genre');
-    const filterAuthorEl = document.getElementById('filter-author');
+    // const filterAuthorEl = document.getElementById('filter-author'); // Removed
     const filterLengthEl = document.getElementById('filter-length');
     const filterAvailabilityEl = document.getElementById('filter-availability');
 
@@ -70,13 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const genres = new Set();
-        const authors = new Set();
+        // const authors = new Set(); // Removed
 
         for (const bookKey in bookCipherBooks) {
             if (bookCipherBooks.hasOwnProperty(bookKey)) {
                 const book = bookCipherBooks[bookKey];
                 if (book.genre) genres.add(book.genre);
-                if (book.author) authors.add(book.author);
+                // if (book.author) authors.add(book.author); // Removed
             }
         }
 
@@ -91,16 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        if (filterAuthorEl) {
-            // Clear existing options except "All Authors"
-            while (filterAuthorEl.options.length > 1) filterAuthorEl.remove(1);
-            authors.forEach(author => {
-                const option = document.createElement('option');
-                option.value = author;
-                option.textContent = author;
-                filterAuthorEl.appendChild(option);
-            });
-        }
+        // if (filterAuthorEl) { // Removed
+        //     // Clear existing options except "All Authors"
+        //     while (filterAuthorEl.options.length > 1) filterAuthorEl.remove(1);
+        //     authors.forEach(author => {
+        //         const option = document.createElement('option');
+        //         option.value = author;
+        //         option.textContent = author;
+        //         filterAuthorEl.appendChild(option);
+        //     });
+        // }
     }
 
 
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Get filter values
         const selectedGenre = filterGenreEl ? filterGenreEl.value : 'all';
-        const selectedAuthor = filterAuthorEl ? filterAuthorEl.value : 'all';
+        // const selectedAuthor = filterAuthorEl ? filterAuthorEl.value : 'all'; // Removed
         const selectedLength = filterLengthEl ? filterLengthEl.value : 'all';
         const selectedAvailability = filterAvailabilityEl ? filterAvailabilityEl.value : 'all';
 
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!book) return false;
 
             const matchesGenre = selectedGenre === 'all' || book.genre === selectedGenre;
-            const matchesAuthor = selectedAuthor === 'all' || book.author === selectedAuthor;
+            // const matchesAuthor = selectedAuthor === 'all' || book.author === selectedAuthor; // Removed
             const matchesLength = selectedLength === 'all' || book.lengthCategory === selectedLength;
 
             let matchesAvailability = true;
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
 
-            return matchesGenre && matchesAuthor && matchesLength && matchesAvailability;
+            return matchesGenre && matchesLength && matchesAvailability; // Removed matchesAuthor
         });
 
 
