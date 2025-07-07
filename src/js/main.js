@@ -759,28 +759,36 @@ function applySavedTheme() {
             if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.add('text-gray-400');
             generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-100'));
             generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-400'));
-            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-500', 'hover:bg-purple-600'); // Slightly different dark for button
+            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-500', 'hover:bg-purple-600');
         }
     }
 
     navTabButtons.forEach(button => {
         const isActive = button.classList.contains('active-tab-button');
+        // Expanded list of classes to remove, covering all managed states and their hovers
         button.classList.remove(
-            'bg-blue-600', 'text-white', 'dark:bg-blue-500', 'dark:text-gray-100',
+            // Light Mode Active (also covers initial 'Intro' tab state)
+            'bg-blue-600', 'text-white', 'hover:bg-blue-700',
+            // Dark Mode Active
+            'dark:bg-blue-500', 'dark:text-gray-100', 'dark:hover:bg-blue-600', // Added dark active hover
+            // Light Mode Inactive
             'bg-gray-200', 'text-gray-700', 'hover:bg-gray-300',
-            'dark:bg-gray-700', 'dark:text-gray-300', 'dark:hover:bg-gray-600'
+            // Dark Mode Inactive (covers initial state of other tabs and JS-applied dark inactive)
+            'bg-gray-700', 'text-gray-300', 'hover:bg-gray-600', // Initial HTML for non-active tabs
+            'dark:bg-gray-700', 'dark:text-gray-300', 'dark:hover:bg-gray-600' // JS applied for dark inactive
         );
 
         if (isActive) {
             if (isLight) {
-                button.classList.add('bg-blue-600', 'text-white');
-            } else {
-                button.classList.add('dark:bg-blue-500', 'dark:text-gray-100');
+                button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+            } else { // isDark
+                button.classList.add('dark:bg-blue-500', 'dark:text-gray-100', 'dark:hover:bg-blue-600');
             }
-        } else {
+        } else { // isInactive
             if (isLight) {
                 button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-            } else {
+            } else { // isDark
+                // For dark theme, inactive buttons use dark-prefixed Tailwind classes
                 button.classList.add('dark:bg-gray-700', 'dark:text-gray-300', 'dark:hover:bg-gray-600');
             }
         }
@@ -1031,3 +1039,81 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+// END - This is the end of the file content provided by read_files.
+// The following is the reconstructed applySavedTheme function that I will use to replace the existing one.
+// NOTE: The actual replacement will happen in the overwrite_file_with_block call.
+
+// function applySavedTheme() { // This line is commented out for the block tool
+//     const savedTheme = localStorage.getItem('theme') || 'dark';
+//     const isLight = savedTheme === 'light';
+//     document.body.classList.toggle('light-theme', isLight);
+//     document.body.classList.toggle('dark', !isLight);
+
+//     document.querySelectorAll('.app-container').forEach(c => {
+//         c.classList.toggle('light-theme-container', isLight);
+//         c.classList.toggle('dark-theme-container', !isLight);
+//     });
+
+//     // Explicitly style #pro-upsell-modal elements based on theme (existing logic)
+//     const proModalContentDiv = document.querySelector('#pro-upsell-modal > div');
+//     const proModalTitle = document.querySelector('#pro-upsell-modal h2');
+//     // ... (rest of modal styling logic remains unchanged) ...
+
+//     navTabButtons.forEach(button => {
+//         const isActive = button.classList.contains('active-tab-button');
+
+//         const classesToRemove = [
+//             'bg-blue-600', 'text-white', 'hover:bg-blue-700',
+//             'bg-gray-200', 'text-gray-700', 'hover:bg-gray-300',
+//             'dark:bg-blue-500', 'dark:text-gray-100', 'dark:hover:bg-blue-600',
+//             'bg-gray-700', 'text-gray-300', 'hover:bg-gray-600',
+//             'dark:bg-gray-700', 'dark:text-gray-300', 'dark:hover:bg-gray-600',
+//             'dark:bg-gradient-to-b',
+//             'dark:from-blue-600', 'dark:to-blue-800',
+//             'dark:hover:from-blue-500', 'dark:hover:to-blue-700',
+//             'dark:text-white',
+//             'dark:bg-gray-800', 'dark:text-gray-400',
+//             'dark:hover:bg-gray-700', 'dark:hover:text-gray-300'
+//         ];
+//         if (!isLight) {
+//             classesToRemove.push('text-white');
+//             if (isActive) {
+//                  classesToRemove.push('text-gray-300', 'dark:text-gray-300', 'dark:text-gray-400');
+//             } else {
+//                  classesToRemove.push('text-gray-100', 'dark:text-white');
+//             }
+//         }
+//         button.classList.remove(...[...new Set(classesToRemove)]);
+
+//         if (isActive) {
+//             if (isLight) {
+//                 button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+//             } else { // isDark - NEW ACTIVE DARK GRADIENT STYLES
+//                 button.classList.add(
+//                     'dark:bg-gradient-to-b', 'dark:from-blue-600', 'dark:to-blue-800', 'dark:text-white',
+//                     'dark:hover:from-blue-500', 'dark:hover:to-blue-700'
+//                 );
+//             }
+//         } else { // isInactive
+//             if (isLight) {
+//                 button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+//             } else { // isDark - NEW INACTIVE DARK STYLES
+//                 button.classList.add(
+//                     'dark:bg-gray-800', 'dark:text-gray-400',
+//                     'dark:hover:bg-gray-700', 'dark:hover:text-gray-300'
+//                 );
+//             }
+//         }
+//     });
+
+//     if (morseReferenceBody) {
+//          morseReferenceBody.querySelectorAll('.border-b').forEach(el => {
+//             el.classList.toggle('border-gray-300', isLight);
+//             el.classList.toggle('dark:border-gray-700', !isLight);
+//          });
+//     }
+//     if (toggleThemeBtn) {
+//         toggleThemeBtn.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+//     }
+// } // This line is commented out for the block tool
+[end of src/js/main.js]
