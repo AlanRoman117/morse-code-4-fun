@@ -323,18 +323,18 @@ function showTab(tabIdToShow) {
     }
 
     if (tabIdToShow === 'book-cipher-tab') {
-        console.log(`[showTab] Target is 'book-cipher-tab'. Checking for library functions.`);
-        if (typeof populateFilterDropdowns === 'function') {
-            console.log(`[showTab] Calling populateFilterDropdowns for book-cipher-tab.`);
-            populateFilterDropdowns();
+        console.log(`[showTab] Target is 'book-cipher-tab'. Checking for library functions on window object.`);
+        if (typeof window.populateFilterDropdowns === 'function') {
+            console.log(`[showTab] Calling window.populateFilterDropdowns for book-cipher-tab.`);
+            window.populateFilterDropdowns();
         } else {
-            console.warn(`[showTab] populateFilterDropdowns function not found for book-cipher-tab.`);
+            console.warn(`[showTab] window.populateFilterDropdowns function not found for book-cipher-tab.`);
         }
-        if (typeof populateBookLibrary === 'function') {
-            console.log(`[showTab] Calling populateBookLibrary for book-cipher-tab.`);
-            populateBookLibrary();
+        if (typeof window.populateBookLibrary === 'function') {
+            console.log(`[showTab] Calling window.populateBookLibrary for book-cipher-tab.`);
+            window.populateBookLibrary();
         } else {
-            console.warn(`[showTab] populateBookLibrary function not found for book-cipher-tab.`);
+            console.warn(`[showTab] window.populateBookLibrary function not found for book-cipher-tab.`);
         }
     }
 

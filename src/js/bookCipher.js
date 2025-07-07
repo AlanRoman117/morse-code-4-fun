@@ -972,6 +972,11 @@ if (typeof attachTapperToArea === 'function') {
     // Set the initial view to the library
     showBookLibraryView();
 
+    // Expose functions to global scope for main.js to call
+    window.populateBookLibrary = populateBookLibrary;
+    window.populateFilterDropdowns = populateFilterDropdowns;
+    console.log('[bookCipher.js] populateBookLibrary and populateFilterDropdowns exposed to window.');
+
     // --- Fireworks Function ---
     function launchFireworks() {
         const duration = 5 * 1000; // 5 seconds
