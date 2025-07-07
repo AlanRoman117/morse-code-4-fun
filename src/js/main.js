@@ -434,55 +434,11 @@ async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowI
     let mediumGap = unitDur * 7;     // Space between words (for '/')
 
     if (overallSpeedWpm < charSpeedWpm) { // Farnsworth timing applies
-        // Standard definition of Farnsworth: character speed (dits/dahs) is maintained.
-        // The extra spacing is added between characters and between words.
-        // Word "PARIS" has 50 units. Time for PARIS at charSpeedWpm = 50 * (1.2 / charSpeedWpm)
-        // Total time for a "standard word" at overallSpeedWpm = 60 / overallSpeedWpm
-        // The difference is the extra space to be distributed.
-        // A common way: T_char_eff = (60 / overallSpeedWpm) * (L_char / L_std_word)
-        // T_word_eff = (60 / overallSpeedWpm) * (L_word / L_std_word)
-        // This is complex. Simpler: stretch the spaces.
-        // Let C = charSpeedWpm, F = overallSpeedWpm.
-        // Time for 1 dit at speed C = 1.2/C.
-        // If F < C, then spaces are longer.
-        // Ratio of total time for a word: C/F.
-        // Standard space durations are 1 (intra-char), 3 (inter-char), 7 (inter-word) units of (1.2/C)
-        // The "silent" parts of these are 1, 2, 6 units respectively (if we consider the preceding sound).
-        // Or, more simply, the silent period after a char before the next one starts.
-        // Let's use the "PARIS" method. A standard word is 50 units long.
-        // Time for PARIS at charSpeedWpm: T_paris_char = 50 * (1.2 / charSpeedWpm).
-        // Expected time for PARIS at overallSpeedWpm: T_paris_farns = 60 / overallSpeedWpm.
-        // Extra time per standard word = T_paris_farns - T_paris_char.
-        // Assume PARIS has 5 letters, so 4 inter-character spaces.
-        // Extra time per inter-character space = (T_paris_farns - T_paris_char) / 4. (This is one model)
-        // So, shortGap = 3 * unitDur + extra_time_per_inter_char_space.
-        // And mediumGap = 7 * unitDur + extra_time_per_word_space (maybe also scaled).
-
-        // Simpler Farnsworth: Scale spaces to achieve the target overall WPM.
-        // Character elements are sent at `charSpeedWpm`.
-        // The spaces between characters and words are lengthened.
-        // The factor 'k' by which the "silent" parts of spaces are stretched:
-        // Effective character duration (including its trailing space) is what matters.
-        // Let T_dot = 1.2 / charSpeedWpm.
-        // Standard character: average 5 dots (e.g. E=1, T=3, A=6, O=9, M=7, avg ~5). Plus 3 dots space. Total 8 dots.
-        // Standard word: 5 chars. 5 * (5+3) - 3 (no space after last char) + 7 (word space) = 40 - 3 + 7 = 44 units. (This varies by definition, "PARIS" is 50).
-        // Let's use a ratio method for space extension:
         const spaceExtensionRatio = charSpeedWpm / overallSpeedWpm;
         if (spaceExtensionRatio > 1) {
-            // Only extend the silent part of the gap.
-            // Standard inter-char gap is 3 units. Sound + 2 units silence. Extend the 2 units.
-            // Standard word gap is 7 units. Sound + 6 units silence. Extend the 6 units.
-            // This is still tricky. Let's use a widely cited Farnsworth formula:
-            // T_dot = 1.2 / Wc (Wc = char speed)
-            // T_farns_char_space = ( (60/Wf) - ( (Ls/Lw) * (60/Wc) ) ) / ( (Nc-1)/Lw )
-            // Wf = Farnsworth speed, Ls = total dits in avg word, Lw = total elements in avg word, Nc=num chars
-            // This is too complex for here.
-            // Simple approach: make inter-character and inter-word spaces longer.
-            // The "effective" duration of a dot for spacing calculations becomes (1.2 / overallSpeedWpm).
             let spacingUnitDur = 1.2 / overallSpeedWpm;
             shortGap = spacingUnitDur * 3;
             mediumGap = spacingUnitDur * 7;
-            // But the actual dits/dahs play at `unitDur` (based on charSpeedWpm)
         }
     }
 
@@ -492,7 +448,7 @@ async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowI
         if (stopMorseCode) break;
         const char = morse[i];
         let durationToPlay = 0;
-        let silenceAfterElement = interElementDelay; // Default silence after a dit or dah within a char
+        let silenceAfterElement = interElementDelay;
 
         switch (char) {
             case '.':
@@ -501,13 +457,13 @@ async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowI
             case '-':
                 durationToPlay = unitDur * 3;
                 break;
-            case ' ': // Morse space: implies end of a character, start of inter-character gap
-                durationToPlay = 0; // No sound
-                silenceAfterElement = shortGap - interElementDelay; // Subtract the already accounted for inter-element space
+            case ' ':
+                durationToPlay = 0;
+                silenceAfterElement = shortGap - interElementDelay;
                 break;
-            case '/': // Morse slash: implies end of a word, start of inter-word gap
-                durationToPlay = 0; // No sound
-                silenceAfterElement = mediumGap - interElementDelay; // Subtract inter-element, assume previous was a char end
+            case '/':
+                durationToPlay = 0;
+                silenceAfterElement = mediumGap - interElementDelay;
                 break;
         }
 
@@ -517,20 +473,16 @@ async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowI
             if (elementToGlow) elementToGlow.classList.remove('active');
         }
 
-        // Determine if it's the last element of a character or word
         const isLastElementOfChar = (i < morse.length - 1 && (morse[i+1] === ' ' || morse[i+1] === '/'));
         const isLastElementOverall = (i === morse.length - 1);
 
-        if (!isLastElementOfChar && !isLastElementOverall && durationToPlay > 0) { // If it's a dit/dah within a char
+        if (!isLastElementOfChar && !isLastElementOverall && durationToPlay > 0) {
              await delay(interElementDelay);
-        } else if (silenceAfterElement > 0 && (char === ' ' || char === '/')) { // If it's a space character from Morse string
+        } else if (silenceAfterElement > 0 && (char === ' ' || char === '/')) {
             await delay(silenceAfterElement);
-        } else if (isLastElementOfChar && durationToPlay > 0) { // End of char, but not end of sequence
-            // The next char will be ' ' or '/', which handles the longer gap.
-            // So, just the standard inter-element delay here.
+        } else if (isLastElementOfChar && durationToPlay > 0) {
             await delay(interElementDelay);
         }
-        // No delay after the very last element of the sequence.
     }
 
     if (!stopMorseCode) {
@@ -538,7 +490,7 @@ async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowI
       if(stopMorseBtn) stopMorseBtn.disabled = true;
     }
     isPlaying = false;
-    if (elementToGlow) elementToGlow.classList.remove('active'); // Ensure glow is off if stopped early
+    if (elementToGlow) elementToGlow.classList.remove('active');
     if (oscillator && !stopMorseCode) {
         try { oscillator.stop(); } catch(e) {/* ignore */}
         oscillator.disconnect();
@@ -548,7 +500,7 @@ async function playMorseSequence(morse, customDotDur, customFreq, elementToGlowI
 
 function playTone(freq, durationSeconds) {
     return new Promise((resolve) => {
-        if (!audioContext) initAudio(); // Attempt to init if not already
+        if (!audioContext) initAudio();
         if (!audioContext || audioContext.state === 'closed') {
             console.warn("AudioContext not available or closed for playTone.");
             resolve();
@@ -562,19 +514,17 @@ function playTone(freq, durationSeconds) {
         currentOscillator.type = 'sine';
         currentOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
 
-        if (!gainNode) { // Should be created by initAudio
+        if (!gainNode) {
             gainNode = audioContext.createGain();
             gainNode.connect(audioContext.destination);
         }
 
         currentOscillator.connect(gainNode);
-        // Ramp up gain quickly to avoid clicks
         gainNode.gain.setValueAtTime(0, audioContext.currentTime);
         gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.005);
 
         currentOscillator.start(audioContext.currentTime);
 
-        // Ramp down gain before stopping to avoid clicks
         gainNode.gain.setValueAtTime(1, audioContext.currentTime + durationSeconds - 0.005);
         gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + durationSeconds);
 
@@ -586,7 +536,7 @@ function playTone(freq, durationSeconds) {
             } catch(e) {/* ignore if already disconnected */}
             resolve();
         };
-        oscillator = currentOscillator; // Store reference to current oscillator for stop button
+        oscillator = currentOscillator;
     });
 }
 
@@ -596,23 +546,18 @@ function delay(durationSeconds) {
 
 function populateMorseReference() {
     if (!morseReferenceBody) {
-        // console.error("Morse reference body not found!"); // Log removed
         return;
     }
-    morseReferenceBody.innerHTML = ''; // Clear existing content
-    // console.log("Populating Morse Reference Table..."); // Log removed
+    morseReferenceBody.innerHTML = '';
 
     const entries = Object.entries(morseCode);
     const numEntries = entries.length;
-    // console.log(`Total Morse code entries: ${numEntries}`); // Log removed
 
     const isDesktop = window.matchMedia('(min-width: 768px)').matches;
-    const pairsPerRow = isDesktop ? 4 : 2; // Number of (Char, Morse) pairs per row
-    // console.log(`Screen isDesktop: ${isDesktop}, Pairs per row: ${pairsPerRow}`); // Log removed
+    const pairsPerRow = isDesktop ? 4 : 2;
 
     for (let i = 0; i < numEntries; i += pairsPerRow) {
         const tr = document.createElement('tr');
-        // console.log(`Starting new row (i=${i})`); // Log removed
         for (let j = 0; j < pairsPerRow; j++) {
             const entryIndex = i + j;
             if (entryIndex < numEntries) {
@@ -639,23 +584,18 @@ function populateMorseReference() {
                 else if (char === '$') idChar = 'Dollar';
                 else if (char === '@') idChar = 'AtSign';
                 else if (char === ' ') idChar = 'Space';
-                // No generic fallback needed as we only use valid chars from morseCode keys
 
                 const tdChar = document.createElement('td');
                 tdChar.textContent = char;
                 tdChar.id = `ref-char-${idChar}`;
                 tr.appendChild(tdChar);
-                // console.log(`  Added Char: ${char} (id: ref-char-${idChar}) to row ${i}, pair index j=${j}`); // Log removed
 
                 const tdMorse = document.createElement('td');
                 tdMorse.textContent = code;
                 tdMorse.id = `ref-morse-${idChar}`;
                 tdMorse.classList.add('font-mono');
                 tr.appendChild(tdMorse);
-                // console.log(`  Added Morse: ${code} (id: ref-morse-${idChar}) for char ${char}`); // Log removed
             } else {
-                // Add two empty cells for each missing pair to maintain table structure
-                // console.log(`  Adding empty cells for pair index j=${j} in row i=${i} as entryIndex ${entryIndex} >= numEntries`); // Log removed
                 const tdCharEmpty = document.createElement('td');
                 tdCharEmpty.innerHTML = '&nbsp;';
                 tr.appendChild(tdCharEmpty);
@@ -665,35 +605,24 @@ function populateMorseReference() {
             }
         }
         morseReferenceBody.appendChild(tr);
-        // console.log(`Finished row (i=${i}), appended to table body.`); // Log removed
     }
-    // console.log("Finished populating Morse Reference Table."); // Log removed
-    // applySavedTheme will be called by showTab or initial load, or by theme toggle.
-    // We might need to explicitly call it here if the table borders are not themed correctly initially.
-    // However, the cell content theming (text color) should be inherited.
-    // The borders are on .reference-table th, .reference-table td in CSS, so they should be fine.
-    // Let's test without explicit applySavedTheme here first.
 }
 
 function applySavedTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     const isLight = savedTheme === 'light';
-    // console.log('[applySavedTheme] Theme from localStorage:', savedTheme, '| isLight:', isLight);
-
-    // console.log('[applySavedTheme] document.body.classList BEFORE:', document.body.classList.toString());
     document.body.classList.toggle('light-theme', isLight);
     document.body.classList.toggle('dark', !isLight);
-    // console.log('[applySavedTheme] document.body.classList AFTER:', document.body.classList.toString());
 
     document.querySelectorAll('.app-container').forEach(c => {
         c.classList.toggle('light-theme-container', isLight);
         c.classList.toggle('dark-theme-container', !isLight);
     });
 
-    // Explicitly style #pro-upsell-modal elements based on theme
-    const proModalContentDiv = document.querySelector('#pro-upsell-modal > div'); // The main content box
+    // Explicitly style #pro-upsell-modal elements based on theme (existing logic)
+    const proModalContentDiv = document.querySelector('#pro-upsell-modal > div');
     const proModalTitle = document.querySelector('#pro-upsell-modal h2');
-    const proModalParagraph = document.querySelector('#pro-upsell-modal p'); // Assuming first p is the main one
+    const proModalParagraph = document.querySelector('#pro-upsell-modal p');
     const proModalBenefitsTitle = document.querySelector('#pro-upsell-modal h3');
     const proModalBenefitsList = document.querySelector('#pro-upsell-modal ul');
     const proModalCloseButton = document.getElementById('close-pro-upsell-modal-top');
@@ -723,30 +652,26 @@ function applySavedTheme() {
         }
     }
 
-    // Aggressively style the general #upsell-modal
-    const generalUpsellModalContentDiv = document.querySelector('#upsell-modal > div'); // Main content box
+    const generalUpsellModalContentDiv = document.querySelector('#upsell-modal > div');
     const generalUpsellModalTitle = document.querySelector('#upsell-modal h2.text-purple-600');
     const generalUpsellModalParagraph = document.querySelector('#upsell-modal p.text-lg.mb-4');
-    const generalUpsellModalList = document.querySelector('#upsell-modal ul.list-disc'); // The UL element itself
-    const generalUpsellModalListItems = document.querySelectorAll('#upsell-modal ul li'); // All LIs for text color
+    const generalUpsellModalList = document.querySelector('#upsell-modal ul.list-disc');
+    const generalUpsellModalListItems = document.querySelectorAll('#upsell-modal ul li');
     const generalUpsellModalListSvgs = document.querySelectorAll('#upsell-modal ul li svg.text-green-500');
     const generalUpsellModalCloseBtn = document.getElementById('close-upsell-modal-btn');
     const generalUpsellModalSmallText = document.querySelector('#upsell-modal p.text-xs.text-gray-500');
     const generalUpsellModalUpgradeBtn = document.getElementById('upgrade-to-pro-btn');
 
-
     if (generalUpsellModalContentDiv) {
-        // Remove Tailwind's dark context class and specific color/bg classes before applying new ones
-        generalUpsellModalContentDiv.classList.remove('dark', 'bg-white', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-100'); // Added dark specific from potential tailwind config
+        generalUpsellModalContentDiv.classList.remove('dark', 'bg-white', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-100');
         if (generalUpsellModalTitle) generalUpsellModalTitle.classList.remove('text-purple-600', 'dark:text-purple-400');
         if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.remove('text-gray-800', 'dark:text-gray-100');
-        if (generalUpsellModalList) generalUpsellModalList.classList.remove('text-gray-800', 'dark:text-gray-100'); // For general list text if not on LIs
+        if (generalUpsellModalList) generalUpsellModalList.classList.remove('text-gray-800', 'dark:text-gray-100');
         if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.remove('text-gray-600', 'hover:text-gray-800', 'dark:text-gray-300', 'dark:hover:text-gray-100');
         if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.remove('text-gray-500', 'dark:text-gray-400');
         generalUpsellModalListItems.forEach(li => li.classList.remove('text-gray-800', 'dark:text-gray-100'));
         generalUpsellModalListSvgs.forEach(svg => svg.classList.remove('text-green-500', 'dark:text-green-400'));
         if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.remove('bg-purple-600', 'hover:bg-purple-700', 'dark:bg-purple-500', 'dark:hover:bg-purple-600');
-
 
         if (isLight) {
             generalUpsellModalContentDiv.classList.add('bg-white', 'text-gray-800');
@@ -755,12 +680,11 @@ function applySavedTheme() {
             if (generalUpsellModalList) generalUpsellModalList.classList.add('text-gray-800');
             if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.add('text-gray-600', 'hover:text-gray-800');
             if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.add('text-gray-500');
-            generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-800')); // Text color for li content
+            generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-800'));
             generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-500'));
             if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-
         } else { // isDark
-            generalUpsellModalContentDiv.classList.add('dark', 'bg-gray-700', 'text-gray-100'); // Example dark theme for this modal
+            generalUpsellModalContentDiv.classList.add('dark', 'bg-gray-700', 'text-gray-100');
             if (generalUpsellModalTitle) generalUpsellModalTitle.classList.add('text-purple-400');
             if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.add('text-gray-100');
             if (generalUpsellModalList) generalUpsellModalList.classList.add('text-gray-100');
@@ -768,32 +692,85 @@ function applySavedTheme() {
             if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.add('text-gray-400');
             generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-100'));
             generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-400'));
-            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-500', 'hover:bg-purple-600'); // Slightly different dark for button
+            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-500', 'hover:bg-purple-600');
         }
     }
 
+    // START of updated navTabButtons styling logic
     navTabButtons.forEach(button => {
         const isActive = button.classList.contains('active-tab-button');
-        button.classList.remove(
-            'bg-blue-600', 'text-white', 'dark:bg-blue-500', 'dark:text-gray-100',
+
+        const classesToRemove = [
+            // Light Mode Active (NEW: bg-blue-700, hover:bg-blue-800)
+            'bg-blue-600', 'hover:bg-blue-700', // Old light active bg/hover
+            'bg-blue-700', 'text-white', 'hover:bg-blue-800', // New light active bg/text/hover
+            // Light Mode Inactive
             'bg-gray-200', 'text-gray-700', 'hover:bg-gray-300',
-            'dark:bg-gray-700', 'dark:text-gray-300', 'dark:hover:bg-gray-600'
-        );
+
+            // Old Dark Mode Active
+            'dark:bg-blue-500', 'dark:text-gray-100', 'dark:hover:bg-blue-600',
+
+            // Old Dark Mode Inactive (covers initial HTML of non-intro tabs & previous JS applied dark inactive)
+            'bg-gray-700',
+            'text-gray-300',
+            'hover:bg-gray-600',
+            'dark:bg-gray-700',
+            'dark:text-gray-300',
+            'dark:hover:bg-gray-600',
+
+            // New Dark Mode Gradient/Specific Classes to ensure they are cleared
+            'dark:bg-gradient-to-b',
+            'dark:from-blue-600', 'dark:to-blue-800',
+            'dark:hover:from-blue-500', 'dark:hover:to-blue-700',
+            // 'dark:text-white', // This will be added for active dark, removing it if it was somehow on inactive
+            'dark:bg-gray-800', 'dark:text-gray-400',
+            'dark:hover:bg-gray-700', 'dark:hover:text-gray-300'
+        ];
+
+        // Specific text color removals to prevent conflicts
+        if (!isLight) { // Only when preparing for dark theme styles
+            classesToRemove.push('text-white'); // from light active
+            classesToRemove.push('text-gray-700'); // from light inactive
+            // classesToRemove.push('dark:text-gray-100'); // from old dark active (already covered by dark:text-white if it was the same)
+                                                    // or if it was different, needs to be added.
+                                                    // Let's assume dark:text-white is the new standard for dark active.
+                                                    // And dark:text-gray-400 for new dark inactive.
+            if(isActive) { // if going to be dark active, remove any inactive dark text variants
+                classesToRemove.push('dark:text-gray-300', 'dark:text-gray-400');
+            } else { // if going to be dark inactive, remove any active dark text variants
+                classesToRemove.push('dark:text-white', 'dark:text-gray-100');
+            }
+
+        } else { // Only when preparing for light theme styles
+             classesToRemove.push('dark:text-white'); // from new dark active
+             classesToRemove.push('dark:text-gray-400'); // from new dark inactive
+             classesToRemove.push('dark:text-gray-300'); // from new dark inactive hover
+             classesToRemove.push('dark:text-gray-100'); // from old dark active
+        }
+
+        button.classList.remove(...[...new Set(classesToRemove)]);
 
         if (isActive) {
             if (isLight) {
-                button.classList.add('bg-blue-600', 'text-white');
-            } else {
-                button.classList.add('dark:bg-blue-500', 'dark:text-gray-100');
+                button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+            } else { // isDark - NEW ACTIVE DARK GRADIENT STYLES
+                button.classList.add(
+                    'dark:bg-gradient-to-b', 'dark:from-blue-600', 'dark:to-blue-800', 'dark:text-white',
+                    'dark:hover:from-blue-500', 'dark:hover:to-blue-700'
+                );
             }
-        } else {
+        } else { // isInactive
             if (isLight) {
                 button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-            } else {
-                button.classList.add('dark:bg-gray-700', 'dark:text-gray-300', 'dark:hover:bg-gray-600');
+            } else { // isDark - NEW INACTIVE DARK STYLES
+                button.classList.add(
+                    'dark:bg-gray-800', 'dark:text-gray-400',
+                    'dark:hover:bg-gray-700', 'dark:hover:text-gray-300'
+                );
             }
         }
     });
+    // END of updated navTabButtons styling logic
 
     if (morseReferenceBody) {
          morseReferenceBody.querySelectorAll('.border-b').forEach(el => {
@@ -888,55 +865,28 @@ if (closeUpsellModalBtn) { // General close button
 }
 if (upgradeToProBtn) { // General upgrade button
     upgradeToProBtn.addEventListener('click', () => {
-        // console.log('[upgradeToProBtn] Clicked. Current window.isProUser:', window.isProUser);
         window.isProUser = true;
         localStorage.setItem('isProUser', 'true');
-        // console.log('[upgradeToProBtn] window.isProUser set to true.');
-
         if (typeof window.initializeKochMethod === 'function') {
-            // console.log('[upgradeToProBtn] Calling initializeKochMethod.');
             window.initializeKochMethod();
         }
-        // console.log('[upgradeToProBtn] Calling updateGoProButtonUI.');
         updateGoProButtonUI();
-
-        // console.log('[upgradeToProBtn] Hiding modals.');
         hideUpsellModal();
         hideBookProUpsellModal();
-
         const currentTab = localStorage.getItem('lastTab');
-        // console.log('[upgradeToProBtn] currentTab from localStorage:', currentTab);
-
         if(currentTab) {
-            // console.log('[upgradeToProBtn] Calling showTab with currentTab:', currentTab);
             showTab(currentTab);
-        } else {
-            // console.log('[upgradeToProBtn] No currentTab found in localStorage. Not calling showTab.');
         }
-        // console.log('[upgradeToProBtn] Listener finished.');
     });
 }
 
 // --- Book Cipher Specific Pro Upsell Modal Logic ---
 function showBookProUpsellModal() {
-    // console.log('[showBookProUpsellModal] Called.');
     if (bookProUpsellModal && !window.isProUser) {
-        // console.log('[showBookProUpsellModal] Modal element found, user is not Pro. Attempting to show modal.');
-        // console.log('[showBookProUpsellModal] document.body.classList:', document.body.classList.toString());
-        // const proUpsellModalContent = document.querySelector('#pro-upsell-modal > div');
-        // if (proUpsellModalContent) {
-            // console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) classList:', proUpsellModalContent.classList.toString());
-        // } else {
-            // console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) NOT found at time of show.');
-        // }
         bookProUpsellModal.classList.remove('hidden');
-    } else if (!bookProUpsellModal) {
-        // console.log('[showBookProUpsellModal] Modal element (bookProUpsellModal) NOT found.');
-    } else if (window.isProUser) {
-        // console.log('[showBookProUpsellModal] User is Pro, modal not shown.');
     }
 }
-window.showBookProUpsellModal = showBookProUpsellModal; // Expose to global for bookCipher.js
+window.showBookProUpsellModal = showBookProUpsellModal;
 
 function hideBookProUpsellModal() {
     if (bookProUpsellModal) {
@@ -952,8 +902,8 @@ if (bookReturnToLibraryBtn) {
 }
 if (bookGoProBtn) {
     bookGoProBtn.addEventListener('click', () => {
-        hideBookProUpsellModal(); // Hide this specific modal first
-        showUpsellModal();      // Then show the general one that has the "purchase" button
+        hideBookProUpsellModal();
+        showUpsellModal();
     });
 }
 
@@ -979,7 +929,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         showTab('introduction-tab'); // Default tab
     }
-    // Ensure durations are correct based on potentially loaded slider values
     updateDurations();
 });
 
@@ -987,24 +936,18 @@ document.addEventListener('DOMContentLoaded', () => {
 window.textToMorse = textToMorse;
 window.playMorseSequence = playMorseSequence;
 window.initAudio = initAudio;
-// morseToText is already on window, morseCode and reversedMorseCode are also already on window.
 
 // Event Listeners for I/O Tab Tapper Controls
 document.addEventListener('DOMContentLoaded', () => {
     const playIoTappedMorseBtn = document.getElementById('play-io-tapped-morse-btn');
     const clearIoTapperInputBtn = document.getElementById('clear-io-tapper-input-btn');
-    const tapperMorseOutput = document.getElementById('tapperMorseOutput'); // Shared tapper output
+    const tapperMorseOutput = document.getElementById('tapperMorseOutput');
 
     if (playIoTappedMorseBtn) {
         playIoTappedMorseBtn.addEventListener('click', async () => {
             const morseOutputOnTapper = tapperMorseOutput ? tapperMorseOutput.textContent : "";
             if (morseOutputOnTapper && morseOutputOnTapper.trim() !== '') {
-                // We don't need to convert to Morse, it's already Morse.
-                // We need to ensure it's in the correct spaced format for playMorseSequence.
-                // VisualTapper's tapperMorseOutput is already character-by-character Morse, spaces between.
-                // If it's from "decoded" text, it would need conversion.
-                // For now, assume tapperMorseOutput.textContent is playable Morse.
-                initAudio(); // Ensure audio context is ready
+                initAudio();
                 await playMorseSequence(morseOutputOnTapper.trim(), null, null, 'tapper', 'play-io-tapped-morse-btn');
             }
         });
@@ -1013,16 +956,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clearIoTapperInputBtn) {
         clearIoTapperInputBtn.addEventListener('click', () => {
             if (typeof resetVisualTapperState === 'function') {
-                resetVisualTapperState(); // This should clear tapperMorseOutput and internal states
+                resetVisualTapperState();
             }
-            // Also explicitly disable the play button for I/O tapper
             if (playIoTappedMorseBtn) {
                 playIoTappedMorseBtn.disabled = true;
             }
         });
     }
 
-    // Observer to enable/disable the play-io-tapped-morse-btn based on tapperMorseOutput content
     if (tapperMorseOutput && playIoTappedMorseBtn) {
         const observer = new MutationObserver(() => {
             if (tapperMorseOutput.textContent && tapperMorseOutput.textContent.trim() !== '') {
@@ -1032,7 +973,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         observer.observe(tapperMorseOutput, { childList: true, characterData: true, subtree: true });
-        // Initial check
         if (tapperMorseOutput.textContent && tapperMorseOutput.textContent.trim() !== '') {
             playIoTappedMorseBtn.disabled = false;
         } else {

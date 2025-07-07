@@ -58,6 +58,7 @@ body {
         .active-tab-button {
             font-weight: 600; /* Tailwind semibold */
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2); /* Subtle cue for dark mode */
         }
         .tab-content {
             width: 100%; /* Ensure it spans the full width available */
@@ -151,23 +152,27 @@ body {
         /* General light theme adjustments for Tailwind classes */
         .light-theme nav button,
         .light-theme-container nav button {
-            background-color: #e5e7eb; /* gray-200 */
-            color: #374151; /* gray-700 */
+            /* Default styles for nav buttons in light theme are handled by applySavedTheme in JS */
+            /* background-color: #e5e7eb; /* gray-200 */
+            /* color: #374151; /* gray-700 */
         }
         .light-theme nav button:hover,
         .light-theme-container nav button:hover {
-            background-color: #d1d5db; /* gray-300 */
+            /* Hover styles for nav buttons in light theme are handled by applySavedTheme in JS */
+            /* background-color: #d1d5db; /* gray-300 */
         }
+        /* Styles for active-tab-button in light mode are now fully managed by applySavedTheme in main.js
+           to ensure JavaScript is the single source of truth for dynamic Tailwind classes.
         .light-theme nav button.active-tab-button,
         .light-theme-container nav button.active-tab-button {
-            background-color: #3b82f6; /* blue-500 */
-            color: #ffffff; /* white */
+            background-color: #3b82f6;
+            color: #ffffff;
         }
         .light-theme nav button.active-tab-button:hover,
         .light-theme-container nav button.active-tab-button:hover {
-            background-color: #2563eb; /* blue-600 */
+            background-color: #2563eb;
         }
-
+        */
 
         .light-theme .input-output-box,
         .light-theme-container .input-output-box {
@@ -184,9 +189,15 @@ body {
         .light-theme-container .text-gray-400 {
              color: #374151 !important; /* Tailwind gray-700, !important to override Tailwind if needed */
         }
-        .light-theme .text-white, /* For elements that are explicitly text-white in dark mode */
+        /* General rule for .text-white in light theme (makes it dark gray) */
+        .light-theme .text-white,
         .light-theme-container .text-white {
             color: #1f2937 !important; /* Tailwind gray-800 */
+        }
+        /* Specific override for active nav buttons in light theme to ensure their text is white */
+        .light-theme nav > button.active-tab-button,
+        .light-theme-container nav > button.active-tab-button {
+            color: #FFFFFF !important; /* Actual white */
         }
 
         .light-theme .section-title,
