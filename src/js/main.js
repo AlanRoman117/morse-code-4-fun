@@ -613,12 +613,12 @@ function populateMorseReference() {
 function applySavedTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     const isLight = savedTheme === 'light';
-    console.log('[applySavedTheme] Theme from localStorage:', savedTheme, '| isLight:', isLight);
+    // console.log('[applySavedTheme] Theme from localStorage:', savedTheme, '| isLight:', isLight);
 
-    console.log('[applySavedTheme] document.body.classList BEFORE:', document.body.classList.toString());
+    // console.log('[applySavedTheme] document.body.classList BEFORE:', document.body.classList.toString());
     document.body.classList.toggle('light-theme', isLight);
     document.body.classList.toggle('dark', !isLight);
-    console.log('[applySavedTheme] document.body.classList AFTER:', document.body.classList.toString());
+    // console.log('[applySavedTheme] document.body.classList AFTER:', document.body.classList.toString());
 
     document.querySelectorAll('.app-container').forEach(c => {
         c.classList.toggle('light-theme-container', isLight);
@@ -632,13 +632,10 @@ function applySavedTheme() {
     const proModalBenefitsTitle = document.querySelector('#pro-upsell-modal h3');
     const proModalBenefitsList = document.querySelector('#pro-upsell-modal ul');
     const proModalCloseButton = document.getElementById('close-pro-upsell-modal-top');
-    // Buttons are trickier as their base and dark styles are more complex, relying on Tailwind's dark: prefix.
-    // We'll focus on text and backgrounds primarily. The existing button classes should work if the overall .dark context is set.
 
     if (proModalContentDiv) {
-        console.log('[applySavedTheme] Aggressively styling #pro-upsell-modal elements. isLight:', isLight);
+        // console.log('[applySavedTheme] Aggressively styling #pro-upsell-modal elements. isLight:', isLight);
 
-        // Remove all potentially conflicting classes first for cleaner application
         proModalContentDiv.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-white', 'dark');
         if (proModalTitle) proModalTitle.classList.remove('text-yellow-600', 'dark:text-yellow-400');
         if (proModalParagraph) proModalParagraph.classList.remove('text-gray-600', 'dark:text-gray-300');
@@ -654,7 +651,6 @@ function applySavedTheme() {
             if (proModalBenefitsList) proModalBenefitsList.classList.add('text-gray-600');
             if (proModalCloseButton) proModalCloseButton.classList.add('text-gray-500', 'hover:text-gray-700');
         } else { // isDark
-            // Add the 'dark' class to the content div to help Tailwind's dark: variants for buttons if they are still used.
             proModalContentDiv.classList.add('dark', 'bg-gray-800', 'text-white');
             if (proModalTitle) proModalTitle.classList.add('text-yellow-400');
             if (proModalParagraph) proModalParagraph.classList.add('text-gray-300');
@@ -662,9 +658,9 @@ function applySavedTheme() {
             if (proModalBenefitsList) proModalBenefitsList.classList.add('text-gray-300');
             if (proModalCloseButton) proModalCloseButton.classList.add('text-gray-400', 'dark:hover:text-white');
         }
-        console.log('[applySavedTheme] Modal content classList AFTER aggressive styling:', proModalContentDiv.classList.toString());
+        // console.log('[applySavedTheme] Modal content classList AFTER aggressive styling:', proModalContentDiv.classList.toString());
     } else {
-        console.log('[applySavedTheme] #pro-upsell-modal > div NOT found for aggressive styling.');
+        // console.log('[applySavedTheme] #pro-upsell-modal > div NOT found for aggressive styling.');
     }
 
     navTabButtons.forEach(button => {
@@ -798,21 +794,21 @@ if (upgradeToProBtn) { // General upgrade button
 
 // --- Book Cipher Specific Pro Upsell Modal Logic ---
 function showBookProUpsellModal() {
-    console.log('[showBookProUpsellModal] Called.');
+    // console.log('[showBookProUpsellModal] Called.');
     if (bookProUpsellModal && !window.isProUser) {
-        console.log('[showBookProUpsellModal] Modal element found, user is not Pro. Attempting to show modal.');
-        console.log('[showBookProUpsellModal] document.body.classList:', document.body.classList.toString());
-        const proUpsellModalContent = document.querySelector('#pro-upsell-modal > div');
-        if (proUpsellModalContent) {
-            console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) classList:', proUpsellModalContent.classList.toString());
-        } else {
-            console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) NOT found at time of show.');
-        }
+        // console.log('[showBookProUpsellModal] Modal element found, user is not Pro. Attempting to show modal.');
+        // console.log('[showBookProUpsellModal] document.body.classList:', document.body.classList.toString());
+        // const proUpsellModalContent = document.querySelector('#pro-upsell-modal > div');
+        // if (proUpsellModalContent) {
+            // console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) classList:', proUpsellModalContent.classList.toString());
+        // } else {
+            // console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) NOT found at time of show.');
+        // }
         bookProUpsellModal.classList.remove('hidden');
     } else if (!bookProUpsellModal) {
-        console.log('[showBookProUpsellModal] Modal element (bookProUpsellModal) NOT found.');
+        // console.log('[showBookProUpsellModal] Modal element (bookProUpsellModal) NOT found.');
     } else if (window.isProUser) {
-        console.log('[showBookProUpsellModal] User is Pro, modal not shown.');
+        // console.log('[showBookProUpsellModal] User is Pro, modal not shown.');
     }
 }
 window.showBookProUpsellModal = showBookProUpsellModal; // Expose to global for bookCipher.js
