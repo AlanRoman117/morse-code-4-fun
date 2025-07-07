@@ -292,11 +292,19 @@ function detachSharedTapper() {
 }
 
 function showTab(tabIdToShow) {
+    console.log(`[showTab] Called with tabIdToShow: ${tabIdToShow}`);
     detachSharedTapper();
     tabContentDivs.forEach(div => div.classList.add('hidden'));
 
     const selectedTabContent = document.getElementById(tabIdToShow);
-    if (selectedTabContent) selectedTabContent.classList.remove('hidden');
+    if (selectedTabContent) {
+        selectedTabContent.classList.remove('hidden');
+        console.log(`[showTab] Made tab ${tabIdToShow} visible.`);
+    } else {
+        console.warn(`[showTab] Tab content not found for ${tabIdToShow}`);
+        // Fallback or error handling might be needed if a tabId is invalid
+        // For now, just log and continue. The UI might look broken if a tab isn't found.
+    }
 
     navTabButtons.forEach(button => {
         if (button.getAttribute('data-tab') === tabIdToShow) {
@@ -305,19 +313,29 @@ function showTab(tabIdToShow) {
             button.classList.remove('active-tab-button');
         }
     });
+    console.log(`[showTab] Updated nav button active states.`);
 
-    applySavedTheme();
+    applySavedTheme(); // applySavedTheme also has its own logs now
 
-    if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') startNewChallenge();
+    if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') {
+        console.log(`[showTab] Initializing learn-practice-tab specific content.`);
+        startNewChallenge();
+    }
 
-    // If switching to book-cipher-tab, ensure its library is populated/refreshed
-    if (tabIdToShow === 'book-cipher-tab' && typeof populateBookLibrary === 'function') {
-        // It's important that populateBookLibrary also handles populating its own filters if needed.
-        // Assuming populateBookLibrary is comprehensive for the book cipher tab.
-        if (typeof populateFilterDropdowns === 'function') { // populateFilterDropdowns is in bookCipher.js
-            populateFilterDropdowns(); // Ensure filters are up-to-date if they depend on book data that might change (though they don't currently change based on pro status)
+    if (tabIdToShow === 'book-cipher-tab') {
+        console.log(`[showTab] Target is 'book-cipher-tab'. Checking for library functions.`);
+        if (typeof populateFilterDropdowns === 'function') {
+            console.log(`[showTab] Calling populateFilterDropdowns for book-cipher-tab.`);
+            populateFilterDropdowns();
+        } else {
+            console.warn(`[showTab] populateFilterDropdowns function not found for book-cipher-tab.`);
         }
-        populateBookLibrary();
+        if (typeof populateBookLibrary === 'function') {
+            console.log(`[showTab] Calling populateBookLibrary for book-cipher-tab.`);
+            populateBookLibrary();
+        } else {
+            console.warn(`[showTab] populateBookLibrary function not found for book-cipher-tab.`);
+        }
     }
 
     // Attach tapper to relevant areas based on the active tab
@@ -833,20 +851,32 @@ if (closeUpsellModalBtn) { // General close button
 }
 if (upgradeToProBtn) { // General upgrade button
     upgradeToProBtn.addEventListener('click', () => {
+        console.log('[upgradeToProBtn] Clicked. Current window.isProUser:', window.isProUser);
         window.isProUser = true;
         localStorage.setItem('isProUser', 'true');
-        // populateBookLibrary(); // Removed: showTab will handle this if book-cipher-tab is active
-        if (typeof window.initializeKochMethod === 'function') window.initializeKochMethod(); // For Koch method unlocks
-        updateGoProButtonUI(); // For settings tab button
+        console.log('[upgradeToProBtn] window.isProUser set to true.');
+
+        if (typeof window.initializeKochMethod === 'function') {
+            console.log('[upgradeToProBtn] Calling initializeKochMethod.');
+            window.initializeKochMethod();
+        }
+        console.log('[upgradeToProBtn] Calling updateGoProButtonUI.');
+        updateGoProButtonUI();
+
+        console.log('[upgradeToProBtn] Hiding modals.');
         hideUpsellModal();
         hideBookProUpsellModal();
 
-        // Refresh current tab UI by calling showTab again.
-        // If it's book-cipher-tab, populateBookLibrary will be called by the modified showTab.
         const currentTab = localStorage.getItem('lastTab');
+        console.log('[upgradeToProBtn] currentTab from localStorage:', currentTab);
+
         if(currentTab) {
+            console.log('[upgradeToProBtn] Calling showTab with currentTab:', currentTab);
             showTab(currentTab);
+        } else {
+            console.log('[upgradeToProBtn] No currentTab found in localStorage. Not calling showTab.');
         }
+        console.log('[upgradeToProBtn] Listener finished.');
     });
 }
 

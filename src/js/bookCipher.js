@@ -65,23 +65,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to populate filter dropdowns
     function populateFilterDropdowns() {
+        console.log('[populateFilterDropdowns] Called.');
         if (!bookCipherBooks || Object.keys(bookCipherBooks).length === 0) {
-            return; // No books to get filters from
+            console.log('[populateFilterDropdowns] No bookCipherBooks data or empty. Aborting.');
+            return;
         }
 
         const genres = new Set();
-        // const authors = new Set(); // Removed
 
         for (const bookKey in bookCipherBooks) {
             if (bookCipherBooks.hasOwnProperty(bookKey)) {
                 const book = bookCipherBooks[bookKey];
                 if (book.genre) genres.add(book.genre);
-                // if (book.author) authors.add(book.author); // Removed
             }
         }
+        console.log('[populateFilterDropdowns] Unique genres found:', Array.from(genres));
 
         if (filterGenreEl) {
-            // Clear existing options except "All Genres"
+            console.log('[populateFilterDropdowns] Populating genre filter.');
             while (filterGenreEl.options.length > 1) filterGenreEl.remove(1);
             genres.forEach(genre => {
                 const option = document.createElement('option');
@@ -89,35 +90,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.textContent = genre;
                 filterGenreEl.appendChild(option);
             });
+        } else {
+            console.log('[populateFilterDropdowns] filterGenreEl not found.');
         }
-
-        // if (filterAuthorEl) { // Removed
-        //     // Clear existing options except "All Authors"
-        //     while (filterAuthorEl.options.length > 1) filterAuthorEl.remove(1);
-        //     authors.forEach(author => {
-        //         const option = document.createElement('option');
-        //         option.value = author;
-        //         option.textContent = author;
-        //         filterAuthorEl.appendChild(option);
-        //     });
-        // }
     }
 
 
     // Function to populate the book library display
     function populateBookLibrary() {
+        console.log('[populateBookLibrary] Called. Current window.isProUser:', window.isProUser);
         const libraryContainer = document.getElementById('book-library-container');
         if (!libraryContainer) {
-            console.error("Book library container 'book-library-container' not found.");
+            console.error("[populateBookLibrary] Book library container 'book-library-container' not found. Aborting.");
             return;
         }
 
-        // Selectively remove only book items to preserve other elements like the banner
         const itemsToRemove = libraryContainer.querySelectorAll('.book-cover-item');
+        console.log(`[populateBookLibrary] Removing ${itemsToRemove.length} existing book items.`);
         itemsToRemove.forEach(item => item.remove());
 
         if (!bookCipherBooks || Object.keys(bookCipherBooks).length === 0) {
-            console.warn("bookCipherBooks object is empty or not defined. Cannot populate library.");
+            console.warn("[populateBookLibrary] bookCipherBooks object is empty or not defined. Displaying 'No books available.'");
             libraryContainer.textContent = 'No books available.';
             return;
         }
@@ -387,10 +380,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // The `appendChild` above should ensure it's there if `hasVisibleBooks` is true.
              }
         } else if (window.isProUser && unlockBooksBanner) {
+        console.log("[populateBookLibrary] User is Pro, hiding unlockBooksBanner.");
             unlockBooksBanner.classList.add('hidden');
         }
-
-
+     console.log(`[populateBookLibrary] Finished. Number of book elements in container: ${libraryContainer.querySelectorAll('.book-cover-item').length}. Visible books flag: ${hasVisibleBooks}`);
     }
 
     // Function to save progress
