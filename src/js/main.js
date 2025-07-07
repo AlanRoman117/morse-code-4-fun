@@ -678,12 +678,8 @@ function populateMorseReference() {
 function applySavedTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     const isLight = savedTheme === 'light';
-    // console.log('[applySavedTheme] Theme from localStorage:', savedTheme, '| isLight:', isLight);
-
-    // console.log('[applySavedTheme] document.body.classList BEFORE:', document.body.classList.toString());
     document.body.classList.toggle('light-theme', isLight);
     document.body.classList.toggle('dark', !isLight);
-    // console.log('[applySavedTheme] document.body.classList AFTER:', document.body.classList.toString());
 
     document.querySelectorAll('.app-container').forEach(c => {
         c.classList.toggle('light-theme-container', isLight);
@@ -691,9 +687,9 @@ function applySavedTheme() {
     });
 
     // Explicitly style #pro-upsell-modal elements based on theme
-    const proModalContentDiv = document.querySelector('#pro-upsell-modal > div'); // The main content box
+    const proModalContentDiv = document.querySelector('#pro-upsell-modal > div');
     const proModalTitle = document.querySelector('#pro-upsell-modal h2');
-    const proModalParagraph = document.querySelector('#pro-upsell-modal p'); // Assuming first p is the main one
+    const proModalParagraph = document.querySelector('#pro-upsell-modal p');
     const proModalBenefitsTitle = document.querySelector('#pro-upsell-modal h3');
     const proModalBenefitsList = document.querySelector('#pro-upsell-modal ul');
     const proModalCloseButton = document.getElementById('close-pro-upsell-modal-top');
@@ -723,30 +719,26 @@ function applySavedTheme() {
         }
     }
 
-    // Aggressively style the general #upsell-modal
-    const generalUpsellModalContentDiv = document.querySelector('#upsell-modal > div'); // Main content box
+    const generalUpsellModalContentDiv = document.querySelector('#upsell-modal > div');
     const generalUpsellModalTitle = document.querySelector('#upsell-modal h2.text-purple-600');
     const generalUpsellModalParagraph = document.querySelector('#upsell-modal p.text-lg.mb-4');
-    const generalUpsellModalList = document.querySelector('#upsell-modal ul.list-disc'); // The UL element itself
-    const generalUpsellModalListItems = document.querySelectorAll('#upsell-modal ul li'); // All LIs for text color
+    const generalUpsellModalList = document.querySelector('#upsell-modal ul.list-disc');
+    const generalUpsellModalListItems = document.querySelectorAll('#upsell-modal ul li');
     const generalUpsellModalListSvgs = document.querySelectorAll('#upsell-modal ul li svg.text-green-500');
     const generalUpsellModalCloseBtn = document.getElementById('close-upsell-modal-btn');
     const generalUpsellModalSmallText = document.querySelector('#upsell-modal p.text-xs.text-gray-500');
     const generalUpsellModalUpgradeBtn = document.getElementById('upgrade-to-pro-btn');
 
-
     if (generalUpsellModalContentDiv) {
-        // Remove Tailwind's dark context class and specific color/bg classes before applying new ones
-        generalUpsellModalContentDiv.classList.remove('dark', 'bg-white', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-100'); // Added dark specific from potential tailwind config
+        generalUpsellModalContentDiv.classList.remove('dark', 'bg-white', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-100');
         if (generalUpsellModalTitle) generalUpsellModalTitle.classList.remove('text-purple-600', 'dark:text-purple-400');
         if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.remove('text-gray-800', 'dark:text-gray-100');
-        if (generalUpsellModalList) generalUpsellModalList.classList.remove('text-gray-800', 'dark:text-gray-100'); // For general list text if not on LIs
+        if (generalUpsellModalList) generalUpsellModalList.classList.remove('text-gray-800', 'dark:text-gray-100');
         if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.remove('text-gray-600', 'hover:text-gray-800', 'dark:text-gray-300', 'dark:hover:text-gray-100');
         if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.remove('text-gray-500', 'dark:text-gray-400');
         generalUpsellModalListItems.forEach(li => li.classList.remove('text-gray-800', 'dark:text-gray-100'));
         generalUpsellModalListSvgs.forEach(svg => svg.classList.remove('text-green-500', 'dark:text-green-400'));
         if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.remove('bg-purple-600', 'hover:bg-purple-700', 'dark:bg-purple-500', 'dark:hover:bg-purple-600');
-
 
         if (isLight) {
             generalUpsellModalContentDiv.classList.add('bg-white', 'text-gray-800');
@@ -755,12 +747,11 @@ function applySavedTheme() {
             if (generalUpsellModalList) generalUpsellModalList.classList.add('text-gray-800');
             if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.add('text-gray-600', 'hover:text-gray-800');
             if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.add('text-gray-500');
-            generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-800')); // Text color for li content
+            generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-800'));
             generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-500'));
             if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-
         } else { // isDark
-            generalUpsellModalContentDiv.classList.add('dark', 'bg-gray-700', 'text-gray-100'); // Example dark theme for this modal
+            generalUpsellModalContentDiv.classList.add('dark', 'bg-gray-700', 'text-gray-100');
             if (generalUpsellModalTitle) generalUpsellModalTitle.classList.add('text-purple-400');
             if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.add('text-gray-100');
             if (generalUpsellModalList) generalUpsellModalList.classList.add('text-gray-100');
