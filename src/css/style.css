@@ -529,44 +529,8 @@ body {
             color: #333;
         } */
 
-/* --- Additions for Dark Theme --- */
-/* When .light-theme is NOT present on body, these styles apply for #upsell-modal */
-/* Targets the div that has .bg-white and .text-gray-800 in the HTML */
-body:not(.light-theme) #upsell-modal > div > div.bg-white.text-gray-800 {
-    background-color: #2c2c2c !important; /* Similar to .app-container dark bg (#2c2c2c) */
-    color: #f0f0f0 !important; /* Light text (#f0f0f0) */
-}
-
-body:not(.light-theme) #upsell-modal .text-purple-600 { /* Modal Title */
-    color: #a78bfa !important; /* Lighter purple (Tailwind purple-400) */
-}
-
-body:not(.light-theme) #upsell-modal #close-upsell-modal-btn.text-gray-600 { /* Close button icon */
-    color: #d1d5db !important; /* Tailwind gray-300 */
-}
-body:not(.light-theme) #upsell-modal #close-upsell-modal-btn.text-gray-600:hover {
-    color: #f9fafb !important; /* Tailwind gray-100 */
-}
-
-/* General text within the modal that was text-gray-800 or similar */
-body:not(.light-theme) #upsell-modal .text-lg.mb-4, /* "Upgrade to Pro and get access..." */
-body:not(.light-theme) #upsell-modal ul.list-disc li { /* List items text */
-    color: #f0f0f0 !important; /* Ensure they become light text */
-}
-
-/* SVG icons within list items are text-green-500. Adjust if needed. */
-body:not(.light-theme) #upsell-modal ul.list-disc li .text-green-500 {
-    color: #4ade80 !important; /* Tailwind green-400, slightly brighter for dark background */
-}
-
-body:not(.light-theme) #upsell-modal .text-xs.text-gray-500 { /* Placeholder payment text */
-    color: #9ca3af !important; /* Tailwind gray-400, which is light enough for dark bg */
-}
-
-/* The main upgrade button (bg-purple-600 text-white) is styled via Tailwind and should be fine. */
-/* No changes needed for it unless specific contrast issues arise. */
-
-/* --- End of Additions for Dark Theme --- */
+/* CSS rules for #upsell-modal dark theme were here and have been removed,
+   as this is now handled by JavaScript in main.js applySavedTheme() */
 
         .char-badge {
             /* Tailwind classes: bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 */
