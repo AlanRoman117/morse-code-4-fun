@@ -190,13 +190,13 @@
                                 <label for="auto-scroll-toggle" class="text-sm font-medium text-gray-300 mr-2">Auto-scroll Morse text:</label>
                                 <input type="checkbox" id="auto-scroll-toggle" class="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-500 rounded focus:ring-blue-500">
                             </div>
-                            <div id="full-book-morse-display" class="p-3 bg-gray-700 border border-gray-600 rounded-md text-gray-300 whitespace-pre-wrap word-wrap-break-word overflow-y-auto" style="max-height: 360px;"> <!-- Adjusted max-height slightly for the toggle -->
+                            <div id="full-book-morse-display" class="p-3 bg-gray-700 border border-gray-600 rounded-md text-gray-300 whitespace-pre-wrap word-wrap-break-word overflow-y-auto max-h-[240px] md:max-h-[360px]">
                                 Full Morse code will appear here...
                             </div>
                         </div>
 
                         <!-- Right Column: Tapper, Unlocked Text, Current Target -->
-                        <div class="md:w-1/3 flex flex-col gap-4">
+                        <div class="md:w-1/4 flex flex-col gap-4">
                             <div id="bookCipherTapperArea" class="text-center my-4" data-predictive-display="hidden">
                                 <!-- The shared visual tapper will be inserted here by JavaScript -->
                             </div>
