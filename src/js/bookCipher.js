@@ -754,6 +754,8 @@ if (typeof attachTapperToArea === 'function') {
                 // Error shown in bookCipherMessageEl within gameView.
             });
     }
+    window.initializeAndStartBookGame = initializeAndStartBookGame; // Expose globally
+
     function setNextTargetMorseSignal() {
         const currentDecodedCharDisplay = document.getElementById('current-decoded-char');
         // unlockedTextDisplay is not used here directly for adding spaces anymore
