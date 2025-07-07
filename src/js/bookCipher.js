@@ -285,23 +285,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     const buttonContainer = document.createElement('div');
                     buttonContainer.className = 'flex flex-col items-center space-y-3';
 
+                    console.log(`[BookDetails] Populating for currentBookId: ${currentBookId}`);
                     const savedProgressString = localStorage.getItem(`bookCipherProgress_${currentBookId}`);
+                    console.log(`[BookDetails] savedProgressString for ${currentBookId}:`, savedProgressString);
+
                     let isBookMarkedCompleted = false;
                     let hasSavedProgress = false; // New flag
                     if (savedProgressString) {
                         hasSavedProgress = true; // Progress exists
+                        console.log(`[BookDetails] hasSavedProgress set to true for ${currentBookId}`);
                         try {
                             const savedProgress = JSON.parse(savedProgressString);
                             if (savedProgress.bookId === currentBookId) {
                                 isBookMarkedCompleted = savedProgress.isCompleted || false;
+                                console.log(`[BookDetails] Parsed progress for ${currentBookId}. isBookMarkedCompleted: ${isBookMarkedCompleted}, Unlocked text: "${savedProgress.unlockedText}"`);
                             }
                         } catch (e) {
-                            console.error('Error parsing progress for button display:', e);
+                            console.error(`[BookDetails] Error parsing progress for ${currentBookId}:`, e);
                         }
+                    } else {
+                        console.log(`[BookDetails] No savedProgressString found for ${currentBookId}. hasSavedProgress is false.`);
                     }
 
                     // "Play Unlocked Morse" and "View Unlocked Text" should appear if any progress exists
                     if (hasSavedProgress) {
+                        console.log(`[BookDetails] Condition 'hasSavedProgress' is TRUE for ${currentBookId}. Attempting to create 'View Unlocked Text' and 'Play Unlocked Morse' buttons.`);
                         const viewUnlockedTextBtn = document.createElement('button');
                         viewUnlockedTextBtn.id = 'view-unlocked-text-btn';
                         viewUnlockedTextBtn.textContent = 'View Unlocked Text';
