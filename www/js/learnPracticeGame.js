@@ -67,6 +67,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentChallengeWord = ''; // Used for tapping practice
     let currentTappedString = '';  // Used for tapping practice
 
+    // Helper function to set practice message and class
+    function setPracticeFeedback(message, type) {
+        if (practiceMessage) {
+            practiceMessage.textContent = message;
+            // Remove old feedback classes
+            practiceMessage.classList.remove(
+                'feedback-message-complete',
+                'feedback-message-correct',
+                'feedback-message-mistake',
+                'feedback-message-unknown'
+            );
+            // Add new feedback class if type is provided
+            if (type) {
+                practiceMessage.classList.add(`feedback-message-${type}`);
+            }
+            // Clear inline style for color, let CSS classes handle it
+            practiceMessage.style.color = '';
+        }
+    }
+
     // Function to get character from Morse (relies on reversedMorseCode from index.html)
     function getCharFromMorse(morseString) {
         if (typeof reversedMorseCode !== 'undefined' && reversedMorseCode[morseString]) {
@@ -83,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTappedString = ''; // Reset internal tracking
         tapperDecodedOutput.textContent = ''; // Clear display
         updatePlayTappedMorseButtonState(); // Update button state
-        practiceMessage.textContent = '';   // Clear feedback
+        setPracticeFeedback('', null); // Clear feedback message and class
 
         // Reset the visual tapper's internal state (e.g., current Morse signals)
         if (typeof resetVisualTapperState === 'function') {
@@ -105,8 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tapperDecodedOutput.classList.remove('glow-green', 'shake-red');
 
         if (currentTappedString === currentChallengeWord) {
-            practiceMessage.textContent = "Challenge Complete!";
-            practiceMessage.style.color = 'lightgreen';
+            setPracticeFeedback("Challenge Complete!", "complete");
             tapperDecodedOutput.classList.add('glow-green');
             setTimeout(() => tapperDecodedOutput.classList.remove('glow-green'), 800);
             
@@ -159,13 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // Optionally, disable further tapper input until "New Challenge"
         } else if (currentChallengeWord.startsWith(currentTappedString)) {
-            practiceMessage.textContent = "Correct!";
-            practiceMessage.style.color = 'lightblue';
+            setPracticeFeedback("Correct!", "correct");
             tapperDecodedOutput.classList.add('glow-green');
             setTimeout(() => tapperDecodedOutput.classList.remove('glow-green'), 800);
         } else {
-            practiceMessage.textContent = "Mistake. Tap 'End Ltr' then try the correct letter.";
-            practiceMessage.style.color = '#DC2626'; // Tailwind red-600 for better contrast
+            setPracticeFeedback("Mistake. Tap 'End Ltr' then try the correct letter.", "mistake");
             tapperDecodedOutput.classList.add('shake-red');
             setTimeout(() => tapperDecodedOutput.classList.remove('shake-red'), 500);
             // To handle the "mistake" more gracefully:
@@ -198,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn("learnPracticeGame: resetVisualTapperState function not found. Cannot reset tapper state.");
             }
             currentTappedString = '';
-            practiceMessage.textContent = '';
+            setPracticeFeedback('', null); // Clear feedback
             // practiceText (challenge word) remains untouched.
             console.log("Tapper input cleared by user.");
         });
@@ -222,8 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (decodedChar) {
                     checkPractice(decodedChar); // This function already updates tapperDecodedOutput and currentTappedString
                 } else {
-                    practiceMessage.textContent = `Unknown Morse: ${morseString}. Try again.`;
-                    practiceMessage.style.color = '#F59E0B'; // Tailwind amber-500
+                    setPracticeFeedback(`Unknown Morse: ${morseString}. Try again.`, "unknown");
                 }
             }
         } else if (detail.type === 'word_space') {
@@ -233,8 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePlayTappedMorseButtonState();
             // Optionally, provide feedback or move to next word if that's part of the game logic
             // For now, just adding a space.
-            practiceMessage.textContent = "Space added.";
-            practiceMessage.style.color = 'lightblue'; // Or some neutral color
+            setPracticeFeedback("Space added.", "correct"); // Using "correct" class for neutral/positive feedback
             // If we want to check if the space was correctly placed (e.g., end of a word in challenge):
             // if (currentTappedString.trim() === currentChallengeWord.substring(0, currentTappedString.length).trim() && currentTappedString.endsWith(' ')) {
             //     // Potentially part of a multi-word challenge, or just confirming space.
@@ -246,17 +261,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Re-evaluate practice message based on the new string
             if (currentTappedString === "") { // If string is empty, clear message
-                practiceMessage.textContent = "";
+                setPracticeFeedback("", null);
             } else if (currentChallengeWord.startsWith(currentTappedString)) {
-                practiceMessage.textContent = "Correct!";
-                practiceMessage.style.color = 'lightblue';
+                setPracticeFeedback("Correct!", "correct");
             } else {
                 // This case might be complex if the string becomes incorrect *after* a delete.
                 // For simplicity, if it's not empty and not a prefix, it's likely a mistake state.
                 // Or, we can clear the message to avoid confusion. Let's clear it for now.
-                // practiceMessage.textContent = "Mistake. Tap 'End Ltr' then try the correct letter.";
-                // practiceMessage.style.color = '#DC2626';
-                practiceMessage.textContent = ""; // Clear message on delete if not perfectly correct start
+                setPracticeFeedback("", null); // Clear message on delete if not perfectly correct start
             }
             // console.log("LearnPracticeGame: Deleted char. New currentTappedString:", currentTappedString); // Log removed
         }

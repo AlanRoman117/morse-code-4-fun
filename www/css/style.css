@@ -58,6 +58,7 @@ body {
         .active-tab-button {
             font-weight: 600; /* Tailwind semibold */
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2); /* Subtle cue for dark mode */
         }
         .tab-content {
             width: 100%; /* Ensure it spans the full width available */
@@ -93,6 +94,13 @@ body {
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             flex-shrink: 0; /* Added from original context if tapper was in flex */
         }
+
+        .tapper-book-cipher {
+            width: 100px !important; /* Smaller width for book cipher view */
+            height: 100px !important; /* Smaller height for book cipher view */
+            font-size: 1rem !important; /* Smaller font size */
+        }
+
         /* Add media query for larger screens */
         @media (min-width: 768px) { /* md breakpoint */
             .tapper {
@@ -144,23 +152,27 @@ body {
         /* General light theme adjustments for Tailwind classes */
         .light-theme nav button,
         .light-theme-container nav button {
-            background-color: #e5e7eb; /* gray-200 */
-            color: #374151; /* gray-700 */
+            /* Default styles for nav buttons in light theme are handled by applySavedTheme in JS */
+            /* background-color: #e5e7eb; /* gray-200 */
+            /* color: #374151; /* gray-700 */
         }
         .light-theme nav button:hover,
         .light-theme-container nav button:hover {
-            background-color: #d1d5db; /* gray-300 */
+            /* Hover styles for nav buttons in light theme are handled by applySavedTheme in JS */
+            /* background-color: #d1d5db; /* gray-300 */
         }
+        /* Styles for active-tab-button in light mode are now fully managed by applySavedTheme in main.js
+           to ensure JavaScript is the single source of truth for dynamic Tailwind classes.
         .light-theme nav button.active-tab-button,
         .light-theme-container nav button.active-tab-button {
-            background-color: #3b82f6; /* blue-500 */
-            color: #ffffff; /* white */
+            background-color: #3b82f6;
+            color: #ffffff;
         }
         .light-theme nav button.active-tab-button:hover,
         .light-theme-container nav button.active-tab-button:hover {
-            background-color: #2563eb; /* blue-600 */
+            background-color: #2563eb;
         }
-
+        */
 
         .light-theme .input-output-box,
         .light-theme-container .input-output-box {
@@ -177,10 +189,18 @@ body {
         .light-theme-container .text-gray-400 {
              color: #374151 !important; /* Tailwind gray-700, !important to override Tailwind if needed */
         }
-        .light-theme .text-white, /* For elements that are explicitly text-white in dark mode */
+        /* General rule for .text-white in light theme (makes it dark gray) */
+        .light-theme .text-white,
         .light-theme-container .text-white {
             color: #1f2937 !important; /* Tailwind gray-800 */
         }
+        /* Specific override for active nav buttons in light theme to ensure their text is white - REMOVED FOR JS CONTROL */
+        /*
+        .light-theme nav > button.active-tab-button,
+        .light-theme-container nav > button.active-tab-button {
+            color: #FFFFFF !important; /* Actual white */
+        }
+        */
 
         .light-theme .section-title,
         .light-theme-container .section-title {
@@ -747,3 +767,166 @@ body.privacy-page.dark-theme {
         display: none !important;
     }
 }
+
+/* === BEGIN REFINED AAA LIGHT THEME BUTTON OVERRIDES (incl. Active States) === */
+
+/* Purple Buttons: HTML base dark theme e.g. "bg-purple-900 text-white active:bg-purple-950" */
+.light-theme .bg-purple-900.text-white,
+.light-theme-container .bg-purple-900.text-white {
+    background-color: #DDD6FE !important; /* purple-200 */
+    color: #4C1D95 !important; /* purple-900 */
+}
+.light-theme .bg-purple-900.text-white:hover,
+.light-theme-container .bg-purple-900.text-white:hover,
+.light-theme button.hover\:bg-purple-800.text-white:hover,
+.light-theme-container button.hover\:bg-purple-800.text-white:hover {
+    background-color: #C4B5FD !important; /* purple-300 */
+    color: #4C1D95 !important; /* purple-900 */
+}
+/* Re-evaluating purple active for better contrast with purple-400 bg */
+.light-theme .bg-purple-900.text-white:active,
+.light-theme-container .bg-purple-900.text-white:active,
+.light-theme button.active\:bg-purple-950.text-white:active,
+.light-theme-container button.active\:bg-purple-950.text-white:active {
+    background-color: #A78BFA !important; /* purple-400 */
+    color: #FFFFFF !important; /* white text */
+}
+
+
+/* Blue Buttons: HTML base dark "bg-blue-900 text-white active:bg-blue-950" */
+.light-theme .bg-blue-900.text-white,
+.light-theme-container .bg-blue-900.text-white {
+    background-color: #BFDBFE !important; /* blue-200 */
+    color: #1E3A8A !important; /* blue-900 */
+}
+.light-theme .bg-blue-900.text-white:hover,
+.light-theme-container .bg-blue-900.text-white:hover,
+.light-theme button.hover\:bg-blue-800.text-white:hover,
+.light-theme-container button.hover\:bg-blue-800.text-white:hover {
+    background-color: #93C5FD !important; /* blue-300 */
+    color: #1E3A8A !important; /* blue-900 */
+}
+.light-theme .bg-blue-900.text-white:active,
+.light-theme-container .bg-blue-900.text-white:active,
+.light-theme button.active\:bg-blue-950.text-white:active,
+.light-theme-container button.active\:bg-blue-950.text-white:active {
+    background-color: #60A5FA !important; /* blue-400 */
+    color: #FFFFFF !important; /* white text, contrast 4.55:1 (AA) */
+}
+
+/* Green Buttons: HTML base dark "bg-green-600 text-black active:bg-green-800" */
+.light-theme .bg-green-600.text-black,
+.light-theme-container .bg-green-600.text-black {
+    background-color: #A7F3D0 !important; /* green-200 */
+    color: #065F46 !important; /* green-900 */
+}
+.light-theme .bg-green-600.text-black:hover,
+.light-theme-container .bg-green-600.text-black:hover,
+.light-theme button.hover\:bg-green-700.text-black:hover,
+.light-theme-container button.hover\:bg-green-700.text-black:hover {
+    background-color: #6EE7B7 !important; /* green-300 */
+    color: #065F46 !important; /* green-900 */
+}
+.light-theme .bg-green-600.text-black:active,
+.light-theme-container .bg-green-600.text-black:active,
+.light-theme button.active\:bg-green-800.text-black:active, /* HTML active */
+.light-theme-container button.active\:bg-green-800.text-black:active {
+    background-color: #34D399 !important; /* green-400 */
+    color: #064E3B !important; /* green-900 (darker for active) */
+}
+
+
+/* Red Buttons: HTML base dark "bg-red-500 text-black active:bg-red-700" */
+.light-theme .bg-red-500.text-black,
+.light-theme-container .bg-red-500.text-black {
+    background-color: #FECACA !important; /* red-200 */
+    color: #7F1D1D !important; /* red-900 */
+}
+.light-theme .bg-red-500.text-black:hover,
+.light-theme-container .bg-red-500.text-black:hover,
+.light-theme button.hover\:bg-red-600.text-black:hover,
+.light-theme-container button.hover\:bg-red-600.text-black:hover {
+    background-color: #FCA5A5 !important; /* red-300 */
+    color: #7F1D1D !important; /* red-900 */
+}
+.light-theme .bg-red-500.text-black:active,
+.light-theme-container .bg-red-500.text-black:active,
+.light-theme button.active\:bg-red-700.text-black:active, /* HTML active */
+.light-theme-container button.active\:bg-red-700.text-black:active {
+    background-color: #FEE2E2 !important; /* red-100 */
+    color: #B91C1C !important; /* red-700 */
+}
+
+
+/* Indigo Buttons: HTML base dark "bg-indigo-900 text-white active:bg-indigo-950" */
+.light-theme .bg-indigo-900.text-white,
+.light-theme-container .bg-indigo-900.text-white {
+    background-color: #C7D2FE !important; /* indigo-200 */
+    color: #312E81 !important; /* indigo-900 */
+}
+.light-theme .bg-indigo-900.text-white:hover,
+.light-theme-container .bg-indigo-900.text-white:hover,
+.light-theme button.hover\:bg-indigo-800.text-white:hover,
+.light-theme-container button.hover\:bg-indigo-800.text-white:hover {
+    background-color: #A5B4FC !important; /* indigo-300 */
+    color: #312E81 !important; /* indigo-900 */
+}
+.light-theme .bg-indigo-900.text-white:active,
+.light-theme-container .bg-indigo-900.text-white:active,
+.light-theme button.active\:bg-indigo-950.text-white:active, /* HTML active */
+.light-theme-container button.active\:bg-indigo-950.text-white:active {
+    background-color: #818CF8 !important; /* indigo-400 */
+    color: #FFFFFF !important; /* white text, contrast 4.68:1 (AA) */
+}
+
+/* Gray Buttons: HTML base dark "bg-gray-800 text-gray-200 active:bg-gray-900" */
+.light-theme .bg-gray-800.text-gray-200,
+.light-theme-container .bg-gray-800.text-gray-200 {
+    background-color: #E5E7EB !important; /* gray-200 */
+    color: #1F2937 !important; /* gray-800 */
+}
+.light-theme .bg-gray-800.text-gray-200:hover,
+.light-theme-container .bg-gray-800.text-gray-200:hover,
+.light-theme a.hover\:bg-gray-700.text-gray-200:hover,
+.light-theme button.hover\:bg-gray-700.text-gray-200:hover {
+    background-color: #D1D5DB !important; /* gray-300 */
+    color: #1F2937 !important; /* gray-800 */
+}
+.light-theme .bg-gray-800.text-gray-200:active,
+.light-theme-container .bg-gray-800.text-gray-200:active,
+.light-theme a.active\:bg-gray-900.text-gray-200:active, /* HTML active for <a> */
+.light-theme button.active\:bg-gray-900.text-gray-200:active { /* HTML active for <button> */
+    background-color: #9CA3AF !important; /* gray-400 */
+    color: #111827 !important; /* gray-900 */
+}
+
+/* Special banner button already handled by targeting parent div hover */
+
+/* === END REFINED AAA LIGHT THEME BUTTON OVERRIDES === */
+
+
+/* === Practice Message Feedback Text Colors === */
+/* Default (Light Theme) */
+.feedback-message-complete { color: #065F46; } /* Dark Green - AAA on white */
+.feedback-message-correct { color: #1E40AF; }  /* Dark Blue - AAA on white */
+.feedback-message-mistake { color: #991B1B; }  /* Dark Red - AA on white */
+.feedback-message-unknown { color: #B45309; }  /* Dark Amber - AA on white */
+
+/* Dark Theme Overrides */
+.dark-theme .feedback-message-complete,
+body.dark .feedback-message-complete { /* Added body.dark for good measure */
+    color: #86EFAC; /* Light Green - AAA on #2c2c2c */
+}
+.dark-theme .feedback-message-correct,
+body.dark .feedback-message-correct {
+    color: #93C5FD; /* Light Blue - AAA on #2c2c2c */
+}
+.dark-theme .feedback-message-mistake,
+body.dark .feedback-message-mistake {
+    color: #FCA5A5; /* Light Red - AA on #2c2c2c */
+}
+.dark-theme .feedback-message-unknown,
+body.dark .feedback-message-unknown {
+    color: #FCD34D; /* Light Amber - AA on #2c2c2c */
+}
+/* === END Practice Message Feedback Text Colors === */
