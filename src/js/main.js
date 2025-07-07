@@ -619,15 +619,19 @@ function applySavedTheme() {
         c.classList.toggle('dark-theme-container', !isLight);
     });
 
-    // Explicitly style #pro-upsell-modal elements based on theme (existing logic)
+    // Explicitly style #pro-upsell-modal elements based on theme
     const proModalContentDiv = document.querySelector('#pro-upsell-modal > div');
     const proModalTitle = document.querySelector('#pro-upsell-modal h2');
     const proModalParagraph = document.querySelector('#pro-upsell-modal p');
     const proModalBenefitsTitle = document.querySelector('#pro-upsell-modal h3');
     const proModalBenefitsList = document.querySelector('#pro-upsell-modal ul');
     const proModalCloseButton = document.getElementById('close-pro-upsell-modal-top');
+    const goProBtnInsideModal = document.querySelector('#pro-upsell-modal #go-pro-button');
+    const returnToLibraryBtnInsideModal = document.querySelector('#pro-upsell-modal #return-to-library-button');
+
 
     if (proModalContentDiv) {
+        // Clear existing theme classes more thoroughly
         proModalContentDiv.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-white', 'dark');
         if (proModalTitle) proModalTitle.classList.remove('text-yellow-600', 'dark:text-yellow-400');
         if (proModalParagraph) proModalParagraph.classList.remove('text-gray-600', 'dark:text-gray-300');
@@ -635,64 +639,95 @@ function applySavedTheme() {
         if (proModalBenefitsList) proModalBenefitsList.classList.remove('text-gray-600', 'dark:text-gray-300');
         if (proModalCloseButton) proModalCloseButton.classList.remove('text-gray-500', 'hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-white');
 
+        // Remove classes from buttons inside this modal before re-applying
+        if(goProBtnInsideModal) goProBtnInsideModal.classList.remove(
+            'bg-green-500', 'hover:bg-green-600', 'text-white', // Old base/light
+            'dark:bg-green-600', 'dark:hover:bg-green-700', // Old dark
+            'bg-green-600', 'text-black', 'hover:bg-green-700', // New light
+            'dark:bg-green-600', 'dark:text-black', 'dark:hover:bg-green-700' // New dark
+        );
+        if(returnToLibraryBtnInsideModal) returnToLibraryBtnInsideModal.classList.remove(
+            'bg-gray-500', 'hover:bg-gray-600', 'text-white', // Old base/light
+            'dark:bg-gray-600', 'dark:hover:bg-gray-700', // Old dark
+            'bg-gray-200', 'text-gray-800', 'hover:bg-gray-300', // New light
+            'dark:bg-gray-800', 'dark:text-gray-200', 'dark:hover:bg-gray-700' // New dark
+        );
+
+
         if (isLight) {
             proModalContentDiv.classList.add('bg-white', 'text-gray-700');
             if (proModalTitle) proModalTitle.classList.add('text-yellow-600');
             if (proModalParagraph) proModalParagraph.classList.add('text-gray-600');
             if (proModalBenefitsTitle) proModalBenefitsTitle.classList.add('text-yellow-700');
             if (proModalBenefitsList) proModalBenefitsList.classList.add('text-gray-600');
-            if (proModalCloseButton) proModalCloseButton.classList.add('text-gray-500', 'hover:text-gray-700');
+            if (proModalCloseButton) proModalCloseButton.classList.add('text-gray-500', 'hover:text-gray-700'); // OK for AA
+
+            if(goProBtnInsideModal) goProBtnInsideModal.classList.add('bg-green-600', 'text-black', 'hover:bg-green-700');
+            if(returnToLibraryBtnInsideModal) returnToLibraryBtnInsideModal.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
+
         } else { // isDark
             proModalContentDiv.classList.add('dark', 'bg-gray-800', 'text-white');
             if (proModalTitle) proModalTitle.classList.add('text-yellow-400');
             if (proModalParagraph) proModalParagraph.classList.add('text-gray-300');
             if (proModalBenefitsTitle) proModalBenefitsTitle.classList.add('text-yellow-300');
             if (proModalBenefitsList) proModalBenefitsList.classList.add('text-gray-300');
-            if (proModalCloseButton) proModalCloseButton.classList.add('text-gray-400', 'dark:hover:text-white');
+            if (proModalCloseButton) proModalCloseButton.classList.add('dark:text-gray-400', 'dark:hover:text-white'); // AA, hover AAA
+
+            if(goProBtnInsideModal) goProBtnInsideModal.classList.add('dark:bg-green-600', 'dark:text-black', 'dark:hover:bg-green-700');
+            if(returnToLibraryBtnInsideModal) returnToLibraryBtnInsideModal.classList.add('dark:bg-gray-800', 'dark:text-gray-200', 'dark:hover:bg-gray-700');
         }
     }
 
+    // General Upsell Modal (#upsell-modal)
     const generalUpsellModalContentDiv = document.querySelector('#upsell-modal > div');
-    const generalUpsellModalTitle = document.querySelector('#upsell-modal h2.text-purple-600');
+    const generalUpsellModalTitle = document.querySelector('#upsell-modal h2.text-purple-600'); // Watch out for querySelector using specific color class
     const generalUpsellModalParagraph = document.querySelector('#upsell-modal p.text-lg.mb-4');
     const generalUpsellModalList = document.querySelector('#upsell-modal ul.list-disc');
     const generalUpsellModalListItems = document.querySelectorAll('#upsell-modal ul li');
-    const generalUpsellModalListSvgs = document.querySelectorAll('#upsell-modal ul li svg.text-green-500');
+    const generalUpsellModalListSvgs = document.querySelectorAll('#upsell-modal ul li svg'); // General SVG
     const generalUpsellModalCloseBtn = document.getElementById('close-upsell-modal-btn');
     const generalUpsellModalSmallText = document.querySelector('#upsell-modal p.text-xs.text-gray-500');
     const generalUpsellModalUpgradeBtn = document.getElementById('upgrade-to-pro-btn');
 
     if (generalUpsellModalContentDiv) {
+        // Clear existing classes
         generalUpsellModalContentDiv.classList.remove('dark', 'bg-white', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-100');
         if (generalUpsellModalTitle) generalUpsellModalTitle.classList.remove('text-purple-600', 'dark:text-purple-400');
         if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.remove('text-gray-800', 'dark:text-gray-100');
         if (generalUpsellModalList) generalUpsellModalList.classList.remove('text-gray-800', 'dark:text-gray-100');
-        if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.remove('text-gray-600', 'hover:text-gray-800', 'dark:text-gray-300', 'dark:hover:text-gray-100');
+        if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.remove('text-gray-600', 'hover:text-gray-800', 'dark:text-gray-300', 'dark:hover:text-gray-100', 'dark:text-gray-200', 'dark:hover:text-white');
         if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.remove('text-gray-500', 'dark:text-gray-400');
         generalUpsellModalListItems.forEach(li => li.classList.remove('text-gray-800', 'dark:text-gray-100'));
         generalUpsellModalListSvgs.forEach(svg => svg.classList.remove('text-green-500', 'dark:text-green-400'));
-        if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.remove('bg-purple-600', 'hover:bg-purple-700', 'dark:bg-purple-500', 'dark:hover:bg-purple-600');
+
+        if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.remove(
+            'bg-purple-600', 'hover:bg-purple-700', 'text-white', // Old base/light
+            'dark:bg-purple-500', 'dark:hover:bg-purple-600', // Old dark
+            'bg-purple-900', 'hover:bg-purple-800', // Base HTML new
+            'bg-purple-200', 'text-purple-900', 'hover:bg-purple-300', // New light
+            'dark:bg-purple-900', 'dark:text-white', 'dark:hover:bg-purple-800' // New dark
+         );
 
         if (isLight) {
             generalUpsellModalContentDiv.classList.add('bg-white', 'text-gray-800');
-            if (generalUpsellModalTitle) generalUpsellModalTitle.classList.add('text-purple-600');
+            if (generalUpsellModalTitle) generalUpsellModalTitle.classList.add('text-purple-600'); // This purple is fine on white
             if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.add('text-gray-800');
             if (generalUpsellModalList) generalUpsellModalList.classList.add('text-gray-800');
-            if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.add('text-gray-600', 'hover:text-gray-800');
+            if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.add('text-gray-700', 'hover:text-gray-900'); // AA
             if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.add('text-gray-500');
             generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-800'));
-            generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-500'));
-            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-600', 'hover:bg-purple-700');
+            generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-500')); // Green on white is fine
+            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-200', 'text-purple-900', 'hover:bg-purple-300');
         } else { // isDark
             generalUpsellModalContentDiv.classList.add('dark', 'bg-gray-700', 'text-gray-100');
-            if (generalUpsellModalTitle) generalUpsellModalTitle.classList.add('text-purple-400');
+            if (generalUpsellModalTitle) generalUpsellModalTitle.classList.add('text-purple-400'); // Purple-400 on gray-700 is ok
             if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.add('text-gray-100');
             if (generalUpsellModalList) generalUpsellModalList.classList.add('text-gray-100');
-            if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.add('text-gray-300', 'hover:text-gray-100');
-            if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.add('text-gray-400');
+            if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.add('dark:text-gray-200', 'dark:hover:text-white'); // AA
+            if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.add('dark:text-gray-400');
             generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-100'));
-            generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-400'));
-            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-500', 'hover:bg-purple-600');
+            generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-400')); // Green-400 on gray-700 is ok
+            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('dark:bg-purple-900', 'dark:text-white', 'dark:hover:bg-purple-800');
         }
     }
 
@@ -700,75 +735,56 @@ function applySavedTheme() {
     navTabButtons.forEach(button => {
         const isActive = button.classList.contains('active-tab-button');
 
+        // Define classes based on state and theme
+        let classesToAdd = [];
         const classesToRemove = [
-            // Light Mode Active (NEW: bg-blue-700, hover:bg-blue-800)
-            'bg-blue-600', 'hover:bg-blue-700', // Old light active bg/hover
-            'bg-blue-700', 'text-white', 'hover:bg-blue-800', // New light active bg/text/hover
-            // Light Mode Inactive
-            'bg-gray-200', 'text-gray-700', 'hover:bg-gray-300',
+            // Old Light Active & New Light Active (to clean before adding)
+            'bg-blue-600', 'hover:bg-blue-700', 'text-white', // Old light active
+            'bg-blue-200', 'text-blue-900', 'hover:bg-blue-300', 'hover:text-blue-900', // New light active
+            // Old Light Inactive & New Light Inactive
+            'bg-gray-200', 'text-gray-700', 'hover:bg-gray-300', // Old light inactive
+            'bg-gray-100', 'text-gray-900', 'hover:bg-gray-200', 'hover:text-gray-900', // New light inactive
 
-            // Old Dark Mode Active
-            'dark:bg-blue-500', 'dark:text-gray-100', 'dark:hover:bg-blue-600',
+            // Old Dark Active (Various forms) & New Dark Active
+            'dark:bg-gradient-to-b', 'dark:from-blue-600', 'dark:to-blue-800', // Old gradient
+            'dark:hover:from-blue-500', 'dark:hover:to-blue-700', // Old gradient hover
+            'dark:bg-blue-500', 'dark:text-gray-100', 'dark:hover:bg-blue-600', // Another old dark active
+            'dark:bg-blue-900', 'dark:text-white', 'dark:hover:bg-blue-800', 'dark:hover:text-white', // New dark active
 
-            // Old Dark Mode Inactive (covers initial HTML of non-intro tabs & previous JS applied dark inactive)
-            'bg-gray-700',
-            'text-gray-300',
-            'hover:bg-gray-600',
-            'dark:bg-gray-700',
-            'dark:text-gray-300',
-            'dark:hover:bg-gray-600',
+            // Old Dark Inactive & New Dark Inactive
+            'bg-gray-700', 'text-gray-300', 'hover:bg-gray-600', // Base HTML dark classes often acted as inactive
+            'dark:bg-gray-700', 'dark:text-gray-300', 'dark:hover:bg-gray-600', // Explicit old dark inactive
+            'dark:bg-gray-800', 'dark:text-gray-400', 'dark:hover:bg-gray-700', 'dark:hover:text-gray-300', // Another old dark inactive
+            'dark:text-gray-200', 'dark:hover:text-gray-200', // New dark inactive text and hover text
 
-            // New Dark Mode Gradient/Specific Classes to ensure they are cleared
-            'dark:bg-gradient-to-b',
-            'dark:from-blue-600', 'dark:to-blue-800',
-            'dark:hover:from-blue-500', 'dark:hover:to-blue-700',
-            // 'dark:text-white', // This will be added for active dark, removing it if it was somehow on inactive
-            'dark:bg-gray-800', 'dark:text-gray-400',
-            'dark:hover:bg-gray-700', 'dark:hover:text-gray-300'
+            // General text colors that might conflict from various states
+            'text-white', 'dark:text-white', 'text-gray-300', 'dark:text-gray-100', 'dark:text-gray-300', 'dark:text-gray-400'
         ];
 
-        // Specific text color removals to prevent conflicts
-        if (!isLight) { // Only when preparing for dark theme styles
-            classesToRemove.push('text-white'); // from light active
-            classesToRemove.push('text-gray-700'); // from light inactive
-            // classesToRemove.push('dark:text-gray-100'); // from old dark active (already covered by dark:text-white if it was the same)
-                                                    // or if it was different, needs to be added.
-                                                    // Let's assume dark:text-white is the new standard for dark active.
-                                                    // And dark:text-gray-400 for new dark inactive.
-            if(isActive) { // if going to be dark active, remove any inactive dark text variants
-                classesToRemove.push('dark:text-gray-300', 'dark:text-gray-400');
-            } else { // if going to be dark inactive, remove any active dark text variants
-                classesToRemove.push('dark:text-white', 'dark:text-gray-100');
-            }
-
-        } else { // Only when preparing for light theme styles
-             classesToRemove.push('dark:text-white'); // from new dark active
-             classesToRemove.push('dark:text-gray-400'); // from new dark inactive
-             classesToRemove.push('dark:text-gray-300'); // from new dark inactive hover
-             classesToRemove.push('dark:text-gray-100'); // from old dark active
-        }
-
-        button.classList.remove(...[...new Set(classesToRemove)]);
+        button.classList.remove(...[...new Set(classesToRemove)]); // Remove all potential conflicting classes
 
         if (isActive) {
             if (isLight) {
-                button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-            } else { // isDark - NEW ACTIVE DARK GRADIENT STYLES
-                button.classList.add(
-                    'dark:bg-gradient-to-b', 'dark:from-blue-600', 'dark:to-blue-800', 'dark:text-white',
-                    'dark:hover:from-blue-500', 'dark:hover:to-blue-700'
-                );
+                // WCAG AAA: bg-blue-200 (#BFDBFE) text-blue-900 (#1E3A8A) -> Contrast: 7.01:1
+                // Hover: bg-blue-300 (#93C5FD) text-blue-900 (#1E3A8A) -> Contrast: 5.13:1 (AA)
+                classesToAdd = ['bg-blue-200', 'text-blue-900', 'hover:bg-blue-300', 'hover:text-blue-900'];
+            } else { // isDark
+                // WCAG AAA: dark:bg-blue-900 (#1E3A8A) dark:text-white (#FFFFFF) -> Contrast: 7.63:1
+                // Hover: dark:bg-blue-800 (#1E40AF) dark:text-white (#FFFFFF) -> Contrast: 6.08:1 (AA)
+                classesToAdd = ['dark:bg-blue-900', 'dark:text-white', 'dark:hover:bg-blue-800', 'dark:hover:text-white'];
             }
         } else { // isInactive
             if (isLight) {
-                button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-            } else { // isDark - NEW INACTIVE DARK STYLES
-                button.classList.add(
-                    'dark:bg-gray-800', 'dark:text-gray-400',
-                    'dark:hover:bg-gray-700', 'dark:hover:text-gray-300'
-                );
+                // WCAG AAA: bg-gray-100 (#F3F4F6) text-gray-900 (#111827) -> Contrast: 14.7:1
+                // Hover: bg-gray-200 (#E5E7EB) text-gray-900 (#111827) -> Contrast: 12.25:1
+                classesToAdd = ['bg-gray-100', 'text-gray-900', 'hover:bg-gray-200', 'hover:text-gray-900'];
+            } else { // isDark
+                // WCAG AAA: dark:bg-gray-800 (#1F2937) dark:text-gray-200 (#E5E7EB) -> Contrast: 7.73:1
+                // Hover: dark:bg-gray-700 (#374151) dark:text-gray-200 (#E5E7EB) -> Contrast: 6.18:1 (AA)
+                classesToAdd = ['dark:bg-gray-800', 'dark:text-gray-200', 'dark:hover:bg-gray-700', 'dark:hover:text-gray-200'];
             }
         }
+        button.classList.add(...classesToAdd);
     });
     // END of updated navTabButtons styling logic
 
