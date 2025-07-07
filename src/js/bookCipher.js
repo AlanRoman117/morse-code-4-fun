@@ -55,6 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (detailsView) detailsView.classList.add('hidden');
         if (gameView) gameView.classList.remove('hidden');
     }
+    // Expose view functions to global scope
+    window.showBookLibraryView = showBookLibraryView;
+    window.showBookDetailsView = showBookDetailsView;
+    window.showGameView = showGameView;
     // --- End View Switching Functions ---
 
     // --- Filter Elements ---
