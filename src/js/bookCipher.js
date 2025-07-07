@@ -287,7 +287,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const savedProgressString = localStorage.getItem(`bookCipherProgress_${currentBookId}`);
                     let isBookMarkedCompleted = false;
+                    let hasSavedProgress = false; // New flag
                     if (savedProgressString) {
+                        hasSavedProgress = true; // Progress exists
                         try {
                             const savedProgress = JSON.parse(savedProgressString);
                             if (savedProgress.bookId === currentBookId) {
@@ -298,7 +300,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
 
-                    if (isBookMarkedCompleted) {
+                    // "Play Unlocked Morse" and "View Unlocked Text" should appear if any progress exists
+                    if (hasSavedProgress) {
                         const viewUnlockedTextBtn = document.createElement('button');
                         viewUnlockedTextBtn.id = 'view-unlocked-text-btn';
                         viewUnlockedTextBtn.textContent = 'View Unlocked Text';
@@ -308,6 +311,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             displayUnlockedBookText(currentBookId);
                         });
 
+                        const playUnlockedMorseBtn = document.createElement('button');
+                        playUnlockedMorseBtn.id = 'play-unlocked-morse-btn';
+                        playUnlockedMorseBtn.textContent = 'Play Unlocked Morse';
+                        playUnlockedMorseBtn.className = 'w-full max-w-xs px-6 py-3 bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-teal-400';
+                        buttonContainer.appendChild(playUnlockedMorseBtn);
+                        playUnlockedMorseBtn.addEventListener('click', () => {
+                            if (typeof playUnlockedMorse === 'function') {
+                                playUnlockedMorse(currentBookId);
+                            } else {
+                                console.error('playUnlockedMorse function not found.');
+                                alert('Play Unlocked Morse feature is currently unavailable.');
+                            }
+                        });
+                    }
+
+                    if (isBookMarkedCompleted) {
+                        // "Restart Deciphering" and "Playback Story" (from previous implementation) only if fully completed
                         const restartDecipheringBtn = document.createElement('button');
                         restartDecipheringBtn.id = 'restart-deciphering-btn';
                         restartDecipheringBtn.textContent = 'Restart Deciphering';
@@ -1401,3 +1421,136 @@ async function startStoryPlayback(bookId) {
 }
 // Make it globally available if bookCipher.js is not a module exporting it.
 window.startStoryPlayback = startStoryPlayback;
+
+async function playUnlockedMorse(bookId) {
+    if (window.isPlayingStoryPlayback) { // Reusing the flag
+        console.log("Playback (Unlocked Morse) is already in progress.");
+        return;
+    }
+
+    const bookCipherMessageEl = document.getElementById('book-cipher-message');
+    let savedProgress;
+    try {
+        const savedProgressString = localStorage.getItem(`bookCipherProgress_${bookId}`);
+        if (!savedProgressString) {
+            if (bookCipherMessageEl) bookCipherMessageEl.textContent = "No saved progress to play.";
+            else alert("No saved progress to play.");
+            return;
+        }
+        savedProgress = JSON.parse(savedProgressString);
+        if (!savedProgress.unlockedText || savedProgress.unlockedText.trim() === "") {
+            if (bookCipherMessageEl) bookCipherMessageEl.textContent = "No unlocked text to play.";
+            else alert("No unlocked text to play.");
+            return;
+        }
+    } catch (e) {
+        console.error("Error loading progress for playUnlockedMorse:", e);
+        if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Error loading progress.";
+        else alert("Error loading progress.");
+        return;
+    }
+
+    const englishTextToPlay = savedProgress.unlockedText.trim();
+    let morseStringToPlay = "";
+    if (typeof window.textToMorse === 'function') {
+        morseStringToPlay = window.textToMorse(englishTextToPlay);
+    } else {
+        console.error("textToMorse function not found.");
+        alert("Morse conversion utility not available.");
+        return;
+    }
+
+    if (!morseStringToPlay || morseStringToPlay.trim() === "") {
+        if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Could not convert unlocked text to Morse.";
+        else alert("Could not convert unlocked text to Morse.");
+        return;
+    }
+
+    window.isPlayingStoryPlayback = true; // Set flag
+    showGameView();
+    if (typeof attachTapperToArea === 'function') {
+        attachTapperToArea('bookCipherTapperArea');
+    } else {
+        console.error("attachTapperToArea function not found for playback.");
+        window.isPlayingStoryPlayback = false;
+        return;
+    }
+
+    const tapperMorseOutputEl = document.getElementById('tapperMorseOutput');
+    const currentDecodedCharDisplayEl = document.getElementById('current-decoded-char');
+    // fullBookMorseDisplayEl is not directly manipulated here per plan
+
+    try {
+        const unitTimeMs = window.getVisualTapperUnitTime ? window.getVisualTapperUnitTime() : 150;
+        const dotDur = unitTimeMs;
+        const dashDur = unitTimeMs * 3;
+        const intraCharSpace = unitTimeMs;      // Space between signals of the same char
+        const interLetterSpace = unitTimeMs * 3; // Base space between letters
+        const wordSpaceDelay = unitTimeMs * 7;   // Base space between words
+
+        // The morseStringToPlay is like ".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
+        // It contains spaces between letters, and " / " between words.
+        const morseWords = morseStringToPlay.split(' / ');
+
+        for (let wordIdx = 0; wordIdx < morseWords.length; wordIdx++) {
+            if (!window.isPlayingStoryPlayback) break;
+            const morseLettersInWord = morseWords[wordIdx].split(' ');
+
+            for (let letterIdx = 0; letterIdx < morseLettersInWord.length; letterIdx++) {
+                if (!window.isPlayingStoryPlayback) break;
+                const morseSignal = morseLettersInWord[letterIdx];
+                if (!morseSignal) continue; // Skip if empty (e.g. multiple spaces in textToMorse output)
+
+                if (tapperMorseOutputEl) tapperMorseOutputEl.textContent = morseSignal;
+                if (currentDecodedCharDisplayEl) currentDecodedCharDisplayEl.textContent = morseSignal;
+
+                for (let i = 0; i < morseSignal.length; i++) {
+                    if (!window.isPlayingStoryPlayback) break;
+                    const signalPart = morseSignal[i];
+                    const duration = (signalPart === '.') ? dotDur : dashDur;
+
+                    if (window.setTapperActive) window.setTapperActive(true);
+                    if (window.playTapSound) window.playTapSound();
+                    await new Promise(resolve => setTimeout(resolve, duration));
+                    if (window.setTapperActive) window.setTapperActive(false);
+                    if (window.stopTapSound) window.stopTapSound();
+
+                    if (i < morseSignal.length - 1) { // If not last part of this letter's signal
+                        await new Promise(resolve => setTimeout(resolve, intraCharSpace));
+                    }
+                }
+                // After a full letter's Morse signal is played
+                if (letterIdx < morseLettersInWord.length - 1) { // If not the last letter of the word
+                    // Wait for space between letters (total 3 units, already had 1 unit intraCharSpace after last signal part)
+                    await new Promise(resolve => setTimeout(resolve, interLetterSpace - intraCharSpace));
+                }
+            }
+            // After a full word is played
+            if (wordIdx < morseWords.length - 1) { // If not the last word in the sequence
+                 // Wait for space between words (total 7 units, already had 3 units interLetterSpace after last letter)
+                await new Promise(resolve => setTimeout(resolve, wordSpaceDelay - interLetterSpace));
+            }
+        }
+    } catch (error) {
+        console.error("Error during unlocked Morse playback:", error);
+        if (bookCipherMessageEl) bookCipherMessageEl.textContent = "Error during playback.";
+        else alert("Error during playback: " + error.message);
+    } finally {
+        window.isPlayingStoryPlayback = false; // Clear flag
+        if (tapperMorseOutputEl) tapperMorseOutputEl.textContent = "";
+        if (currentDecodedCharDisplayEl) currentDecodedCharDisplayEl.textContent = "-";
+
+        // Restore the game view to its normal state for the current book
+        // This ensures the full-book-morse-display and other elements are correctly shown
+        if (currentBookId === bookId) { // only if playback was for the currently active book
+             initializeAndStartBookGame(bookId);
+        } else {
+            // If playback was for a book different than current main game,
+            // simply ensure the tapper is detached if we don't want game view to persist.
+            // However, the button is on details page, which implies currentBookId is set.
+            // For now, assume currentBookId is the one we played.
+            initializeAndStartBookGame(bookId);
+        }
+    }
+}
+window.playUnlockedMorse = playUnlockedMorse;
