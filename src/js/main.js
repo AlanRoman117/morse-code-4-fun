@@ -292,18 +292,16 @@ function detachSharedTapper() {
 }
 
 function showTab(tabIdToShow) {
-    console.log(`[showTab] Called with tabIdToShow: ${tabIdToShow}`);
+    // console.log(`[showTab] Called with tabIdToShow: ${tabIdToShow}`);
     detachSharedTapper();
     tabContentDivs.forEach(div => div.classList.add('hidden'));
 
     const selectedTabContent = document.getElementById(tabIdToShow);
     if (selectedTabContent) {
         selectedTabContent.classList.remove('hidden');
-        console.log(`[showTab] Made tab ${tabIdToShow} visible.`);
+        // console.log(`[showTab] Made tab ${tabIdToShow} visible.`);
     } else {
-        console.warn(`[showTab] Tab content not found for ${tabIdToShow}`);
-        // Fallback or error handling might be needed if a tabId is invalid
-        // For now, just log and continue. The UI might look broken if a tab isn't found.
+        // console.warn(`[showTab] Tab content not found for ${tabIdToShow}`);
     }
 
     navTabButtons.forEach(button => {
@@ -313,28 +311,28 @@ function showTab(tabIdToShow) {
             button.classList.remove('active-tab-button');
         }
     });
-    console.log(`[showTab] Updated nav button active states.`);
+    // console.log(`[showTab] Updated nav button active states.`);
 
-    applySavedTheme(); // applySavedTheme also has its own logs now
+    applySavedTheme();
 
     if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') {
-        console.log(`[showTab] Initializing learn-practice-tab specific content.`);
+        // console.log(`[showTab] Initializing learn-practice-tab specific content.`);
         startNewChallenge();
     }
 
     if (tabIdToShow === 'book-cipher-tab') {
-        console.log(`[showTab] Target is 'book-cipher-tab'. Checking for library functions on window object.`);
+        // console.log(`[showTab] Target is 'book-cipher-tab'. Checking for library functions on window object.`);
         if (typeof window.populateFilterDropdowns === 'function') {
-            console.log(`[showTab] Calling window.populateFilterDropdowns for book-cipher-tab.`);
+            // console.log(`[showTab] Calling window.populateFilterDropdowns for book-cipher-tab.`);
             window.populateFilterDropdowns();
         } else {
-            console.warn(`[showTab] window.populateFilterDropdowns function not found for book-cipher-tab.`);
+            // console.warn(`[showTab] window.populateFilterDropdowns function not found for book-cipher-tab.`);
         }
         if (typeof window.populateBookLibrary === 'function') {
-            console.log(`[showTab] Calling window.populateBookLibrary for book-cipher-tab.`);
+            // console.log(`[showTab] Calling window.populateBookLibrary for book-cipher-tab.`);
             window.populateBookLibrary();
         } else {
-            console.warn(`[showTab] window.populateBookLibrary function not found for book-cipher-tab.`);
+            // console.warn(`[showTab] window.populateBookLibrary function not found for book-cipher-tab.`);
         }
     }
 
@@ -851,32 +849,32 @@ if (closeUpsellModalBtn) { // General close button
 }
 if (upgradeToProBtn) { // General upgrade button
     upgradeToProBtn.addEventListener('click', () => {
-        console.log('[upgradeToProBtn] Clicked. Current window.isProUser:', window.isProUser);
+        // console.log('[upgradeToProBtn] Clicked. Current window.isProUser:', window.isProUser);
         window.isProUser = true;
         localStorage.setItem('isProUser', 'true');
-        console.log('[upgradeToProBtn] window.isProUser set to true.');
+        // console.log('[upgradeToProBtn] window.isProUser set to true.');
 
         if (typeof window.initializeKochMethod === 'function') {
-            console.log('[upgradeToProBtn] Calling initializeKochMethod.');
+            // console.log('[upgradeToProBtn] Calling initializeKochMethod.');
             window.initializeKochMethod();
         }
-        console.log('[upgradeToProBtn] Calling updateGoProButtonUI.');
+        // console.log('[upgradeToProBtn] Calling updateGoProButtonUI.');
         updateGoProButtonUI();
 
-        console.log('[upgradeToProBtn] Hiding modals.');
+        // console.log('[upgradeToProBtn] Hiding modals.');
         hideUpsellModal();
         hideBookProUpsellModal();
 
         const currentTab = localStorage.getItem('lastTab');
-        console.log('[upgradeToProBtn] currentTab from localStorage:', currentTab);
+        // console.log('[upgradeToProBtn] currentTab from localStorage:', currentTab);
 
         if(currentTab) {
-            console.log('[upgradeToProBtn] Calling showTab with currentTab:', currentTab);
+            // console.log('[upgradeToProBtn] Calling showTab with currentTab:', currentTab);
             showTab(currentTab);
         } else {
-            console.log('[upgradeToProBtn] No currentTab found in localStorage. Not calling showTab.');
+            // console.log('[upgradeToProBtn] No currentTab found in localStorage. Not calling showTab.');
         }
-        console.log('[upgradeToProBtn] Listener finished.');
+        // console.log('[upgradeToProBtn] Listener finished.');
     });
 }
 

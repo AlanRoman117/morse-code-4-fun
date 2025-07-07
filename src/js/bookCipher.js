@@ -65,9 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to populate filter dropdowns
     function populateFilterDropdowns() {
-        console.log('[populateFilterDropdowns] Called.');
+        // console.log('[populateFilterDropdowns] Called.');
         if (!bookCipherBooks || Object.keys(bookCipherBooks).length === 0) {
-            console.log('[populateFilterDropdowns] No bookCipherBooks data or empty. Aborting.');
+            // console.log('[populateFilterDropdowns] No bookCipherBooks data or empty. Aborting.');
             return;
         }
 
@@ -79,10 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (book.genre) genres.add(book.genre);
             }
         }
-        console.log('[populateFilterDropdowns] Unique genres found:', Array.from(genres));
+        // console.log('[populateFilterDropdowns] Unique genres found:', Array.from(genres));
 
         if (filterGenreEl) {
-            console.log('[populateFilterDropdowns] Populating genre filter.');
+            // console.log('[populateFilterDropdowns] Populating genre filter.');
             while (filterGenreEl.options.length > 1) filterGenreEl.remove(1);
             genres.forEach(genre => {
                 const option = document.createElement('option');
@@ -91,26 +91,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 filterGenreEl.appendChild(option);
             });
         } else {
-            console.log('[populateFilterDropdowns] filterGenreEl not found.');
+            // console.log('[populateFilterDropdowns] filterGenreEl not found.');
         }
     }
 
 
     // Function to populate the book library display
     function populateBookLibrary() {
-        console.log('[populateBookLibrary] Called. Current window.isProUser:', window.isProUser);
+        // console.log('[populateBookLibrary] Called. Current window.isProUser:', window.isProUser);
         const libraryContainer = document.getElementById('book-library-container');
         if (!libraryContainer) {
-            console.error("[populateBookLibrary] Book library container 'book-library-container' not found. Aborting.");
+            console.error("[populateBookLibrary] Book library container 'book-library-container' not found. Aborting."); // Keep this error
             return;
         }
 
         const itemsToRemove = libraryContainer.querySelectorAll('.book-cover-item');
-        console.log(`[populateBookLibrary] Removing ${itemsToRemove.length} existing book items.`);
+        // console.log(`[populateBookLibrary] Removing ${itemsToRemove.length} existing book items.`);
         itemsToRemove.forEach(item => item.remove());
 
         if (!bookCipherBooks || Object.keys(bookCipherBooks).length === 0) {
-            console.warn("[populateBookLibrary] bookCipherBooks object is empty or not defined. Displaying 'No books available.'");
+            console.warn("[populateBookLibrary] bookCipherBooks object is empty or not defined. Displaying 'No books available.'"); // Keep this warn
             libraryContainer.textContent = 'No books available.';
             return;
         }
@@ -380,10 +380,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // The `appendChild` above should ensure it's there if `hasVisibleBooks` is true.
              }
         } else if (window.isProUser && unlockBooksBanner) {
-        console.log("[populateBookLibrary] User is Pro, hiding unlockBooksBanner.");
+        // console.log("[populateBookLibrary] User is Pro, hiding unlockBooksBanner.");
             unlockBooksBanner.classList.add('hidden');
         }
-     console.log(`[populateBookLibrary] Finished. Number of book elements in container: ${libraryContainer.querySelectorAll('.book-cover-item').length}. Visible books flag: ${hasVisibleBooks}`);
+     // console.log(`[populateBookLibrary] Finished. Number of book elements in container: ${libraryContainer.querySelectorAll('.book-cover-item').length}. Visible books flag: ${hasVisibleBooks}`);
     }
 
     // Function to save progress
@@ -975,7 +975,7 @@ if (typeof attachTapperToArea === 'function') {
     // Expose functions to global scope for main.js to call
     window.populateBookLibrary = populateBookLibrary;
     window.populateFilterDropdowns = populateFilterDropdowns;
-    console.log('[bookCipher.js] populateBookLibrary and populateFilterDropdowns exposed to window.');
+    // console.log('[bookCipher.js] populateBookLibrary and populateFilterDropdowns exposed to window.');
 
     // --- Fireworks Function ---
     function launchFireworks() {
