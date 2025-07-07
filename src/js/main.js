@@ -277,23 +277,62 @@ const hiddenTapperStorage = document.getElementById('hiddenTapperStorage');
 
 function attachTapperToArea(targetAreaId) {
     const targetElement = document.getElementById(targetAreaId);
+    const tapperItself = document.getElementById('tapper'); // Get the tapper element itself
+
     if (sharedVisualTapperWrapper && targetElement) {
         targetElement.appendChild(sharedVisualTapperWrapper);
         sharedVisualTapperWrapper.style.display = 'block';
+
+        if (tapperItself) {
+            if (targetAreaId === 'bookCipherTapperArea') {
+                tapperItself.classList.add('tapper-book-cipher');
+            } else {
+                // Ensure the class is removed if attached to any other area
+                tapperItself.classList.remove('tapper-book-cipher');
+            }
+        }
     }
 }
+window.attachTapperToArea = attachTapperToArea;
 
 function detachSharedTapper() {
     if (typeof resetVisualTapperState === 'function') resetVisualTapperState();
+    const tapperItself = document.getElementById('tapper'); // Get the tapper element itself
+
     if (sharedVisualTapperWrapper && hiddenTapperStorage && sharedVisualTapperWrapper.parentNode !== hiddenTapperStorage) {
         hiddenTapperStorage.appendChild(sharedVisualTapperWrapper);
         sharedVisualTapperWrapper.style.display = 'none';
+        if (tapperItself) {
+            tapperItself.classList.remove('tapper-book-cipher'); // Remove class when detaching
+        }
     }
 }
+window.detachSharedTapper = detachSharedTapper;
 
 function showTab(tabIdToShow) {
+    const currentActiveButton = document.querySelector('nav button.active-tab-button');
+    const currentActiveTabId = currentActiveButton ? currentActiveButton.getAttribute('data-tab') : null;
+
+    if (window.isPlayingStoryPlayback) {
+        window.isPlayingStoryPlayback = false; // Always stop playback sound/loop first
+        if (currentActiveTabId && tabIdToShow !== currentActiveTabId) {
+            // Only set navigatingAway if it's a TRULY different tab
+            console.log(`[showTab] Playback active, switching to a DIFFERENT tab (${tabIdToShow} from ${currentActiveTabId}). Setting navigatingAwayFromPlayback=true.`);
+            window.navigatingAwayFromPlayback = true;
+        } else if (currentActiveTabId && tabIdToShow === currentActiveTabId) {
+            console.log(`[showTab] Playback active, clicked SAME tab (${tabIdToShow}). NOT setting navigatingAwayFromPlayback. Playback will stop, view should refresh via finally.`);
+            // Ensure navigatingAwayFromPlayback is false, so the finally block in playback does its full refresh.
+            // This is important because the finally block always resets it to false AFTER its check.
+            // If it was true from a previous different-tab navigation that got interrupted, we need to clear it here.
+            window.navigatingAwayFromPlayback = false;
+        } else {
+             // Fallback if no currentActiveTabId found, or some other oddity, treat as navigation (safer to stop full reinit)
+            console.log(`[showTab] Playback active, currentActiveTabId not found or tabIdToShow is unusual. Setting navigatingAwayFromPlayback=true.`);
+            window.navigatingAwayFromPlayback = true;
+        }
+    }
     // console.log(`[showTab] Called with tabIdToShow: ${tabIdToShow}`);
-    detachSharedTapper();
+    window.detachSharedTapper(); // Ensure using window. prefix
     tabContentDivs.forEach(div => div.classList.add('hidden'));
 
     const selectedTabContent = document.getElementById(tabIdToShow);

@@ -185,18 +185,18 @@
                 <div id="book-game-view" class="hidden"> <!-- Existing outer container -->
                     <div class="flex flex-col md:flex-row gap-4"> <!-- Main flex container for two columns -->
                         <!-- Left Column: Full Morse Display -->
-                        <div class="md:w-2/3"> <!-- Wrapper for display and toggle -->
-                            <div class="flex items-center justify-between mb-2">
-                                <label for="auto-scroll-toggle" class="text-sm font-medium text-gray-300">Auto-scroll Morse text:</label>
+                        <div class="md:w-3/4"> <!-- Wrapper for display and toggle -->
+                            <div class="flex items-center justify-start mb-2">
+                                <label for="auto-scroll-toggle" class="text-sm font-medium text-gray-300 mr-2">Auto-scroll Morse text:</label>
                                 <input type="checkbox" id="auto-scroll-toggle" class="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-500 rounded focus:ring-blue-500">
                             </div>
-                            <div id="full-book-morse-display" class="p-3 bg-gray-700 border border-gray-600 rounded-md text-gray-300 whitespace-pre-wrap word-wrap-break-word overflow-y-auto" style="max-height: 360px;"> <!-- Adjusted max-height slightly for the toggle -->
+                            <div id="full-book-morse-display" class="p-3 bg-gray-700 border border-gray-600 rounded-md text-gray-300 whitespace-pre-wrap word-wrap-break-word overflow-y-auto max-h-40 md:max-h-96">
                                 Full Morse code will appear here...
                             </div>
                         </div>
 
                         <!-- Right Column: Tapper, Unlocked Text, Current Target -->
-                        <div class="md:w-1/3 flex flex-col gap-4">
+                        <div class="md:w-1/4 flex flex-col gap-4">
                             <div id="bookCipherTapperArea" class="text-center my-4" data-predictive-display="hidden">
                                 <!-- The shared visual tapper will be inserted here by JavaScript -->
                             </div>
@@ -211,7 +211,9 @@
                                 <div id="current-decoded-char" class="p-2 bg-gray-700 rounded-md text-2xl font-mono text-center min-w-[60px] inline-block text-gray-300">-</div>
                             </div>
 
-                            <button id="return-to-library-from-game-btn" class="mt-4 w-full bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500">Return to Library</button>
+                            <button id="play-unlocked-morse-on-game-btn" class="mt-4 w-full bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Play Unlocked Morse</button>
+                            <button id="stop-morse-playback-btn" class="mt-2 w-full bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-400 hidden">Stop Playback</button>
+                            <button id="return-to-library-from-game-btn" class="mt-2 w-full bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500">Return to Library</button>
                         </div>
                     </div>
                 </div> <!-- End of book-game-view -->

@@ -28,6 +28,20 @@ function updateVisualTapperUnitTime(newUnitTime) {
 function getVisualTapperUnitTime() {
   return UNIT_TIME_MS;
 }
+window.getVisualTapperUnitTime = getVisualTapperUnitTime; // Expose to global
+
+// Function to set tapper active state for playback
+function setTapperActive(isActive) {
+    const tapperElement = document.getElementById('tapper');
+    if (tapperElement) {
+        if (isActive) {
+            tapperElement.classList.add('active');
+        } else {
+            tapperElement.classList.remove('active');
+        }
+    }
+}
+window.setTapperActive = setTapperActive; // Expose to global
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Visual Tapper JavaScript ---
@@ -62,9 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playTapSound() {
-        if (typeof window.isMasterSoundEnabled !== 'undefined' && !window.isMasterSoundEnabled) {
-            return;
+        // Allow sound if story playback is active OR if master sound is enabled (or undefined initially).
+        const storyPlaybackActiveOnBookCipher = window.isPlayingStoryPlayback && document.getElementById('book-game-view') && !document.getElementById('book-game-view').classList.contains('hidden');
+        const masterSoundEnabled = (typeof window.isMasterSoundEnabled === 'undefined') || window.isMasterSoundEnabled;
+
+        if (!storyPlaybackActiveOnBookCipher && !masterSoundEnabled) {
+            return; // Sound is explicitly off and not in story playback mode
         }
+
+        // Original sound playing logic
         if (typeof Tone !== 'undefined' && Tone && Tone.Synth) {
             const playNoteInternal = () => {
                 if (!tapperTone) {
@@ -79,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 if (tapperTone && typeof tapperTone.triggerAttack === 'function') {
-                    tapperTone.triggerRelease();
+                    tapperTone.triggerRelease(); // Ensure previous note is released
                     tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now());
                 }
             };
@@ -94,14 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+    window.playTapSound = playTapSound; // Expose to global
 
     function stopTapSound() {
         if (tapperTone && typeof tapperTone.triggerRelease === 'function') {
             tapperTone.triggerRelease();
         }
     }
+    window.stopTapSound = stopTapSound; // Expose to global
     
     tapper.addEventListener('touchstart', (e) => {
+        if (window.isPlayingStoryPlayback) { e.preventDefault(); return; }
         e.preventDefault();
         tapper.classList.add('active');
         playTapSound();
@@ -110,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     tapper.addEventListener('touchend', (e) => {
+        if (window.isPlayingStoryPlayback) { e.preventDefault(); return; }
         e.preventDefault();
         if (tapStartTime === 0) return;
         tapper.classList.remove('active');
@@ -125,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     tapper.addEventListener('mousedown', (e) => {
+        if (window.isPlayingStoryPlayback) { e.preventDefault(); return; }
         tapper.classList.add('active');
         playTapSound();
         tapStartTime = Date.now();
@@ -132,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     tapper.addEventListener('mouseup', (e) => {
+        if (window.isPlayingStoryPlayback) { e.preventDefault(); return; }
         if (tapStartTime === 0) return;
         tapper.classList.remove('active');
         stopTapSound();
@@ -146,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     tapper.addEventListener('mouseleave', (e) => {
+        if (window.isPlayingStoryPlayback) { return; }
         if (tapper.classList.contains('active')) {
             tapper.classList.remove('active');
             stopTapSound();
@@ -155,21 +182,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     spaceButton.addEventListener('click', () => {
-        if (isPlayingBack) return;
+        if (window.isPlayingStoryPlayback || isPlayingBack) return; // Check both flags
         clearTimeout(silenceTimer);
         decodeMorse(true);
     });
 
     deleteLastCharButton.addEventListener('click', () => {
+        if (window.isPlayingStoryPlayback || isPlayingBack) return; // Check both flags
         // console.log("[VisualTapper] Delete Last Char Button clicked."); // Log removed
-        if (isPlayingBack) {
+        // if (isPlayingBack) { // This check is now part of the combined condition above
             // console.log("[VisualTapper] Delete ignored: isPlayingBack is true."); // Log removed
-            return;
-        }
+            // return;
+        // }
         deleteLastDecodedChar();
     });
 
     document.addEventListener('keydown', (event) => {
+        if (window.isPlayingStoryPlayback) { event.preventDefault(); return; } // Ignore keydown if story playback
+
         if (event.key === ' ' || event.keyCode === 32) {
             const activeElement = document.activeElement;
             if (activeElement) {
@@ -180,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             event.preventDefault();
-            if (isPlayingBack) return;
+            if (isPlayingBack) return; // Keep original isPlayingBack check for non-story playback scenarios
             clearTimeout(silenceTimer);
             decodeMorse(true);
             if (spaceButton) {
@@ -198,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             event.preventDefault();
-            if (isPlayingBack) return;
+            if (isPlayingBack) return; // Keep original isPlayingBack check
             deleteLastDecodedChar();
             if (deleteLastCharButton) {
                 deleteLastCharButton.classList.add('active');
