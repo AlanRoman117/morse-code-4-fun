@@ -138,10 +138,40 @@
                 <p id="book-cipher-message" class="text-center feedback-message text-yellow-500 mb-3 h-6"></p> <!-- Message area, h-6 for consistent height -->
 
                 <div id="book-library-view">
+                    <!-- Filter Controls -->
+                    <div id="book-filters" class="mb-4 p-3 bg-gray-750 rounded-lg shadow">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label for="filter-genre" class="block text-xs font-medium text-gray-400 mb-1">Genre</label>
+                                <select id="filter-genre" class="filter-select w-full bg-gray-700 border border-gray-600 text-gray-300 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 p-1.5">
+                                    <option value="all">All Genres</option>
+                                    <!-- Options populated by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filter-length" class="block text-xs font-medium text-gray-400 mb-1">Length</label>
+                                <select id="filter-length" class="filter-select w-full bg-gray-700 border border-gray-600 text-gray-300 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 p-1.5">
+                                    <option value="all">All Lengths</option>
+                                    <option value="Short">Short</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Long">Long</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filter-availability" class="block text-xs font-medium text-gray-400 mb-1">Availability</label>
+                                <select id="filter-availability" class="filter-select w-full bg-gray-700 border border-gray-600 text-gray-300 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 p-1.5">
+                                    <option value="all">All Books</option>
+                                    <option value="free">Free Only</option>
+                                    <option value="pro">Pro Only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Book Library Container -->
                     <div class="mb-4">
-                        <label for="book-library-container" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label>
-                        <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-[40rem] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <label for="book-library-container" class="block mb-2 text-sm font-medium text-gray-300">Select Book:</label> <!-- This label might be redundant now with filters -->
+                        <div id="book-library-container" class="bg-gray-700 border border-gray-600 rounded-lg p-2 max-h-[35rem] md:max-h-[40rem] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             <!-- Book covers will be dynamically added here by JavaScript -->
                              <div id="unlock-books-banner" class="col-span-full bg-yellow-500 text-black p-3 text-center rounded-md my-2 hidden">
                                 Unlock 20+ more books with Pro! <button id="go-pro-from-library-btn" class="font-bold underline hover:text-yellow-800">Go Pro</button>
@@ -467,7 +497,37 @@
         </div>
     </div>
 
-    <!-- Upsell Modal -->
+    <!-- Pro Upsell Modal (Book Cipher Specific) -->
+    <div id="pro-upsell-modal" class="fixed inset-0 bg-black bg-opacity-75 dark:bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full text-gray-700 dark:text-white">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-yellow-600 dark:text-yellow-400">Unlock More Stories with Pro!</h2>
+                <button id="close-pro-upsell-modal-top" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white text-2xl">&times;</button>
+            </div>
+            <p class="mb-4 text-gray-600 dark:text-gray-300">
+                You've discovered a Pro story! To read this and access our full library of exclusive books, please upgrade to Morse Code 4 Fun Pro.
+            </p>
+            <div class="mb-6">
+                <h3 class="font-semibold mb-2 text-lg text-yellow-700 dark:text-yellow-300">Pro Benefits:</h3>
+                <ul class="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-300">
+                    <li>Access all current and future Pro stories</li>
+                    <li>Enjoy an ad-free experience across the app</li>
+                    <li>Unlock all Koch method levels immediately</li>
+                    <li>Support future app development & new content</li>
+                </ul>
+            </div>
+            <div class="flex flex-col space-y-3">
+                <button id="go-pro-button" class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 active:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 dark:active:bg-green-800 text-white font-semibold rounded-lg shadow-md transition-colors">
+                    Upgrade to Pro
+                </button>
+                <button id="return-to-library-button" class="w-full px-4 py-3 bg-gray-500 hover:bg-gray-600 active:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 dark:active:bg-gray-800 text-white font-semibold rounded-lg shadow-md transition-colors">
+                    Return to Free Books
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Original Upsell Modal (General) -->
     <div id="upsell-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full text-gray-800">
             <div class="flex justify-between items-center mb-4">

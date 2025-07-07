@@ -292,11 +292,17 @@ function detachSharedTapper() {
 }
 
 function showTab(tabIdToShow) {
+    // console.log(`[showTab] Called with tabIdToShow: ${tabIdToShow}`);
     detachSharedTapper();
     tabContentDivs.forEach(div => div.classList.add('hidden'));
 
     const selectedTabContent = document.getElementById(tabIdToShow);
-    if (selectedTabContent) selectedTabContent.classList.remove('hidden');
+    if (selectedTabContent) {
+        selectedTabContent.classList.remove('hidden');
+        // console.log(`[showTab] Made tab ${tabIdToShow} visible.`);
+    } else {
+        // console.warn(`[showTab] Tab content not found for ${tabIdToShow}`);
+    }
 
     navTabButtons.forEach(button => {
         if (button.getAttribute('data-tab') === tabIdToShow) {
@@ -305,10 +311,30 @@ function showTab(tabIdToShow) {
             button.classList.remove('active-tab-button');
         }
     });
+    // console.log(`[showTab] Updated nav button active states.`);
 
     applySavedTheme();
 
-    if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') startNewChallenge();
+    if (tabIdToShow === 'learn-practice-tab' && typeof startNewChallenge === 'function') {
+        // console.log(`[showTab] Initializing learn-practice-tab specific content.`);
+        startNewChallenge();
+    }
+
+    if (tabIdToShow === 'book-cipher-tab') {
+        // console.log(`[showTab] Target is 'book-cipher-tab'. Checking for library functions on window object.`);
+        if (typeof window.populateFilterDropdowns === 'function') {
+            // console.log(`[showTab] Calling window.populateFilterDropdowns for book-cipher-tab.`);
+            window.populateFilterDropdowns();
+        } else {
+            // console.warn(`[showTab] window.populateFilterDropdowns function not found for book-cipher-tab.`);
+        }
+        if (typeof window.populateBookLibrary === 'function') {
+            // console.log(`[showTab] Calling window.populateBookLibrary for book-cipher-tab.`);
+            window.populateBookLibrary();
+        } else {
+            // console.warn(`[showTab] window.populateBookLibrary function not found for book-cipher-tab.`);
+        }
+    }
 
     // Attach tapper to relevant areas based on the active tab
     if (sharedVisualTapperWrapper) {
@@ -613,14 +639,99 @@ function populateMorseReference() {
 function applySavedTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     const isLight = savedTheme === 'light';
+    // console.log('[applySavedTheme] Theme from localStorage:', savedTheme, '| isLight:', isLight);
 
+    // console.log('[applySavedTheme] document.body.classList BEFORE:', document.body.classList.toString());
     document.body.classList.toggle('light-theme', isLight);
     document.body.classList.toggle('dark', !isLight);
+    // console.log('[applySavedTheme] document.body.classList AFTER:', document.body.classList.toString());
 
     document.querySelectorAll('.app-container').forEach(c => {
         c.classList.toggle('light-theme-container', isLight);
         c.classList.toggle('dark-theme-container', !isLight);
     });
+
+    // Explicitly style #pro-upsell-modal elements based on theme
+    const proModalContentDiv = document.querySelector('#pro-upsell-modal > div'); // The main content box
+    const proModalTitle = document.querySelector('#pro-upsell-modal h2');
+    const proModalParagraph = document.querySelector('#pro-upsell-modal p'); // Assuming first p is the main one
+    const proModalBenefitsTitle = document.querySelector('#pro-upsell-modal h3');
+    const proModalBenefitsList = document.querySelector('#pro-upsell-modal ul');
+    const proModalCloseButton = document.getElementById('close-pro-upsell-modal-top');
+
+    if (proModalContentDiv) {
+        proModalContentDiv.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-white', 'dark');
+        if (proModalTitle) proModalTitle.classList.remove('text-yellow-600', 'dark:text-yellow-400');
+        if (proModalParagraph) proModalParagraph.classList.remove('text-gray-600', 'dark:text-gray-300');
+        if (proModalBenefitsTitle) proModalBenefitsTitle.classList.remove('text-yellow-700', 'dark:text-yellow-300');
+        if (proModalBenefitsList) proModalBenefitsList.classList.remove('text-gray-600', 'dark:text-gray-300');
+        if (proModalCloseButton) proModalCloseButton.classList.remove('text-gray-500', 'hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-white');
+
+        if (isLight) {
+            proModalContentDiv.classList.add('bg-white', 'text-gray-700');
+            if (proModalTitle) proModalTitle.classList.add('text-yellow-600');
+            if (proModalParagraph) proModalParagraph.classList.add('text-gray-600');
+            if (proModalBenefitsTitle) proModalBenefitsTitle.classList.add('text-yellow-700');
+            if (proModalBenefitsList) proModalBenefitsList.classList.add('text-gray-600');
+            if (proModalCloseButton) proModalCloseButton.classList.add('text-gray-500', 'hover:text-gray-700');
+        } else { // isDark
+            proModalContentDiv.classList.add('dark', 'bg-gray-800', 'text-white');
+            if (proModalTitle) proModalTitle.classList.add('text-yellow-400');
+            if (proModalParagraph) proModalParagraph.classList.add('text-gray-300');
+            if (proModalBenefitsTitle) proModalBenefitsTitle.classList.add('text-yellow-300');
+            if (proModalBenefitsList) proModalBenefitsList.classList.add('text-gray-300');
+            if (proModalCloseButton) proModalCloseButton.classList.add('text-gray-400', 'dark:hover:text-white');
+        }
+    }
+
+    // Aggressively style the general #upsell-modal
+    const generalUpsellModalContentDiv = document.querySelector('#upsell-modal > div'); // Main content box
+    const generalUpsellModalTitle = document.querySelector('#upsell-modal h2.text-purple-600');
+    const generalUpsellModalParagraph = document.querySelector('#upsell-modal p.text-lg.mb-4');
+    const generalUpsellModalList = document.querySelector('#upsell-modal ul.list-disc'); // The UL element itself
+    const generalUpsellModalListItems = document.querySelectorAll('#upsell-modal ul li'); // All LIs for text color
+    const generalUpsellModalListSvgs = document.querySelectorAll('#upsell-modal ul li svg.text-green-500');
+    const generalUpsellModalCloseBtn = document.getElementById('close-upsell-modal-btn');
+    const generalUpsellModalSmallText = document.querySelector('#upsell-modal p.text-xs.text-gray-500');
+    const generalUpsellModalUpgradeBtn = document.getElementById('upgrade-to-pro-btn');
+
+
+    if (generalUpsellModalContentDiv) {
+        // Remove Tailwind's dark context class and specific color/bg classes before applying new ones
+        generalUpsellModalContentDiv.classList.remove('dark', 'bg-white', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-100'); // Added dark specific from potential tailwind config
+        if (generalUpsellModalTitle) generalUpsellModalTitle.classList.remove('text-purple-600', 'dark:text-purple-400');
+        if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.remove('text-gray-800', 'dark:text-gray-100');
+        if (generalUpsellModalList) generalUpsellModalList.classList.remove('text-gray-800', 'dark:text-gray-100'); // For general list text if not on LIs
+        if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.remove('text-gray-600', 'hover:text-gray-800', 'dark:text-gray-300', 'dark:hover:text-gray-100');
+        if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.remove('text-gray-500', 'dark:text-gray-400');
+        generalUpsellModalListItems.forEach(li => li.classList.remove('text-gray-800', 'dark:text-gray-100'));
+        generalUpsellModalListSvgs.forEach(svg => svg.classList.remove('text-green-500', 'dark:text-green-400'));
+        if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.remove('bg-purple-600', 'hover:bg-purple-700', 'dark:bg-purple-500', 'dark:hover:bg-purple-600');
+
+
+        if (isLight) {
+            generalUpsellModalContentDiv.classList.add('bg-white', 'text-gray-800');
+            if (generalUpsellModalTitle) generalUpsellModalTitle.classList.add('text-purple-600');
+            if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.add('text-gray-800');
+            if (generalUpsellModalList) generalUpsellModalList.classList.add('text-gray-800');
+            if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.add('text-gray-600', 'hover:text-gray-800');
+            if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.add('text-gray-500');
+            generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-800')); // Text color for li content
+            generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-500'));
+            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-600', 'hover:bg-purple-700');
+
+        } else { // isDark
+            generalUpsellModalContentDiv.classList.add('dark', 'bg-gray-700', 'text-gray-100'); // Example dark theme for this modal
+            if (generalUpsellModalTitle) generalUpsellModalTitle.classList.add('text-purple-400');
+            if (generalUpsellModalParagraph) generalUpsellModalParagraph.classList.add('text-gray-100');
+            if (generalUpsellModalList) generalUpsellModalList.classList.add('text-gray-100');
+            if (generalUpsellModalCloseBtn) generalUpsellModalCloseBtn.classList.add('text-gray-300', 'hover:text-gray-100');
+            if (generalUpsellModalSmallText) generalUpsellModalSmallText.classList.add('text-gray-400');
+            generalUpsellModalListItems.forEach(li => li.classList.add('text-gray-100'));
+            generalUpsellModalListSvgs.forEach(svg => svg.classList.add('text-green-400'));
+            if(generalUpsellModalUpgradeBtn) generalUpsellModalUpgradeBtn.classList.add('bg-purple-500', 'hover:bg-purple-600'); // Slightly different dark for button
+        }
+    }
 
     navTabButtons.forEach(button => {
         const isActive = button.classList.contains('active-tab-button');
@@ -702,31 +813,111 @@ if (shareButton) {
     });
 }
 
-const upsellModal = document.getElementById('upsell-modal');
-const goProBtn = document.getElementById('go-pro-btn');
-const goProFromLibraryBtn = document.getElementById('go-pro-from-library-btn');
-const closeUpsellModalBtn = document.getElementById('close-upsell-modal-btn');
-const upgradeToProBtn = document.getElementById('upgrade-to-pro-btn');
+const upsellModal = document.getElementById('upsell-modal'); // General Pro Upsell Modal
+const goProBtn = document.getElementById('go-pro-btn'); // General "Go Pro" button in settings
+const goProFromLibraryBtn = document.getElementById('go-pro-from-library-btn'); // "Go Pro" button in library banner
+const closeUpsellModalBtn = document.getElementById('close-upsell-modal-btn'); // Close for general upsell modal
+const upgradeToProBtn = document.getElementById('upgrade-to-pro-btn'); // Actual upgrade button in general upsell modal
 
-function showUpsellModal() { if (upsellModal && !window.isProUser) upsellModal.classList.remove('hidden'); }
-function hideUpsellModal() { if (upsellModal) upsellModal.classList.add('hidden'); }
+// Book Cipher Specific Pro Upsell Modal Elements
+const bookProUpsellModal = document.getElementById('pro-upsell-modal');
+const closeBookProUpsellModalTopBtn = document.getElementById('close-pro-upsell-modal-top');
+const bookGoProBtn = document.getElementById('go-pro-button'); // "Upgrade to Pro" from book specific modal
+const bookReturnToLibraryBtn = document.getElementById('return-to-library-button');
 
-if (goProBtn && !window.isProUser) goProBtn.addEventListener('click', showUpsellModal);
-if (goProFromLibraryBtn && !window.isProUser) goProFromLibraryBtn.addEventListener('click', showUpsellModal);
-if (closeUpsellModalBtn) closeUpsellModalBtn.addEventListener('click', hideUpsellModal);
-if (upgradeToProBtn) {
+
+// --- General Upsell Modal Logic ---
+function showUpsellModal() {
+    if (upsellModal && !window.isProUser) {
+        upsellModal.classList.remove('hidden');
+    }
+}
+function hideUpsellModal() {
+    if (upsellModal) {
+        upsellModal.classList.add('hidden');
+    }
+}
+
+if (goProBtn && !window.isProUser) { // Settings "Go Pro"
+    goProBtn.addEventListener('click', showUpsellModal);
+}
+if (goProFromLibraryBtn && !window.isProUser) { // Library banner "Go Pro"
+    goProFromLibraryBtn.addEventListener('click', showUpsellModal);
+}
+if (closeUpsellModalBtn) { // General close button
+    closeUpsellModalBtn.addEventListener('click', hideUpsellModal);
+}
+if (upgradeToProBtn) { // General upgrade button
     upgradeToProBtn.addEventListener('click', () => {
+        // console.log('[upgradeToProBtn] Clicked. Current window.isProUser:', window.isProUser);
         window.isProUser = true;
         localStorage.setItem('isProUser', 'true');
-        if (typeof populateBookLibrary === 'function') populateBookLibrary();
-        if (typeof window.initializeKochMethod === 'function') window.initializeKochMethod();
+        // console.log('[upgradeToProBtn] window.isProUser set to true.');
+
+        if (typeof window.initializeKochMethod === 'function') {
+            // console.log('[upgradeToProBtn] Calling initializeKochMethod.');
+            window.initializeKochMethod();
+        }
+        // console.log('[upgradeToProBtn] Calling updateGoProButtonUI.');
         updateGoProButtonUI();
+
+        // console.log('[upgradeToProBtn] Hiding modals.');
         hideUpsellModal();
-        // Refresh current tab if it has pro features that are now unlocked.
+        hideBookProUpsellModal();
+
         const currentTab = localStorage.getItem('lastTab');
-        if(currentTab) showTab(currentTab);
+        // console.log('[upgradeToProBtn] currentTab from localStorage:', currentTab);
+
+        if(currentTab) {
+            // console.log('[upgradeToProBtn] Calling showTab with currentTab:', currentTab);
+            showTab(currentTab);
+        } else {
+            // console.log('[upgradeToProBtn] No currentTab found in localStorage. Not calling showTab.');
+        }
+        // console.log('[upgradeToProBtn] Listener finished.');
     });
 }
+
+// --- Book Cipher Specific Pro Upsell Modal Logic ---
+function showBookProUpsellModal() {
+    // console.log('[showBookProUpsellModal] Called.');
+    if (bookProUpsellModal && !window.isProUser) {
+        // console.log('[showBookProUpsellModal] Modal element found, user is not Pro. Attempting to show modal.');
+        // console.log('[showBookProUpsellModal] document.body.classList:', document.body.classList.toString());
+        // const proUpsellModalContent = document.querySelector('#pro-upsell-modal > div');
+        // if (proUpsellModalContent) {
+            // console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) classList:', proUpsellModalContent.classList.toString());
+        // } else {
+            // console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) NOT found at time of show.');
+        // }
+        bookProUpsellModal.classList.remove('hidden');
+    } else if (!bookProUpsellModal) {
+        // console.log('[showBookProUpsellModal] Modal element (bookProUpsellModal) NOT found.');
+    } else if (window.isProUser) {
+        // console.log('[showBookProUpsellModal] User is Pro, modal not shown.');
+    }
+}
+window.showBookProUpsellModal = showBookProUpsellModal; // Expose to global for bookCipher.js
+
+function hideBookProUpsellModal() {
+    if (bookProUpsellModal) {
+        bookProUpsellModal.classList.add('hidden');
+    }
+}
+
+if (closeBookProUpsellModalTopBtn) {
+    closeBookProUpsellModalTopBtn.addEventListener('click', hideBookProUpsellModal);
+}
+if (bookReturnToLibraryBtn) {
+    bookReturnToLibraryBtn.addEventListener('click', hideBookProUpsellModal);
+}
+if (bookGoProBtn) {
+    bookGoProBtn.addEventListener('click', () => {
+        hideBookProUpsellModal(); // Hide this specific modal first
+        showUpsellModal();      // Then show the general one that has the "purchase" button
+    });
+}
+
 
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
