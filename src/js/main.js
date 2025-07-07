@@ -625,19 +625,46 @@ function applySavedTheme() {
         c.classList.toggle('dark-theme-container', !isLight);
     });
 
-    // Explicitly apply theme to the book pro upsell modal's content wrapper
-    const proUpsellModalContent = document.querySelector('#pro-upsell-modal > div');
-    if (proUpsellModalContent) {
-        console.log('[applySavedTheme] #pro-upsell-modal > div found.');
-        console.log('[applySavedTheme] Modal content classList BEFORE:', proUpsellModalContent.classList.toString());
+    // Explicitly style #pro-upsell-modal elements based on theme
+    const proModalContentDiv = document.querySelector('#pro-upsell-modal > div'); // The main content box
+    const proModalTitle = document.querySelector('#pro-upsell-modal h2');
+    const proModalParagraph = document.querySelector('#pro-upsell-modal p'); // Assuming first p is the main one
+    const proModalBenefitsTitle = document.querySelector('#pro-upsell-modal h3');
+    const proModalBenefitsList = document.querySelector('#pro-upsell-modal ul');
+    const proModalCloseButton = document.getElementById('close-pro-upsell-modal-top');
+    // Buttons are trickier as their base and dark styles are more complex, relying on Tailwind's dark: prefix.
+    // We'll focus on text and backgrounds primarily. The existing button classes should work if the overall .dark context is set.
+
+    if (proModalContentDiv) {
+        console.log('[applySavedTheme] Aggressively styling #pro-upsell-modal elements. isLight:', isLight);
+
+        // Remove all potentially conflicting classes first for cleaner application
+        proModalContentDiv.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-white', 'dark');
+        if (proModalTitle) proModalTitle.classList.remove('text-yellow-600', 'dark:text-yellow-400');
+        if (proModalParagraph) proModalParagraph.classList.remove('text-gray-600', 'dark:text-gray-300');
+        if (proModalBenefitsTitle) proModalBenefitsTitle.classList.remove('text-yellow-700', 'dark:text-yellow-300');
+        if (proModalBenefitsList) proModalBenefitsList.classList.remove('text-gray-600', 'dark:text-gray-300');
+        if (proModalCloseButton) proModalCloseButton.classList.remove('text-gray-500', 'hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-white');
+
         if (isLight) {
-            proUpsellModalContent.classList.remove('dark');
+            proModalContentDiv.classList.add('bg-white', 'text-gray-700');
+            if (proModalTitle) proModalTitle.classList.add('text-yellow-600');
+            if (proModalParagraph) proModalParagraph.classList.add('text-gray-600');
+            if (proModalBenefitsTitle) proModalBenefitsTitle.classList.add('text-yellow-700');
+            if (proModalBenefitsList) proModalBenefitsList.classList.add('text-gray-600');
+            if (proModalCloseButton) proModalCloseButton.classList.add('text-gray-500', 'hover:text-gray-700');
         } else { // isDark
-            proUpsellModalContent.classList.add('dark');
+            // Add the 'dark' class to the content div to help Tailwind's dark: variants for buttons if they are still used.
+            proModalContentDiv.classList.add('dark', 'bg-gray-800', 'text-white');
+            if (proModalTitle) proModalTitle.classList.add('text-yellow-400');
+            if (proModalParagraph) proModalParagraph.classList.add('text-gray-300');
+            if (proModalBenefitsTitle) proModalBenefitsTitle.classList.add('text-yellow-300');
+            if (proModalBenefitsList) proModalBenefitsList.classList.add('text-gray-300');
+            if (proModalCloseButton) proModalCloseButton.classList.add('text-gray-400', 'dark:hover:text-white');
         }
-        console.log('[applySavedTheme] Modal content classList AFTER:', proUpsellModalContent.classList.toString());
+        console.log('[applySavedTheme] Modal content classList AFTER aggressive styling:', proModalContentDiv.classList.toString());
     } else {
-        console.log('[applySavedTheme] #pro-upsell-modal > div NOT found.');
+        console.log('[applySavedTheme] #pro-upsell-modal > div NOT found for aggressive styling.');
     }
 
     navTabButtons.forEach(button => {
