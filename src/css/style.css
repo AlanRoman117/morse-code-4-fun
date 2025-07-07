@@ -765,3 +765,139 @@ body.privacy-page.dark-theme {
         display: none !important;
     }
 }
+
+/* === BEGIN REFINED AAA LIGHT THEME BUTTON OVERRIDES (incl. Active States) === */
+
+/* Purple Buttons: HTML base dark theme e.g. "bg-purple-900 text-white active:bg-purple-950" */
+.light-theme .bg-purple-900.text-white,
+.light-theme-container .bg-purple-900.text-white {
+    background-color: #DDD6FE !important; /* purple-200 */
+    color: #4C1D95 !important; /* purple-900 */
+}
+.light-theme .bg-purple-900.text-white:hover,
+.light-theme-container .bg-purple-900.text-white:hover,
+.light-theme button.hover\:bg-purple-800.text-white:hover,
+.light-theme-container button.hover\:bg-purple-800.text-white:hover {
+    background-color: #C4B5FD !important; /* purple-300 */
+    color: #4C1D95 !important; /* purple-900 */
+}
+/* Re-evaluating purple active for better contrast with purple-400 bg */
+.light-theme .bg-purple-900.text-white:active,
+.light-theme-container .bg-purple-900.text-white:active,
+.light-theme button.active\:bg-purple-950.text-white:active,
+.light-theme-container button.active\:bg-purple-950.text-white:active {
+    background-color: #A78BFA !important; /* purple-400 */
+    color: #FFFFFF !important; /* white text */
+}
+
+
+/* Blue Buttons: HTML base dark "bg-blue-900 text-white active:bg-blue-950" */
+.light-theme .bg-blue-900.text-white,
+.light-theme-container .bg-blue-900.text-white {
+    background-color: #BFDBFE !important; /* blue-200 */
+    color: #1E3A8A !important; /* blue-900 */
+}
+.light-theme .bg-blue-900.text-white:hover,
+.light-theme-container .bg-blue-900.text-white:hover,
+.light-theme button.hover\:bg-blue-800.text-white:hover,
+.light-theme-container button.hover\:bg-blue-800.text-white:hover {
+    background-color: #93C5FD !important; /* blue-300 */
+    color: #1E3A8A !important; /* blue-900 */
+}
+.light-theme .bg-blue-900.text-white:active,
+.light-theme-container .bg-blue-900.text-white:active,
+.light-theme button.active\:bg-blue-950.text-white:active,
+.light-theme-container button.active\:bg-blue-950.text-white:active {
+    background-color: #60A5FA !important; /* blue-400 */
+    color: #FFFFFF !important; /* white text, contrast 4.55:1 (AA) */
+}
+
+/* Green Buttons: HTML base dark "bg-green-600 text-black active:bg-green-800" */
+.light-theme .bg-green-600.text-black,
+.light-theme-container .bg-green-600.text-black {
+    background-color: #A7F3D0 !important; /* green-200 */
+    color: #065F46 !important; /* green-900 */
+}
+.light-theme .bg-green-600.text-black:hover,
+.light-theme-container .bg-green-600.text-black:hover,
+.light-theme button.hover\:bg-green-700.text-black:hover,
+.light-theme-container button.hover\:bg-green-700.text-black:hover {
+    background-color: #6EE7B7 !important; /* green-300 */
+    color: #065F46 !important; /* green-900 */
+}
+.light-theme .bg-green-600.text-black:active,
+.light-theme-container .bg-green-600.text-black:active,
+.light-theme button.active\:bg-green-800.text-black:active, /* HTML active */
+.light-theme-container button.active\:bg-green-800.text-black:active {
+    background-color: #34D399 !important; /* green-400 */
+    color: #064E3B !important; /* green-900 (darker for active) */
+}
+
+
+/* Red Buttons: HTML base dark "bg-red-500 text-black active:bg-red-700" */
+.light-theme .bg-red-500.text-black,
+.light-theme-container .bg-red-500.text-black {
+    background-color: #FECACA !important; /* red-200 */
+    color: #7F1D1D !important; /* red-900 */
+}
+.light-theme .bg-red-500.text-black:hover,
+.light-theme-container .bg-red-500.text-black:hover,
+.light-theme button.hover\:bg-red-600.text-black:hover,
+.light-theme-container button.hover\:bg-red-600.text-black:hover {
+    background-color: #FCA5A5 !important; /* red-300 */
+    color: #7F1D1D !important; /* red-900 */
+}
+.light-theme .bg-red-500.text-black:active,
+.light-theme-container .bg-red-500.text-black:active,
+.light-theme button.active\:bg-red-700.text-black:active, /* HTML active */
+.light-theme-container button.active\:bg-red-700.text-black:active {
+    background-color: #FEE2E2 !important; /* red-100 */
+    color: #B91C1C !important; /* red-700 */
+}
+
+
+/* Indigo Buttons: HTML base dark "bg-indigo-900 text-white active:bg-indigo-950" */
+.light-theme .bg-indigo-900.text-white,
+.light-theme-container .bg-indigo-900.text-white {
+    background-color: #C7D2FE !important; /* indigo-200 */
+    color: #312E81 !important; /* indigo-900 */
+}
+.light-theme .bg-indigo-900.text-white:hover,
+.light-theme-container .bg-indigo-900.text-white:hover,
+.light-theme button.hover\:bg-indigo-800.text-white:hover,
+.light-theme-container button.hover\:bg-indigo-800.text-white:hover {
+    background-color: #A5B4FC !important; /* indigo-300 */
+    color: #312E81 !important; /* indigo-900 */
+}
+.light-theme .bg-indigo-900.text-white:active,
+.light-theme-container .bg-indigo-900.text-white:active,
+.light-theme button.active\:bg-indigo-950.text-white:active, /* HTML active */
+.light-theme-container button.active\:bg-indigo-950.text-white:active {
+    background-color: #818CF8 !important; /* indigo-400 */
+    color: #FFFFFF !important; /* white text, contrast 4.68:1 (AA) */
+}
+
+/* Gray Buttons: HTML base dark "bg-gray-800 text-gray-200 active:bg-gray-900" */
+.light-theme .bg-gray-800.text-gray-200,
+.light-theme-container .bg-gray-800.text-gray-200 {
+    background-color: #E5E7EB !important; /* gray-200 */
+    color: #1F2937 !important; /* gray-800 */
+}
+.light-theme .bg-gray-800.text-gray-200:hover,
+.light-theme-container .bg-gray-800.text-gray-200:hover,
+.light-theme a.hover\:bg-gray-700.text-gray-200:hover,
+.light-theme button.hover\:bg-gray-700.text-gray-200:hover {
+    background-color: #D1D5DB !important; /* gray-300 */
+    color: #1F2937 !important; /* gray-800 */
+}
+.light-theme .bg-gray-800.text-gray-200:active,
+.light-theme-container .bg-gray-800.text-gray-200:active,
+.light-theme a.active\:bg-gray-900.text-gray-200:active, /* HTML active for <a> */
+.light-theme button.active\:bg-gray-900.text-gray-200:active { /* HTML active for <button> */
+    background-color: #9CA3AF !important; /* gray-400 */
+    color: #111827 !important; /* gray-900 */
+}
+
+/* Special banner button already handled by targeting parent div hover */
+
+/* === END REFINED AAA LIGHT THEME BUTTON OVERRIDES === */
