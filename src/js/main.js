@@ -701,12 +701,13 @@ function applySavedTheme() {
         const isActive = button.classList.contains('active-tab-button');
 
         const classesToRemove = [
-            // Light Mode Active
-            'bg-blue-600', 'text-white', 'hover:bg-blue-700',
+            // Light Mode Active (NEW: bg-blue-700, hover:bg-blue-800)
+            'bg-blue-600', 'hover:bg-blue-700', // Old light active bg/hover
+            'bg-blue-700', 'text-white', 'hover:bg-blue-800', // New light active bg/text/hover
             // Light Mode Inactive
             'bg-gray-200', 'text-gray-700', 'hover:bg-gray-300',
 
-            // Old Dark Mode Active (styles used before this gradient change)
+            // Old Dark Mode Active
             'dark:bg-blue-500', 'dark:text-gray-100', 'dark:hover:bg-blue-600',
 
             // Old Dark Mode Inactive (covers initial HTML of non-intro tabs & previous JS applied dark inactive)

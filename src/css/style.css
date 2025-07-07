@@ -189,9 +189,15 @@ body {
         .light-theme-container .text-gray-400 {
              color: #374151 !important; /* Tailwind gray-700, !important to override Tailwind if needed */
         }
-        .light-theme .text-white, /* For elements that are explicitly text-white in dark mode */
-        .light-theme-container .text-white {
+        /* Apply dark text to .text-white elements in light theme, UNLESS it's an active nav button */
+        .light-theme :not(nav > button.active-tab-button).text-white,
+        .light-theme-container :not(nav > button.active-tab-button).text-white {
             color: #1f2937 !important; /* Tailwind gray-800 */
+        }
+        /* Ensure that active nav buttons explicitly styled with text-white by JS DO render as white */
+        .light-theme nav > button.active-tab-button.text-white,
+        .light-theme-container nav > button.active-tab-button.text-white {
+            color: #FFFFFF !important; /* Actual white, overriding the general .light-theme .text-white if necessary */
         }
 
         .light-theme .section-title,
