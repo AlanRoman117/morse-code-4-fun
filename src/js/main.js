@@ -622,6 +622,19 @@ function applySavedTheme() {
         c.classList.toggle('dark-theme-container', !isLight);
     });
 
+    // Explicitly apply theme to the book pro upsell modal's content wrapper
+    const proUpsellModalContent = document.querySelector('#pro-upsell-modal > div');
+    if (proUpsellModalContent) {
+        if (isLight) {
+            proUpsellModalContent.classList.remove('dark');
+            // Ensure light mode default classes are active (Tailwind should handle this via `dark:` prefixes not matching)
+            // For example, bg-white should take precedence if 'dark' class is not present.
+        } else { // isDark
+            proUpsellModalContent.classList.add('dark');
+            // This should activate the `dark:` variants like `dark:bg-gray-800`
+        }
+    }
+
     navTabButtons.forEach(button => {
         const isActive = button.classList.contains('active-tab-button');
         button.classList.remove(
