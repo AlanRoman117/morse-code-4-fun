@@ -683,6 +683,7 @@ if (typeof attachTapperToArea === 'function') {
 
                 // Wire up the "Play Unlocked Morse" button on the game screen
                 const playUnlockedMorseGameBtn = document.getElementById('play-unlocked-morse-on-game-btn');
+                console.log('[GameInit] playUnlockedMorseGameBtn element:', playUnlockedMorseGameBtn);
                 if (playUnlockedMorseGameBtn) {
                     playUnlockedMorseGameBtn.addEventListener('click', () => {
                         if (typeof playUnlockedMorse === 'function') {
@@ -693,26 +694,35 @@ if (typeof attachTapperToArea === 'function') {
                         }
                     });
 
+                    console.log(`[GameInit] progressLoaded status for button logic: ${progressLoaded}`);
                     // Enable/disable based on whether any progress (and thus unlocked text) was loaded
                     if (progressLoaded) {
                         const savedProgressString = localStorage.getItem(`bookCipherProgress_${bookId}`);
+                        console.log(`[GameInit] savedProgressString for button:`, savedProgressString);
                         if (savedProgressString) {
                             try {
                                 const savedProg = JSON.parse(savedProgressString);
                                 if (savedProg.unlockedText && savedProg.unlockedText.trim() !== "") {
                                     playUnlockedMorseGameBtn.disabled = false;
+                                    console.log('[GameInit] playUnlockedMorseGameBtn ENABLED (progress loaded with text).');
                                 } else {
                                     playUnlockedMorseGameBtn.disabled = true;
+                                    console.log('[GameInit] playUnlockedMorseGameBtn DISABLED (progress loaded, but no/empty unlockedText).');
                                 }
                             } catch (e) {
                                 playUnlockedMorseGameBtn.disabled = true; // Disable on error
+                                console.log('[GameInit] playUnlockedMorseGameBtn DISABLED (error parsing progress).');
                             }
                         } else {
                              playUnlockedMorseGameBtn.disabled = true;
+                             console.log('[GameInit] playUnlockedMorseGameBtn DISABLED (no savedProgressString though progressLoaded was true - unusual).');
                         }
                     } else {
                         playUnlockedMorseGameBtn.disabled = true;
+                        console.log('[GameInit] playUnlockedMorseGameBtn DISABLED (progressLoaded is false).');
                     }
+                } else {
+                    console.log('[GameInit] play-unlocked-morse-on-game-btn NOT FOUND in DOM.');
                 }
 
             })
@@ -932,10 +942,20 @@ if (typeof attachTapperToArea === 'function') {
 
             // Enable the 'Play Unlocked Morse' button on game screen if it's not already
             const playUnlockedMorseGameBtn = document.getElementById('play-unlocked-morse-on-game-btn');
+            // console.log('[InputHandler] playUnlockedMorseGameBtn element:', playUnlockedMorseGameBtn);
             if (playUnlockedMorseGameBtn && playUnlockedMorseGameBtn.disabled) {
+                // console.log('[InputHandler] Button found and is disabled. Checking unlockedTextDisplay.');
+                // console.log('[InputHandler] unlockedTextDisplay.textContent:', unlockedTextDisplay ? unlockedTextDisplay.textContent : 'N/A');
                 if (unlockedTextDisplay && unlockedTextDisplay.textContent && unlockedTextDisplay.textContent.trim() !== "" && unlockedTextDisplay.textContent.trim() !== "-") {
                     playUnlockedMorseGameBtn.disabled = false;
+                    console.log('[InputHandler] playUnlockedMorseGameBtn has been ENABLED.');
+                } else {
+                    // console.log('[InputHandler] unlockedTextDisplay still considered empty or placeholder. Button remains disabled.');
                 }
+            } else if (playUnlockedMorseGameBtn && !playUnlockedMorseGameBtn.disabled) {
+                // console.log('[InputHandler] playUnlockedMorseGameBtn found and is already ENABLED.');
+            } else if (!playUnlockedMorseGameBtn) {
+                // console.log('[InputHandler] play-unlocked-morse-on-game-btn NOT FOUND in DOM.');
             }
         } else {
             // --- MISMATCH ---
