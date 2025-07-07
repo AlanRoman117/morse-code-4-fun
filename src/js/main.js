@@ -293,6 +293,7 @@ function attachTapperToArea(targetAreaId) {
         }
     }
 }
+window.attachTapperToArea = attachTapperToArea;
 
 function detachSharedTapper() {
     if (typeof resetVisualTapperState === 'function') resetVisualTapperState();

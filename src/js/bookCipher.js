@@ -319,19 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             displayUnlockedBookText(currentBookId);
                         });
 
-                        const playUnlockedMorseBtn = document.createElement('button');
-                        playUnlockedMorseBtn.id = 'play-unlocked-morse-btn';
-                        playUnlockedMorseBtn.textContent = 'Play Unlocked Morse';
-                        playUnlockedMorseBtn.className = 'w-full max-w-xs px-6 py-3 bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-teal-400';
-                        buttonContainer.appendChild(playUnlockedMorseBtn);
-                        playUnlockedMorseBtn.addEventListener('click', () => {
-                            if (typeof playUnlockedMorse === 'function') {
-                                playUnlockedMorse(currentBookId);
-                            } else {
-                                console.error('playUnlockedMorse function not found.');
-                                alert('Play Unlocked Morse feature is currently unavailable.');
-                            }
-                        });
+                        // "Play Unlocked Morse" button REMOVED from here. It will be added to the game screen.
                     }
 
                     if (isBookMarkedCompleted) {
@@ -693,6 +681,40 @@ if (typeof attachTapperToArea === 'function') {
                 }
                 // END - Modified code to populate #full-book-morse-display with spans
 
+                // Wire up the "Play Unlocked Morse" button on the game screen
+                const playUnlockedMorseGameBtn = document.getElementById('play-unlocked-morse-on-game-btn');
+                if (playUnlockedMorseGameBtn) {
+                    playUnlockedMorseGameBtn.addEventListener('click', () => {
+                        if (typeof playUnlockedMorse === 'function') {
+                            playUnlockedMorse(currentBookId); // currentBookId is in scope here
+                        } else {
+                            console.error('playUnlockedMorse function not found from game screen button.');
+                            alert('Play Unlocked Morse feature is currently unavailable.');
+                        }
+                    });
+
+                    // Enable/disable based on whether any progress (and thus unlocked text) was loaded
+                    if (progressLoaded) {
+                        const savedProgressString = localStorage.getItem(`bookCipherProgress_${bookId}`);
+                        if (savedProgressString) {
+                            try {
+                                const savedProg = JSON.parse(savedProgressString);
+                                if (savedProg.unlockedText && savedProg.unlockedText.trim() !== "") {
+                                    playUnlockedMorseGameBtn.disabled = false;
+                                } else {
+                                    playUnlockedMorseGameBtn.disabled = true;
+                                }
+                            } catch (e) {
+                                playUnlockedMorseGameBtn.disabled = true; // Disable on error
+                            }
+                        } else {
+                             playUnlockedMorseGameBtn.disabled = true;
+                        }
+                    } else {
+                        playUnlockedMorseGameBtn.disabled = true;
+                    }
+                }
+
             })
             .catch(error => {
                 console.error('Error fetching book content for game:', error);
@@ -907,6 +929,14 @@ if (typeof attachTapperToArea === 'function') {
 
             setNextTargetMorseSignal(); // Set up the next target
             saveProgress(currentBookId, isBookCompleted); // Save progress
+
+            // Enable the 'Play Unlocked Morse' button on game screen if it's not already
+            const playUnlockedMorseGameBtn = document.getElementById('play-unlocked-morse-on-game-btn');
+            if (playUnlockedMorseGameBtn && playUnlockedMorseGameBtn.disabled) {
+                if (unlockedTextDisplay && unlockedTextDisplay.textContent && unlockedTextDisplay.textContent.trim() !== "" && unlockedTextDisplay.textContent.trim() !== "-") {
+                    playUnlockedMorseGameBtn.disabled = false;
+                }
+            }
         } else {
             // --- MISMATCH ---
             if (bookCipherMessageEl) bookCipherMessageEl.textContent = 'Incorrect. Try again.';
