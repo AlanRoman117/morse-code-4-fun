@@ -311,8 +311,9 @@ window.detachSharedTapper = detachSharedTapper;
 
 function showTab(tabIdToShow) {
     if (window.isPlayingStoryPlayback) {
-        console.log(`[showTab] Playback active while switching. Setting isPlayingStoryPlayback to false.`);
+        console.log(`[showTab] Playback active while switching. Setting isPlayingStoryPlayback=false, navigatingAwayFromPlayback=true.`);
         window.isPlayingStoryPlayback = false;
+        window.navigatingAwayFromPlayback = true;
     }
     // console.log(`[showTab] Called with tabIdToShow: ${tabIdToShow}`);
     window.detachSharedTapper(); // Ensure using window. prefix

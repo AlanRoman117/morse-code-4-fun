@@ -1,3 +1,5 @@
+window.navigatingAwayFromPlayback = false; // Flag to manage navigation during playback
+
 document.addEventListener('DOMContentLoaded', () => {
     let currentBookId = null; // Added for saving progress
     let isBookCompleted = false; // Flag for book completion status
@@ -1066,11 +1068,9 @@ if (typeof attachTapperToArea === 'function') {
             console.log("'Return to Library' button clicked from game view.");
 
             if (window.isPlayingStoryPlayback) {
-                console.log('[ReturnToLibraryButton] Playback active, setting isPlayingStoryPlayback to false.');
+                console.log('[ReturnBtn] Playback active. Setting isPlayingStoryPlayback=false, navigatingAwayFromPlayback=true.');
                 window.isPlayingStoryPlayback = false;
-                // The playback function's finally block should handle UI restoration (like hiding stop button)
-                // and calling initializeAndStartBookGame, which might be interrupted by immediate view change.
-                // For a cleaner stop, we might also need to directly manage button visibility here if the finally block doesn't run fully.
+                window.navigatingAwayFromPlayback = true;
             }
 
             if (currentBookId) { // currentBookId is a global in this file
@@ -1508,7 +1508,13 @@ async function startStoryPlayback(bookId) {
 
         // const bookIsActuallyCompleted = isBookCompleted; // Removed: Causes ReferenceError, and initializeAndStartBookGame handles state
         // saveProgress(bookId, bookIsActuallyCompleted); // Removed: initializeAndStartBookGame will manage progress based on its own load.
-        initializeAndStartBookGame(bookId);
+        if (!window.navigatingAwayFromPlayback) {
+            console.log('[startStoryPlayback finally] Not navigating away, calling initializeAndStartBookGame.');
+            initializeAndStartBookGame(bookId);
+        } else {
+            console.log('[startStoryPlayback finally] Navigating away, SKIPPING initializeAndStartBookGame.');
+        }
+        window.navigatingAwayFromPlayback = false; // Reset flag
 
 
     }
@@ -1645,7 +1651,13 @@ async function playUnlockedMorse(bookId) {
 
         // Restore the game view to its normal state for the current book
         // This ensures the full-book-morse-display and other elements are correctly shown
-        initializeAndStartBookGame(bookId); // Use the bookId parameter from the function
+        if (!window.navigatingAwayFromPlayback) {
+            console.log('[playUnlockedMorse finally] Not navigating away, calling initializeAndStartBookGame.');
+            initializeAndStartBookGame(bookId);
+        } else {
+            console.log('[playUnlockedMorse finally] Navigating away, SKIPPING initializeAndStartBookGame.');
+        }
+        window.navigatingAwayFromPlayback = false; // Reset flag
     }
 }
 window.playUnlockedMorse = playUnlockedMorse;
