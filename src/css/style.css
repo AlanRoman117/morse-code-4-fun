@@ -58,6 +58,7 @@ body {
         .active-tab-button {
             font-weight: 600; /* Tailwind semibold */
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2); /* Subtle cue for dark mode */
         }
         .tab-content {
             width: 100%; /* Ensure it spans the full width available */
