@@ -613,9 +613,12 @@ function populateMorseReference() {
 function applySavedTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     const isLight = savedTheme === 'light';
+    console.log('[applySavedTheme] Theme from localStorage:', savedTheme, '| isLight:', isLight);
 
+    console.log('[applySavedTheme] document.body.classList BEFORE:', document.body.classList.toString());
     document.body.classList.toggle('light-theme', isLight);
     document.body.classList.toggle('dark', !isLight);
+    console.log('[applySavedTheme] document.body.classList AFTER:', document.body.classList.toString());
 
     document.querySelectorAll('.app-container').forEach(c => {
         c.classList.toggle('light-theme-container', isLight);
@@ -625,14 +628,16 @@ function applySavedTheme() {
     // Explicitly apply theme to the book pro upsell modal's content wrapper
     const proUpsellModalContent = document.querySelector('#pro-upsell-modal > div');
     if (proUpsellModalContent) {
+        console.log('[applySavedTheme] #pro-upsell-modal > div found.');
+        console.log('[applySavedTheme] Modal content classList BEFORE:', proUpsellModalContent.classList.toString());
         if (isLight) {
             proUpsellModalContent.classList.remove('dark');
-            // Ensure light mode default classes are active (Tailwind should handle this via `dark:` prefixes not matching)
-            // For example, bg-white should take precedence if 'dark' class is not present.
         } else { // isDark
             proUpsellModalContent.classList.add('dark');
-            // This should activate the `dark:` variants like `dark:bg-gray-800`
         }
+        console.log('[applySavedTheme] Modal content classList AFTER:', proUpsellModalContent.classList.toString());
+    } else {
+        console.log('[applySavedTheme] #pro-upsell-modal > div NOT found.');
     }
 
     navTabButtons.forEach(button => {
@@ -766,8 +771,21 @@ if (upgradeToProBtn) { // General upgrade button
 
 // --- Book Cipher Specific Pro Upsell Modal Logic ---
 function showBookProUpsellModal() {
+    console.log('[showBookProUpsellModal] Called.');
     if (bookProUpsellModal && !window.isProUser) {
+        console.log('[showBookProUpsellModal] Modal element found, user is not Pro. Attempting to show modal.');
+        console.log('[showBookProUpsellModal] document.body.classList:', document.body.classList.toString());
+        const proUpsellModalContent = document.querySelector('#pro-upsell-modal > div');
+        if (proUpsellModalContent) {
+            console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) classList:', proUpsellModalContent.classList.toString());
+        } else {
+            console.log('[showBookProUpsellModal] Modal content (#pro-upsell-modal > div) NOT found at time of show.');
+        }
         bookProUpsellModal.classList.remove('hidden');
+    } else if (!bookProUpsellModal) {
+        console.log('[showBookProUpsellModal] Modal element (bookProUpsellModal) NOT found.');
+    } else if (window.isProUser) {
+        console.log('[showBookProUpsellModal] User is Pro, modal not shown.');
     }
 }
 window.showBookProUpsellModal = showBookProUpsellModal; // Expose to global for bookCipher.js
