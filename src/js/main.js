@@ -310,10 +310,26 @@ function detachSharedTapper() {
 window.detachSharedTapper = detachSharedTapper;
 
 function showTab(tabIdToShow) {
+    const currentActiveButton = document.querySelector('nav button.active-tab-button');
+    const currentActiveTabId = currentActiveButton ? currentActiveButton.getAttribute('data-tab') : null;
+
     if (window.isPlayingStoryPlayback) {
-        console.log(`[showTab] Playback active while switching. Setting isPlayingStoryPlayback=false, navigatingAwayFromPlayback=true.`);
-        window.isPlayingStoryPlayback = false;
-        window.navigatingAwayFromPlayback = true;
+        window.isPlayingStoryPlayback = false; // Always stop playback sound/loop first
+        if (currentActiveTabId && tabIdToShow !== currentActiveTabId) {
+            // Only set navigatingAway if it's a TRULY different tab
+            console.log(`[showTab] Playback active, switching to a DIFFERENT tab (${tabIdToShow} from ${currentActiveTabId}). Setting navigatingAwayFromPlayback=true.`);
+            window.navigatingAwayFromPlayback = true;
+        } else if (currentActiveTabId && tabIdToShow === currentActiveTabId) {
+            console.log(`[showTab] Playback active, clicked SAME tab (${tabIdToShow}). NOT setting navigatingAwayFromPlayback. Playback will stop, view should refresh via finally.`);
+            // Ensure navigatingAwayFromPlayback is false, so the finally block in playback does its full refresh.
+            // This is important because the finally block always resets it to false AFTER its check.
+            // If it was true from a previous different-tab navigation that got interrupted, we need to clear it here.
+            window.navigatingAwayFromPlayback = false;
+        } else {
+             // Fallback if no currentActiveTabId found, or some other oddity, treat as navigation (safer to stop full reinit)
+            console.log(`[showTab] Playback active, currentActiveTabId not found or tabIdToShow is unusual. Setting navigatingAwayFromPlayback=true.`);
+            window.navigatingAwayFromPlayback = true;
+        }
     }
     // console.log(`[showTab] Called with tabIdToShow: ${tabIdToShow}`);
     window.detachSharedTapper(); // Ensure using window. prefix
