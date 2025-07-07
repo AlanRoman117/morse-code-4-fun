@@ -57,6 +57,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // --- End View Switching Functions ---
 
+    // --- Filter Elements ---
+    const filterGenreEl = document.getElementById('filter-genre');
+    const filterAuthorEl = document.getElementById('filter-author');
+    const filterLengthEl = document.getElementById('filter-length');
+    const filterAvailabilityEl = document.getElementById('filter-availability');
+
+    // Function to populate filter dropdowns
+    function populateFilterDropdowns() {
+        if (!bookCipherBooks || Object.keys(bookCipherBooks).length === 0) {
+            return; // No books to get filters from
+        }
+
+        const genres = new Set();
+        const authors = new Set();
+
+        for (const bookKey in bookCipherBooks) {
+            if (bookCipherBooks.hasOwnProperty(bookKey)) {
+                const book = bookCipherBooks[bookKey];
+                if (book.genre) genres.add(book.genre);
+                if (book.author) authors.add(book.author);
+            }
+        }
+
+        if (filterGenreEl) {
+            // Clear existing options except "All Genres"
+            while (filterGenreEl.options.length > 1) filterGenreEl.remove(1);
+            genres.forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre;
+                option.textContent = genre;
+                filterGenreEl.appendChild(option);
+            });
+        }
+
+        if (filterAuthorEl) {
+            // Clear existing options except "All Authors"
+            while (filterAuthorEl.options.length > 1) filterAuthorEl.remove(1);
+            authors.forEach(author => {
+                const option = document.createElement('option');
+                option.value = author;
+                option.textContent = author;
+                filterAuthorEl.appendChild(option);
+            });
+        }
+    }
+
+
     // Function to populate the book library display
     function populateBookLibrary() {
         const libraryContainer = document.getElementById('book-library-container');
@@ -68,108 +115,136 @@ document.addEventListener('DOMContentLoaded', () => {
         // Selectively remove only book items to preserve other elements like the banner
         const itemsToRemove = libraryContainer.querySelectorAll('.book-cover-item');
         itemsToRemove.forEach(item => item.remove());
-        // libraryContainer.innerHTML = ''; // Old way: Cleared existing content, including banner
 
         if (!bookCipherBooks || Object.keys(bookCipherBooks).length === 0) {
             console.warn("bookCipherBooks object is empty or not defined. Cannot populate library.");
-            // Make sure the banner placeholder is also cleared or handled if library is empty.
-            // The banner is inside libraryContainer, so clearing innerHTML handles it.
-            libraryContainer.textContent = 'No books available.'; // Display a message
+            libraryContainer.textContent = 'No books available.';
             return;
         }
 
-        // The banner is now part of the HTML structure inside libraryContainer.
-        // We will control its visibility after populating books.
-        const unlockBooksBanner = document.getElementById('unlock-books-banner'); // Get banner element
+        // Get filter values
+        const selectedGenre = filterGenreEl ? filterGenreEl.value : 'all';
+        const selectedAuthor = filterAuthorEl ? filterAuthorEl.value : 'all';
+        const selectedLength = filterLengthEl ? filterLengthEl.value : 'all';
+        const selectedAvailability = filterAvailabilityEl ? filterAvailabilityEl.value : 'all';
 
-        for (const bookKey in bookCipherBooks) {
-            if (bookCipherBooks.hasOwnProperty(bookKey)) {
-                const book = bookCipherBooks[bookKey];
-                const bookElement = document.createElement('div');
-                // bookElement.textContent = book.title; // Title will be inside a sub-element
+        let hasVisibleBooks = false;
 
-                const titleSpan = document.createElement('span');
-                titleSpan.textContent = book.title;
-                bookElement.appendChild(titleSpan);
+        const filteredBookKeys = Object.keys(bookCipherBooks).filter(bookKey => {
+            const book = bookCipherBooks[bookKey];
+            if (!book) return false;
 
-                bookElement.classList.add('book-cover-item');
-                bookElement.setAttribute('data-book-id', bookKey);
+            const matchesGenre = selectedGenre === 'all' || book.genre === selectedGenre;
+            const matchesAuthor = selectedAuthor === 'all' || book.author === selectedAuthor;
+            const matchesLength = selectedLength === 'all' || book.lengthCategory === selectedLength;
 
-                const isLocked = book.isPro && !window.isProUser;
+            let matchesAvailability = true;
+            if (selectedAvailability === 'free') {
+                matchesAvailability = !book.isPro;
+            } else if (selectedAvailability === 'pro') {
+                matchesAvailability = book.isPro && window.isProUser; // Only show Pro if user has Pro
+            }
+            // If selectedAvailability is 'all', matchesAvailability remains true.
+            // An additional case: if Pro is selected but user is not Pro, we might still want to show locked books.
+            // The current logic for displaying lock icons handles the visual part.
+            // Let's adjust `matchesAvailability` for showing locked Pro books if "Pro Only" or "All" is selected by a non-Pro user.
+            if (selectedAvailability === 'pro' && book.isPro) { // Show all pro books if "Pro Only" is selected, lock state handled below
+                 matchesAvailability = true;
+            } else if (selectedAvailability === 'free' && book.isPro) {
+                 matchesAvailability = false;
+            }
 
-                if (isLocked) {
-                    bookElement.classList.add('opacity-50', 'cursor-not-allowed', 'relative');
-                    bookElement.title = "Unlock with Pro"; // Tooltip
 
-                    const lockIcon = document.createElement('div');
-                    lockIcon.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute top-1 right-1 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            return matchesGenre && matchesAuthor && matchesLength && matchesAvailability;
+        });
+
+
+        for (const bookKey of filteredBookKeys) {
+            const book = bookCipherBooks[bookKey];
+            // Skip if book is undefined (shouldn't happen with Object.keys(bookCipherBooks) if data is clean)
+            if (!book) continue;
+
+            hasVisibleBooks = true;
+            const bookElement = document.createElement('div');
+            const titleSpan = document.createElement('span');
+            titleSpan.textContent = book.title;
+            bookElement.appendChild(titleSpan);
+
+            bookElement.classList.add('book-cover-item');
+            bookElement.setAttribute('data-book-id', bookKey);
+
+            const isLocked = book.isPro && !window.isProUser;
+
+            if (isLocked) {
+                bookElement.classList.add('opacity-50', 'cursor-not-allowed', 'relative');
+                bookElement.title = "Unlock with Pro";
+
+                const lockIcon = document.createElement('div');
+                lockIcon.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute top-1 right-1 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                `;
+                bookElement.appendChild(lockIcon);
+
+                const proLabel = document.createElement('span');
+                proLabel.textContent = "PRO";
+                proLabel.className = "absolute bottom-1 right-1 bg-purple-600 text-white text-xs font-bold px-1.5 py-0.5 rounded";
+                bookElement.appendChild(proLabel);
+
+                bookElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (typeof window.showBookProUpsellModal === 'function') {
+                        window.showBookProUpsellModal();
+                    } else if (typeof window.showUpsellModal === 'function') {
+                        console.warn('showBookProUpsellModal not found, falling back to general showUpsellModal');
+                        window.showUpsellModal();
+                    } else {
+                        alert("This book requires the Pro version. Please upgrade to access all stories!");
+                    }
+                });
+            } else {
+                // Add click listener only for non-locked books
+                const savedProgressStringForLibrary = localStorage.getItem(`bookCipherProgress_${bookKey}`);
+                let isBookMarkedCompletedInLibrary = false;
+                if (savedProgressStringForLibrary) {
+                    try {
+                        const savedProgress = JSON.parse(savedProgressStringForLibrary);
+                        if (savedProgress.bookId === bookKey) {
+                            isBookMarkedCompletedInLibrary = savedProgress.isCompleted || false;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing progress for library display:', e);
+                    }
+                }
+
+                if (isBookMarkedCompletedInLibrary) {
+                    const checkIcon = document.createElement('div');
+                    checkIcon.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute top-1 left-1 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     `;
-                    bookElement.appendChild(lockIcon);
+                    checkIcon.title = "Completed";
+                    bookElement.appendChild(checkIcon);
+                    bookElement.classList.add('border-2', 'border-green-400');
+                }
 
-                    const proLabel = document.createElement('span');
-                    proLabel.textContent = "PRO";
-                    proLabel.className = "absolute bottom-1 right-1 bg-purple-600 text-white text-xs font-bold px-1.5 py-0.5 rounded";
-                    bookElement.appendChild(proLabel);
-
-
-                    // Prevent click or show upsell modal
-                    bookElement.addEventListener('click', (e) => {
-                        e.stopPropagation(); // Prevent any other listeners if needed
-                        if (typeof window.showUpsellModal === 'function') {
-                            window.showUpsellModal();
-                        } else {
-                            alert("This book requires the Pro version.");
-                        }
-                    });
-                } else {
-                    // Add click listener only for non-locked books
-                    // Check for completion status
-                    const savedProgressStringForLibrary = localStorage.getItem(`bookCipherProgress_${bookKey}`);
-                    let isBookMarkedCompletedInLibrary = false;
-                    if (savedProgressStringForLibrary) {
-                        try {
-                            const savedProgress = JSON.parse(savedProgressStringForLibrary);
-                            if (savedProgress.bookId === bookKey) {
-                                isBookMarkedCompletedInLibrary = savedProgress.isCompleted || false;
-                            }
-                        } catch (e) {
-                            console.error('Error parsing progress for library display:', e);
-                        }
-                    }
-
-                    if (isBookMarkedCompletedInLibrary) {
-                        const checkIcon = document.createElement('div');
-                        checkIcon.innerHTML = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute top-1 left-1 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        `;
-                        checkIcon.title = "Completed"; // Tooltip for the checkmark
-                        bookElement.appendChild(checkIcon);
-                        bookElement.classList.add('border-2', 'border-green-400'); // Optional: add a border as well
-                    }
-
-                    bookElement.addEventListener('click', () => {
-                        currentBookId = bookElement.getAttribute('data-book-id');
-                        // Visually mark selected book in library
-                        const allBookItems = libraryContainer.querySelectorAll('.book-cover-item');
-                    allBookItems.forEach(item => {
-                        item.classList.remove('book-cover-selected');
-                    });
+                bookElement.addEventListener('click', () => {
+                    currentBookId = bookElement.getAttribute('data-book-id');
+                    const allBookItems = libraryContainer.querySelectorAll('.book-cover-item');
+                    allBookItems.forEach(item => item.classList.remove('book-cover-selected'));
                     bookElement.classList.add('book-cover-selected');
 
                     if (bookCipherMessageEl) bookCipherMessageEl.textContent = '';
-                    console.log("Book selected for details view:", currentBookId);
+                    // console.log("Book selected for details view:", currentBookId);
 
                     const detailsView = document.getElementById('book-details-view');
                     if (!detailsView) {
                         console.error("Book details view container 'book-details-view' not found.");
                         return;
                     }
-                    detailsView.innerHTML = ''; // Clear previous details
+                    detailsView.innerHTML = '';
 
                     const bookData = bookCipherBooks[currentBookId];
                     if (!bookData) {
@@ -189,6 +264,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     authorEl.className = 'text-md text-gray-400 mb-1 text-center';
                     detailsView.appendChild(authorEl);
 
+                    // Display Genre and Length
+                    if (bookData.genre) {
+                        const genreEl = document.createElement('p');
+                        genreEl.textContent = `Genre: ${bookData.genre}`;
+                        genreEl.className = 'text-sm text-gray-400 mb-1 text-center';
+                        detailsView.appendChild(genreEl);
+                    }
+                    if (bookData.lengthCategory) {
+                        const lengthEl = document.createElement('p');
+                        lengthEl.textContent = `Length: ${bookData.lengthCategory}`;
+                        lengthEl.className = 'text-sm text-gray-400 mb-1 text-center';
+                        detailsView.appendChild(lengthEl);
+                    }
+
+
                     const coverPlaceholder = document.createElement('div');
                     coverPlaceholder.className = 'w-full h-48 bg-gray-700 flex items-center justify-center text-gray-500 my-4 rounded-md shadow-inner';
                     coverPlaceholder.textContent = 'Book Cover Placeholder';
@@ -202,7 +292,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const buttonContainer = document.createElement('div');
                     buttonContainer.className = 'flex flex-col items-center space-y-3';
 
-                    // Load progress to determine button display
                     const savedProgressString = localStorage.getItem(`bookCipherProgress_${currentBookId}`);
                     let isBookMarkedCompleted = false;
                     if (savedProgressString) {
@@ -225,12 +314,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         viewUnlockedTextBtn.addEventListener('click', () => {
                             displayUnlockedBookText(currentBookId);
                         });
-                        // Event listener for restartDecipheringBtn will be added in a later step
 
                         const restartDecipheringBtn = document.createElement('button');
                         restartDecipheringBtn.id = 'restart-deciphering-btn';
                         restartDecipheringBtn.textContent = 'Restart Deciphering';
-                        // Adjusted class to match yellow-500 and ring-yellow-400 as per plan
                         restartDecipheringBtn.className = 'w-full max-w-xs px-6 py-3 bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-yellow-400';
                         buttonContainer.appendChild(restartDecipheringBtn);
                         restartDecipheringBtn.addEventListener('click', () => {
@@ -242,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         startDecipheringBtn.textContent = 'Start Deciphering';
                         startDecipheringBtn.className = 'w-full max-w-xs px-6 py-3 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500';
                         buttonContainer.appendChild(startDecipheringBtn);
-
                         startDecipheringBtn.addEventListener('click', () => {
                             initializeAndStartBookGame(currentBookId);
                         });
@@ -253,34 +339,58 @@ document.addEventListener('DOMContentLoaded', () => {
                     backToLibraryBtn.textContent = 'Back to Library';
                     backToLibraryBtn.className = 'w-full max-w-xs px-6 py-3 bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold rounded-lg shadow-md transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500';
                     buttonContainer.appendChild(backToLibraryBtn);
-
                     detailsView.appendChild(buttonContainer);
 
                     document.getElementById('back-to-library-btn').addEventListener('click', () => {
                         showBookLibraryView();
                     });
-
                     showBookDetailsView();
-                    });
-                }
-                libraryContainer.appendChild(bookElement);
+                });
             }
+            libraryContainer.appendChild(bookElement);
         }
-        // Show or hide the "Unlock more books" banner based on Pro status
-        if (unlockBooksBanner) {
-            if (!window.isProUser) {
-                unlockBooksBanner.classList.remove('hidden');
-                // Ensure the banner is placed correctly by re-inserting it if necessary,
-                // or by styling it to appear at the end.
-                // If it's already in the HTML, removing 'hidden' is enough.
-                // If it was cleared by innerHTML, it needs to be re-added or handled by initial HTML structure.
-                // The current HTML places it inside, so it should be fine.
-            } else {
-                unlockBooksBanner.classList.add('hidden');
-            }
+
+        const unlockBooksBanner = document.getElementById('unlock-books-banner');
+        if (!hasVisibleBooks) {
+            libraryContainer.textContent = 'No books match the current filters.';
+            if (unlockBooksBanner) unlockBooksBanner.classList.add('hidden'); // Hide banner if no books shown
         } else {
-            console.warn("#unlock-books-banner element not found in DOM for controlling visibility.");
+            // Show or hide the "Unlock more books" banner based on Pro status
+            if (unlockBooksBanner) {
+                 if (!window.isProUser) {
+                    // Check if there are any pro books that are currently *not* displayed due to filters
+                    // This is to avoid showing the banner if all pro books are filtered out for other reasons.
+                    let hasHiddenProBooks = false;
+                    for (const key in bookCipherBooks) {
+                        if (bookCipherBooks[key].isPro && !filteredBookKeys.includes(key)) {
+                            // This check is a bit too complex. Simpler: if not pro, and banner exists, show it.
+                            // The user can decide if the filters are why they don't see pro books.
+                        }
+                    }
+                    // Simplified: Show banner if user is not Pro and there are books.
+                    // The banner itself is an invitation, regardless of current filter results.
+                    unlockBooksBanner.classList.remove('hidden');
+                    libraryContainer.appendChild(unlockBooksBanner); // Ensure it's at the end if books are few
+                } else {
+                    unlockBooksBanner.classList.add('hidden');
+                }
+            }
         }
+        if (!window.isProUser && unlockBooksBanner && libraryContainer.children.length > 1 && !libraryContainer.contains(unlockBooksBanner)) {
+             // If banner was removed by "No books match..." message, re-add it if books become visible again
+             // This logic might be complex. It's easier if the banner is outside the container that gets cleared.
+             // For now, the above appendChild should handle re-adding it if it was part of itemsToRemove.
+             // The issue is if libraryContainer.textContent was set.
+             // Let's ensure banner is re-added if needed.
+             if (hasVisibleBooks && !libraryContainer.querySelector('#unlock-books-banner')) {
+                // This implies it was cleared. We need to decide if it should be re-inserted.
+                // The `appendChild` above should ensure it's there if `hasVisibleBooks` is true.
+             }
+        } else if (window.isProUser && unlockBooksBanner) {
+            unlockBooksBanner.classList.add('hidden');
+        }
+
+
     }
 
     // Function to save progress

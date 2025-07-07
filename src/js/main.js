@@ -702,19 +702,41 @@ if (shareButton) {
     });
 }
 
-const upsellModal = document.getElementById('upsell-modal');
-const goProBtn = document.getElementById('go-pro-btn');
-const goProFromLibraryBtn = document.getElementById('go-pro-from-library-btn');
-const closeUpsellModalBtn = document.getElementById('close-upsell-modal-btn');
-const upgradeToProBtn = document.getElementById('upgrade-to-pro-btn');
+const upsellModal = document.getElementById('upsell-modal'); // General Pro Upsell Modal
+const goProBtn = document.getElementById('go-pro-btn'); // General "Go Pro" button in settings
+const goProFromLibraryBtn = document.getElementById('go-pro-from-library-btn'); // "Go Pro" button in library banner
+const closeUpsellModalBtn = document.getElementById('close-upsell-modal-btn'); // Close for general upsell modal
+const upgradeToProBtn = document.getElementById('upgrade-to-pro-btn'); // Actual upgrade button in general upsell modal
 
-function showUpsellModal() { if (upsellModal && !window.isProUser) upsellModal.classList.remove('hidden'); }
-function hideUpsellModal() { if (upsellModal) upsellModal.classList.add('hidden'); }
+// Book Cipher Specific Pro Upsell Modal Elements
+const bookProUpsellModal = document.getElementById('pro-upsell-modal');
+const closeBookProUpsellModalTopBtn = document.getElementById('close-pro-upsell-modal-top');
+const bookGoProBtn = document.getElementById('go-pro-button'); // "Upgrade to Pro" from book specific modal
+const bookReturnToLibraryBtn = document.getElementById('return-to-library-button');
 
-if (goProBtn && !window.isProUser) goProBtn.addEventListener('click', showUpsellModal);
-if (goProFromLibraryBtn && !window.isProUser) goProFromLibraryBtn.addEventListener('click', showUpsellModal);
-if (closeUpsellModalBtn) closeUpsellModalBtn.addEventListener('click', hideUpsellModal);
-if (upgradeToProBtn) {
+
+// --- General Upsell Modal Logic ---
+function showUpsellModal() {
+    if (upsellModal && !window.isProUser) {
+        upsellModal.classList.remove('hidden');
+    }
+}
+function hideUpsellModal() {
+    if (upsellModal) {
+        upsellModal.classList.add('hidden');
+    }
+}
+
+if (goProBtn && !window.isProUser) { // Settings "Go Pro"
+    goProBtn.addEventListener('click', showUpsellModal);
+}
+if (goProFromLibraryBtn && !window.isProUser) { // Library banner "Go Pro"
+    goProFromLibraryBtn.addEventListener('click', showUpsellModal);
+}
+if (closeUpsellModalBtn) { // General close button
+    closeUpsellModalBtn.addEventListener('click', hideUpsellModal);
+}
+if (upgradeToProBtn) { // General upgrade button
     upgradeToProBtn.addEventListener('click', () => {
         window.isProUser = true;
         localStorage.setItem('isProUser', 'true');
@@ -722,11 +744,40 @@ if (upgradeToProBtn) {
         if (typeof window.initializeKochMethod === 'function') window.initializeKochMethod();
         updateGoProButtonUI();
         hideUpsellModal();
+        hideBookProUpsellModal(); // Also hide the book-specific one if it was somehow open
         // Refresh current tab if it has pro features that are now unlocked.
         const currentTab = localStorage.getItem('lastTab');
         if(currentTab) showTab(currentTab);
     });
 }
+
+// --- Book Cipher Specific Pro Upsell Modal Logic ---
+function showBookProUpsellModal() {
+    if (bookProUpsellModal && !window.isProUser) {
+        bookProUpsellModal.classList.remove('hidden');
+    }
+}
+window.showBookProUpsellModal = showBookProUpsellModal; // Expose to global for bookCipher.js
+
+function hideBookProUpsellModal() {
+    if (bookProUpsellModal) {
+        bookProUpsellModal.classList.add('hidden');
+    }
+}
+
+if (closeBookProUpsellModalTopBtn) {
+    closeBookProUpsellModalTopBtn.addEventListener('click', hideBookProUpsellModal);
+}
+if (bookReturnToLibraryBtn) {
+    bookReturnToLibraryBtn.addEventListener('click', hideBookProUpsellModal);
+}
+if (bookGoProBtn) {
+    bookGoProBtn.addEventListener('click', () => {
+        hideBookProUpsellModal(); // Hide this specific modal first
+        showUpsellModal();      // Then show the general one that has the "purchase" button
+    });
+}
+
 
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
