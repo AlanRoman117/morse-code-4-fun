@@ -194,11 +194,13 @@ body {
         .light-theme-container .text-white {
             color: #1f2937 !important; /* Tailwind gray-800 */
         }
-        /* Specific override for active nav buttons in light theme to ensure their text is white */
+        /* Specific override for active nav buttons in light theme to ensure their text is white - REMOVED FOR JS CONTROL */
+        /*
         .light-theme nav > button.active-tab-button,
         .light-theme-container nav > button.active-tab-button {
             color: #FFFFFF !important; /* Actual white */
         }
+        */
 
         .light-theme .section-title,
         .light-theme-container .section-title {
