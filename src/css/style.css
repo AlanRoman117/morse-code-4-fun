@@ -151,23 +151,27 @@ body {
         /* General light theme adjustments for Tailwind classes */
         .light-theme nav button,
         .light-theme-container nav button {
-            background-color: #e5e7eb; /* gray-200 */
-            color: #374151; /* gray-700 */
+            /* Default styles for nav buttons in light theme are handled by applySavedTheme in JS */
+            /* background-color: #e5e7eb; /* gray-200 */
+            /* color: #374151; /* gray-700 */
         }
         .light-theme nav button:hover,
         .light-theme-container nav button:hover {
-            background-color: #d1d5db; /* gray-300 */
+            /* Hover styles for nav buttons in light theme are handled by applySavedTheme in JS */
+            /* background-color: #d1d5db; /* gray-300 */
         }
+        /* Styles for active-tab-button in light mode are now fully managed by applySavedTheme in main.js
+           to ensure JavaScript is the single source of truth for dynamic Tailwind classes.
         .light-theme nav button.active-tab-button,
         .light-theme-container nav button.active-tab-button {
-            background-color: #3b82f6; /* blue-500 */
-            color: #ffffff; /* white */
+            background-color: #3b82f6;
+            color: #ffffff;
         }
         .light-theme nav button.active-tab-button:hover,
         .light-theme-container nav button.active-tab-button:hover {
-            background-color: #2563eb; /* blue-600 */
+            background-color: #2563eb;
         }
-
+        */
 
         .light-theme .input-output-box,
         .light-theme-container .input-output-box {
