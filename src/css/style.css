@@ -903,3 +903,30 @@ body.privacy-page.dark-theme {
 /* Special banner button already handled by targeting parent div hover */
 
 /* === END REFINED AAA LIGHT THEME BUTTON OVERRIDES === */
+
+
+/* === Practice Message Feedback Text Colors === */
+/* Default (Light Theme) */
+.feedback-message-complete { color: #065F46; } /* Dark Green - AAA on white */
+.feedback-message-correct { color: #1E40AF; }  /* Dark Blue - AAA on white */
+.feedback-message-mistake { color: #991B1B; }  /* Dark Red - AA on white */
+.feedback-message-unknown { color: #B45309; }  /* Dark Amber - AA on white */
+
+/* Dark Theme Overrides */
+.dark-theme .feedback-message-complete,
+body.dark .feedback-message-complete { /* Added body.dark for good measure */
+    color: #86EFAC; /* Light Green - AAA on #2c2c2c */
+}
+.dark-theme .feedback-message-correct,
+body.dark .feedback-message-correct {
+    color: #93C5FD; /* Light Blue - AAA on #2c2c2c */
+}
+.dark-theme .feedback-message-mistake,
+body.dark .feedback-message-mistake {
+    color: #FCA5A5; /* Light Red - AA on #2c2c2c */
+}
+.dark-theme .feedback-message-unknown,
+body.dark .feedback-message-unknown {
+    color: #FCD34D; /* Light Amber - AA on #2c2c2c */
+}
+/* === END Practice Message Feedback Text Colors === */
