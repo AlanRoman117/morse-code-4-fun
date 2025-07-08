@@ -297,14 +297,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const savedUnitTime = localStorage.getItem('visualTapperUnitTime');
     if (savedUnitTime) {
-        // console.log("Found saved unit time in localStorage:", savedUnitTime); // Log removed
         updateVisualTapperUnitTime(parseInt(savedUnitTime)); 
     } else {
-        // console.log("No saved unit time in localStorage, ensuring default configuration is applied via updateVisualTapperUnitTime."); // Log removed
         updateVisualTapperUnitTime(UNIT_TIME_MS);
     }
 
+    // --- Suggestion Side Toggle Logic ---
+    const toggleSuggestionSideBtn = document.getElementById('toggle-suggestion-side-btn');
     const predictiveDisplayElement = document.getElementById('predictive-taps-display');
+
+    function applySuggestionSidePreference(side) {
+        if (!predictiveDisplayElement) return;
+
+        // Remove all potentially conflicting classes first
+        predictiveDisplayElement.classList.remove('order-first', 'mr-2', 'order-last', 'ml-2');
+
+        if (side === 'right') {
+            predictiveDisplayElement.classList.add('order-last', 'ml-2');
+        } else { // Default to left
+            predictiveDisplayElement.classList.add('order-first', 'mr-2');
+        }
+    }
+    window.applySuggestionSidePreference = applySuggestionSidePreference; // Make it global for main.js if needed
+
+    if (toggleSuggestionSideBtn && predictiveDisplayElement) {
+        toggleSuggestionSideBtn.addEventListener('click', () => {
+            const currentIsLeft = predictiveDisplayElement.classList.contains('order-first');
+            const newSide = currentIsLeft ? 'right' : 'left';
+            applySuggestionSidePreference(newSide);
+            localStorage.setItem('suggestionSide', newSide);
+        });
+    }
+
+    // Load and apply saved preference on initialization
+    const savedSuggestionSide = localStorage.getItem('suggestionSide');
+    if (savedSuggestionSide) {
+        applySuggestionSidePreference(savedSuggestionSide);
+    } else {
+        applySuggestionSidePreference('left'); // Default to left
+    }
+    // --- End Suggestion Side Toggle Logic ---
+
     if (predictiveDisplayElement) {
         const interactionHandler = () => {
             if (predictiveDisplayTimeout && !predictiveDisplayElement.classList.contains('hidden') && !predictiveDisplayElement.classList.contains('opacity-0')) {
