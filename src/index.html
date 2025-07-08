@@ -422,26 +422,25 @@
 
     <div id="hiddenTapperStorage" style="display: none;"></div>
     <div id="sharedVisualTapperWrapper" style="display: none;">
-        <div class="tapper-section-container flex flex-col items-center my-2 md:my-4">
-            <!-- Controls: Space, Delete, Toggle Suggestion Side -->
+        <div class="tapper-section-container relative flex flex-col items-center my-2 md:my-4">
+            <!-- Controls: Space, Delete (Toggle button moved into suggestions panel) -->
             <div class="flex justify-center items-center gap-3 mb-2">
                 <button id="spaceButton" title="End Letter / Word Space" class="text-sm bg-blue-900 hover:bg-blue-800 active:bg-blue-950 text-white font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Word<br>Space</button>
                 <button id="deleteLastCharButton" title="Delete Last Character" class="text-sm bg-red-500 hover:bg-red-600 active:bg-red-700 text-black font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Delete</button>
-                <button id="toggle-suggestion-side-btn" title="Toggle Suggestion Side" class="text-sm bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white font-semibold p-2 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">⇄</button>
             </div>
 
-            <!-- Tapper and Suggestions Row -->
-            <div class="flex items-center justify-center w-full">
-                <!-- Predictive Taps Display (Suggestions) - Now a sidebar -->
-                <div id="predictive-taps-display" class="order-first bg-gray-800 text-white p-2 rounded-md shadow-lg max-h-40 overflow-y-auto border border-gray-600 hidden transition-opacity duration-500 ease-in-out w-32 md:w-40 mr-2">
-                    <!-- Pills will be dynamically inserted here -->
-                </div>
-
-                <div id="tapper" class="tapper shadow-lg">Tap!</div>
+            <!-- Predictive Taps Display (Suggestions) - Absolutely Positioned Sidebar -->
+            <!-- JS will add left-4 or right-4 classes. Centered vertically with tapper. -->
+            <div id="predictive-taps-display" class="absolute top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-1 rounded-md shadow-lg max-h-40 overflow-y-auto border border-gray-600 hidden transition-opacity duration-500 ease-in-out w-32 md:w-40">
+                <button id="toggle-suggestion-side-btn" title="Toggle Suggestion Side" class="w-full text-center py-1 mb-1 bg-gray-700 hover:bg-gray-600 rounded text-white font-semibold text-sm">⇄ Side</button>
+                <!-- Pills will be dynamically inserted below the button -->
             </div>
+
+            <!-- Tapper (should be centered by items-center on parent) -->
+            <div id="tapper" class="tapper shadow-lg">Tap!</div>
 
             <!-- Output area remains below -->
-            <div class="output-area mt-2 w-full max-w-md mx-auto"> <!-- Added w-full, max-w-md, mx-auto for consistency -->
+            <div class="output-area mt-2 w-full max-w-md mx-auto">
                 <h3 class="text-base md:text-lg font-semibold mb-1 text-center">Your Morse:</h3>
                 <p id="tapperMorseOutput" class="text-base md:text-xl font-mono min-h-[20px] md:min-h-[25px] break-all bg-gray-700 p-1 md:p-2 rounded text-center"></p>
             </div>

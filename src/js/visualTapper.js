@@ -309,21 +309,25 @@ document.addEventListener('DOMContentLoaded', () => {
     function applySuggestionSidePreference(side) {
         if (!predictiveDisplayElement) return;
 
-        // Remove all potentially conflicting classes first
-        predictiveDisplayElement.classList.remove('order-first', 'mr-2', 'order-last', 'ml-2');
+        // Remove all potentially conflicting horizontal positioning classes first
+        predictiveDisplayElement.classList.remove('left-4', 'right-4');
+        // Note: 'left-0', 'right-0' etc. could also be used if no padding from edge is desired.
+        // Using 'left-4' and 'right-4' to provide a 1rem padding from the tapper-section-container edge.
 
         if (side === 'right') {
-            predictiveDisplayElement.classList.add('order-last', 'ml-2');
+            predictiveDisplayElement.classList.add('right-4');
         } else { // Default to left
-            predictiveDisplayElement.classList.add('order-first', 'mr-2');
+            predictiveDisplayElement.classList.add('left-4');
         }
     }
     window.applySuggestionSidePreference = applySuggestionSidePreference; // Make it global for main.js if needed
 
     if (toggleSuggestionSideBtn && predictiveDisplayElement) {
         toggleSuggestionSideBtn.addEventListener('click', () => {
-            const currentIsLeft = predictiveDisplayElement.classList.contains('order-first');
-            const newSide = currentIsLeft ? 'right' : 'left';
+            // Check current side by looking for 'left-4' or lack of 'right-4'
+            const isCurrentlyLeft = predictiveDisplayElement.classList.contains('left-4') ||
+                                   !predictiveDisplayElement.classList.contains('right-4');
+            const newSide = isCurrentlyLeft ? 'right' : 'left';
             applySuggestionSidePreference(newSide);
             localStorage.setItem('suggestionSide', newSide);
         });
