@@ -422,11 +422,7 @@
 
     <div id="hiddenTapperStorage" style="display: none;"></div>
     <div id="sharedVisualTapperWrapper" style="display: none;">
-        <div class="tapper-section-container text-center my-2 md:my-4 relative"> <!-- Added position: relative -->
-            <!-- Predictive Taps Display (Tooltip Style) -->
-            <div id="predictive-taps-display" class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 bg-gray-800 text-white p-2 rounded-md shadow-lg max-h-36 overflow-y-auto z-10 border border-gray-600 hidden transition-opacity duration-500 ease-in-out">
-                <!-- Pills will be dynamically inserted here -->
-            </div>
+        <div class="tapper-section-container text-center my-2 md:my-4">
             <!-- Flex container for tapper and buttons -->
             <div class="flex justify-center items-center gap-2 md:gap-4 mb-2 md:mb-3">
                 <div id="tapper" class="tapper shadow-lg">Tap!</div>
@@ -435,6 +431,10 @@
                     <button id="spaceButton" title="End Letter / Word Space" class="text-sm bg-blue-900 hover:bg-blue-800 active:bg-blue-950 text-white font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Word<br>Space</button>
                     <button id="deleteLastCharButton" title="Delete Last Character" class="text-sm bg-red-500 hover:bg-red-600 active:bg-red-700 text-black font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Delete</button>
                 </div>
+            </div>
+            <!-- Predictive Taps Display (Suggestions) - Moved here and classes adjusted -->
+            <div id="predictive-taps-display" class="mx-auto mb-2 w-80 bg-gray-800 text-white p-2 rounded-md shadow-lg max-h-36 overflow-y-auto border border-gray-600 hidden transition-opacity duration-500 ease-in-out">
+                <!-- Pills will be dynamically inserted here -->
             </div>
             <!-- Output area remains below -->
             <div class="output-area mt-1 md:mt-2"> <!-- Adjusted mt-2 to mt-1 md:mt-2 -->
