@@ -84,8 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Sound is explicitly off and not in story playback mode
         }
 
-        // Original sound playing logic
-        if (typeof Tone !== 'undefined' && Tone && Tone.Synth) {
+        // Check if Tone.js is available and its context is running (should be started by user gesture via main.js)
+        if (typeof Tone === 'undefined' || !Tone.context || Tone.context.state !== 'running') {
+            // console.warn('playTapSound: Tone.js context not ready or not started by user gesture.'); // Keep for debugging if needed
+            return;
+        }
+
+        // Original sound playing logic, now simplified
+        if (Tone && Tone.Synth) { // Check Tone.Synth existence as well
             const playNoteInternal = () => {
                 if (!tapperTone) {
                     try {
@@ -103,15 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now());
                 }
             };
-            if (Tone.context.state !== 'running') {
-                Tone.start().then(() => {
-                    playNoteInternal();
-                }).catch(e => {
-                    console.warn("Tone.js audio context couldn't start via playTapSound's Tone.start(): ", e);
-                });
-            } else {
-                playNoteInternal();
-            }
+            playNoteInternal(); // Directly call, assuming Tone.js context is running
         }
     }
     window.playTapSound = playTapSound; // Expose to global
@@ -404,20 +402,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (suggestionsPanel) {
         const interactionHandler = () => {
-            if (predictiveDisplayTimeout && !predictiveDisplayElement.classList.contains('hidden') && !predictiveDisplayElement.classList.contains('opacity-0')) {
+            // Use suggestionsPanel here, as predictiveDisplayElement is not defined in this immediate scope
+            // and suggestionsPanel refers to the same DOM element.
+            if (predictiveDisplayTimeout && !suggestionsPanel.classList.contains('hidden') && !suggestionsPanel.classList.contains('opacity-0')) {
                 // console.log('User interaction with predictive display detected. Resetting hide timer.'); // Log removed
                 resetPredictiveDisplayHideTimer(); 
             }
         };
-        predictiveDisplayElement.addEventListener('touchstart', interactionHandler, { passive: true });
-        predictiveDisplayElement.addEventListener('click', interactionHandler);
-        predictiveDisplayElement.addEventListener('wheel', interactionHandler, { passive: true });
+        // Attach listeners to suggestionsPanel
+        suggestionsPanel.addEventListener('touchstart', interactionHandler, { passive: true });
+        suggestionsPanel.addEventListener('click', interactionHandler);
+        suggestionsPanel.addEventListener('wheel', interactionHandler, { passive: true });
     } else {
-        console.warn("Predictive taps display element not found for attaching interaction listeners.");
+        console.warn("Predictive taps display element (suggestionsPanel) not found for attaching interaction listeners.");
     }
 });
 
 function resetPredictiveDisplayHideTimer() {
+    // This function uses 'displayElement', which is fine as it's locally scoped by getElementById.
     const displayElement = document.getElementById('predictive-taps-display');
     if (!displayElement || displayElement.classList.contains('hidden') || displayElement.classList.contains('opacity-0')) {
         // console.log('resetPredictiveDisplayHideTimer called, but display not in a state to reset timer.'); // Log removed
