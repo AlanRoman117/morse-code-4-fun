@@ -305,9 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Suggestion Side Toggle Logic ---
     const toggleSuggestionSideBtn = document.getElementById('toggle-suggestion-side-btn');
     const suggestionsPanel = document.getElementById('predictive-taps-display'); // Renamed for clarity
-    const tapper = document.getElementById('tapper');
+    // const tapper = document.getElementById('tapper'); // REMOVED: tapper is already defined above in this scope
 
     function applySuggestionSidePreference(side) {
+        // 'tapper' const is available from the top of the DOMContentLoaded scope
         if (!suggestionsPanel || !tapper) {
             // console.warn("Tapper or suggestions panel not found for positioning."); // Keep if debugging needed
             return;
@@ -533,6 +534,7 @@ function updatePredictiveDisplay(morseString) {
         }
     }
 }
+window.resetVisualTapperState = resetVisualTapperState; // Expose to global scope
 
 function resetVisualTapperState() {
     currentMorse = "";
