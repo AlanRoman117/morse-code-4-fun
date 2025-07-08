@@ -304,45 +304,104 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Suggestion Side Toggle Logic ---
     const toggleSuggestionSideBtn = document.getElementById('toggle-suggestion-side-btn');
-    const predictiveDisplayElement = document.getElementById('predictive-taps-display');
+    const suggestionsPanel = document.getElementById('predictive-taps-display'); // Renamed for clarity
+    const tapper = document.getElementById('tapper');
 
     function applySuggestionSidePreference(side) {
-        if (!predictiveDisplayElement) return;
+        if (!suggestionsPanel || !tapper) {
+            // console.warn("Tapper or suggestions panel not found for positioning."); // Keep if debugging needed
+            return;
+        }
 
-        // Remove all potentially conflicting horizontal positioning classes first
-        predictiveDisplayElement.classList.remove('left-4', 'right-4');
-        // Note: 'left-0', 'right-0' etc. could also be used if no padding from edge is desired.
-        // Using 'left-4' and 'right-4' to provide a 1rem padding from the tapper-section-container edge.
+        // Ensure suggestionsPanel is visible to get correct offsetWidth, otherwise defer or use last known width.
+        // This function will be called by updatePredictiveDisplay after it's made visible.
+        if (suggestionsPanel.offsetParent === null && !suggestionsPanel.classList.contains('hidden')) {
+             // It's not hidden by class, but might be display:none via parent.
+             // console.warn("Suggestions panel is not visible for offsetWidth calculation in applySuggestionSidePreference. Deferring or check visibility logic.");
+             // To prevent errors, we can skip positioning if it's not truly visible.
+             // The call from updatePredictiveDisplay will handle it once visible.
+             return;
+        }
+
+
+        const tapperContainer = tapper.parentElement; // This is the flex row div
+        if (!tapperContainer) {
+            // console.warn("Tapper container not found."); // Keep if debugging
+            return;
+        }
+
+        const tapperRect = tapper.getBoundingClientRect();
+        const containerRect = tapperContainer.getBoundingClientRect(); // This container is the one that centers the tapper
+
+        // Calculate tapper's edges relative to its immediate parent container's coordinate system
+        const tapperLeftEdgeInContainer = tapperRect.left - containerRect.left;
+        const tapperRightEdgeInContainer = tapperRect.right - containerRect.left;
+
+        const desiredGapPx = 8; // 0.5rem
+        const suggestionsPanelWidth = suggestionsPanel.offsetWidth;
+
+        // Clear potentially conflicting Tailwind classes and old inline styles
+        suggestionsPanel.classList.remove('left-4', 'right-4', 'order-first', 'order-last', 'mr-2', 'ml-2');
+        suggestionsPanel.style.left = '';
+        suggestionsPanel.style.right = '';
 
         if (side === 'right') {
-            predictiveDisplayElement.classList.add('right-4');
-        } else { // Default to left
-            predictiveDisplayElement.classList.add('left-4');
+            const newLeft = tapperRightEdgeInContainer + desiredGapPx;
+            suggestionsPanel.style.left = newLeft + 'px';
+            // console.log(`Set suggestions (right): left=${newLeft}px`); // Keep if debugging
+        } else { // Default to 'left'
+            const newLeft = tapperLeftEdgeInContainer - suggestionsPanelWidth - desiredGapPx;
+            suggestionsPanel.style.left = newLeft + 'px';
+            // console.log(`Set suggestions (left): left=${newLeft}px`); // Keep if debugging
         }
     }
-    window.applySuggestionSidePreference = applySuggestionSidePreference; // Make it global for main.js if needed
+    window.applySuggestionSidePreference = applySuggestionSidePreference;
 
-    if (toggleSuggestionSideBtn && predictiveDisplayElement) {
+    if (toggleSuggestionSideBtn && suggestionsPanel) {
         toggleSuggestionSideBtn.addEventListener('click', () => {
-            // Check current side by looking for 'left-4' or lack of 'right-4'
-            const isCurrentlyLeft = predictiveDisplayElement.classList.contains('left-4') ||
-                                   !predictiveDisplayElement.classList.contains('right-4');
-            const newSide = isCurrentlyLeft ? 'right' : 'left';
-            applySuggestionSidePreference(newSide);
+            const currentSide = localStorage.getItem('suggestionSide') || 'left';
+            const newSide = (currentSide === 'left') ? 'right' : 'left';
             localStorage.setItem('suggestionSide', newSide);
+            applySuggestionSidePreference(newSide); // Apply immediately
         });
     }
 
-    // Load and apply saved preference on initialization
+    // Initial application on load - might be imperfect if elements not fully rendered/visible.
+    // The call from updatePredictiveDisplay is more reliable for precise positioning.
     const savedSuggestionSide = localStorage.getItem('suggestionSide');
-    if (savedSuggestionSide) {
-        applySuggestionSidePreference(savedSuggestionSide);
-    } else {
-        applySuggestionSidePreference('left'); // Default to left
-    }
+    // Apply initially, will be corrected by updatePredictiveDisplay if panel is shown then.
+    // Or by resize handler if panel is already visible and window resizes.
+    applySuggestionSidePreference(savedSuggestionSide || 'left');
     // --- End Suggestion Side Toggle Logic ---
 
-    if (predictiveDisplayElement) {
+
+    // --- Debounced Resize Handler ---
+    function debounce(func, wait, immediate) {
+        let timeout;
+        return function() {
+            const context = this, args = arguments;
+            const later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            const callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    }
+
+    const handleResize = debounce(() => {
+        if (suggestionsPanel && !suggestionsPanel.classList.contains('hidden')) {
+            // console.log("Debounced resize event: Recalculating suggestion panel position."); // For debugging
+            applySuggestionSidePreference(localStorage.getItem('suggestionSide') || 'left');
+        }
+    }, 250); // Debounce by 250ms
+
+    window.addEventListener('resize', handleResize);
+    // --- End Debounced Resize Handler ---
+
+    if (suggestionsPanel) {
         const interactionHandler = () => {
             if (predictiveDisplayTimeout && !predictiveDisplayElement.classList.contains('hidden') && !predictiveDisplayElement.classList.contains('opacity-0')) {
                 // console.log('User interaction with predictive display detected. Resetting hide timer.'); // Log removed
@@ -437,6 +496,8 @@ function updatePredictiveDisplay(morseString) {
             overallDisplayPanel.classList.remove('hidden', 'opacity-0');
             void overallDisplayPanel.offsetWidth; // Trigger reflow
             overallDisplayPanel.classList.add('opacity-100');
+            // Ensure position is correctly set now that it's visible and has dimensions
+            applySuggestionSidePreference(localStorage.getItem('suggestionSide') || 'left');
             predictiveDisplayTimeout = setTimeout(() => {
                 overallDisplayPanel.classList.remove('opacity-100');
                 overallDisplayPanel.classList.add('opacity-0');
@@ -448,6 +509,8 @@ function updatePredictiveDisplay(morseString) {
             overallDisplayPanel.classList.remove('hidden', 'opacity-0');
             void overallDisplayPanel.offsetWidth; // Trigger reflow
             overallDisplayPanel.classList.add('opacity-100');
+            // Ensure position is correctly set for "No match" case too
+            applySuggestionSidePreference(localStorage.getItem('suggestionSide') || 'left');
             predictiveDisplayTimeout = setTimeout(() => {
                 overallDisplayPanel.classList.remove('opacity-100');
                 overallDisplayPanel.classList.add('opacity-0');
