@@ -394,36 +394,38 @@ function updatePredictiveDisplay(morseString) {
         return;
     }
     // console.log('updatePredictiveDisplay CALLED - Time:', Date.now(), '| Morse:', morseString, '| Current Timeout ID before logic:', predictiveDisplayTimeout); // Log removed
-    const displayElement = document.getElementById('predictive-taps-display');
-    if (!displayElement) return;
+    const overallDisplayPanel = document.getElementById('predictive-taps-display'); // Parent panel for visibility
+    const pillsContainer = document.getElementById('suggestion-pills-container'); // Child for pills content
+
+    if (!overallDisplayPanel || !pillsContainer) {
+        console.error("Predictive display panel or pills container not found.");
+        return;
+    }
 
     if (morseString && morseString.length > 0) {
         if (predictiveDisplayTimeout) {
             clearTimeout(predictiveDisplayTimeout);
             predictiveDisplayTimeout = null;
-            // console.log('Cleared existing timeout due to new morseString:', morseString); // Log removed
         }
         let exactMatchHtml = "";
         let partialMatchesHtml = [];
         if (typeof morseCode === 'undefined') { 
             console.error("morseCode dictionary is not available to updatePredictiveDisplay.");
-            displayElement.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
-            displayElement.classList.remove('hidden', 'opacity-0');
-            void displayElement.offsetWidth;
-            displayElement.classList.add('opacity-100');
+            pillsContainer.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
+            overallDisplayPanel.classList.remove('hidden', 'opacity-0');
+            void overallDisplayPanel.offsetWidth; // Trigger reflow for transition
+            overallDisplayPanel.classList.add('opacity-100');
             predictiveDisplayTimeout = setTimeout(() => {
-                // console.log('6s timeout for error message expired. Hiding.'); // Log removed
-                displayElement.classList.remove('opacity-100');
-                displayElement.classList.add('opacity-0');
+                overallDisplayPanel.classList.remove('opacity-100');
+                overallDisplayPanel.classList.add('opacity-0');
                 predictiveDisplayTimeout = null; 
-                setTimeout(() => { displayElement.classList.add('hidden'); }, 500);
+                setTimeout(() => { overallDisplayPanel.classList.add('hidden'); }, 500);
             }, 6000);
             return;
         }
         for (const char in morseCode) {
             const currentMorseValue = morseCode[char];
             if (currentMorseValue === morseString) {
-                // console.log('Exact match found for:', char, morseString, 'Applying highlight class.');  // Log removed
                 exactMatchHtml = `<span class="char-badge exact-match-highlight text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${currentMorseValue})</span>`;
             } else if (currentMorseValue.startsWith(morseString)) {
                 partialMatchesHtml.push(`<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${currentMorseValue})</span>`);
@@ -431,43 +433,39 @@ function updatePredictiveDisplay(morseString) {
         }
         const finalHtml = exactMatchHtml + partialMatchesHtml.join('');
         if (finalHtml.length > 0) {
-            displayElement.innerHTML = finalHtml;
-            displayElement.classList.remove('hidden', 'opacity-0');
-            void displayElement.offsetWidth;
-            displayElement.classList.add('opacity-100');
-            // console.log('Displaying predictions. Setting 6s timeout.'); // Log removed
+            pillsContainer.innerHTML = finalHtml;
+            overallDisplayPanel.classList.remove('hidden', 'opacity-0');
+            void overallDisplayPanel.offsetWidth; // Trigger reflow
+            overallDisplayPanel.classList.add('opacity-100');
             predictiveDisplayTimeout = setTimeout(() => {
-                // console.log('6s timeout for predictions expired. Hiding.'); // Log removed
-                displayElement.classList.remove('opacity-100');
-                displayElement.classList.add('opacity-0');
+                overallDisplayPanel.classList.remove('opacity-100');
+                overallDisplayPanel.classList.add('opacity-0');
                 predictiveDisplayTimeout = null; 
-                setTimeout(() => { displayElement.classList.add('hidden'); }, 500);
+                setTimeout(() => { overallDisplayPanel.classList.add('hidden'); }, 500);
             }, 6000);
         } else { 
-            displayElement.innerHTML = "<span class='text-gray-500'>No match</span>";
-            displayElement.classList.remove('hidden', 'opacity-0');
-            void displayElement.offsetWidth;
-            displayElement.classList.add('opacity-100');
-            // console.log('Displaying "No match". Setting 6s timeout.'); // Log removed
+            pillsContainer.innerHTML = "<span class='text-gray-500'>No match</span>";
+            overallDisplayPanel.classList.remove('hidden', 'opacity-0');
+            void overallDisplayPanel.offsetWidth; // Trigger reflow
+            overallDisplayPanel.classList.add('opacity-100');
             predictiveDisplayTimeout = setTimeout(() => {
-                // console.log('6s timeout for "No match" expired. Hiding.'); // Log removed
-                displayElement.classList.remove('opacity-100');
-                displayElement.classList.add('opacity-0');
+                overallDisplayPanel.classList.remove('opacity-100');
+                overallDisplayPanel.classList.add('opacity-0');
                 predictiveDisplayTimeout = null; 
-                setTimeout(() => { displayElement.classList.add('hidden'); }, 500);
+                setTimeout(() => { overallDisplayPanel.classList.add('hidden'); }, 500);
             }, 6000);
         }
     } 
-    else { 
+    else { // morseString is empty or null
         if (predictiveDisplayTimeout) {
-            // console.log('Empty morseString received, but a timeout (ID:', predictiveDisplayTimeout, ') is active. Letting it run.'); // Log removed
+            // Active timeout, let it run to hide the panel.
         } else {
-            // console.log('Empty morseString and NO active timeout. Hiding now.'); // Log removed
-            displayElement.classList.remove('opacity-100');
-            displayElement.classList.add('opacity-0');
+            // No active timeout, and morseString is empty, so hide panel immediately.
+            overallDisplayPanel.classList.remove('opacity-100');
+            overallDisplayPanel.classList.add('opacity-0');
             setTimeout(() => {
-                displayElement.classList.add('hidden');
-                displayElement.innerHTML = "";
+                overallDisplayPanel.classList.add('hidden');
+                pillsContainer.innerHTML = ""; // Clear pills when hiding due to empty input
             }, 500);
         }
     }
