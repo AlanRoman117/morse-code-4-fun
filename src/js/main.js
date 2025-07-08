@@ -1,5 +1,7 @@
 // The Final, Definitive main.js
 
+window.isToneReady = false; // Flag to indicate if Tone.js has been successfully started
+
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     initializeCoreUI();
@@ -52,9 +54,15 @@ function initializeCoreUI() {
     updateDurations();
 
     const masterAudioInitListener = () => {
-        initAudio();
+        initAudio(); // Initializes the Web Audio API context if needed
         if (typeof Tone !== 'undefined' && Tone.start) {
-            Tone.start().catch(e => console.warn("Tone.start() failed:", e));
+            Tone.start().then(() => {
+                window.isToneReady = true;
+                console.log("Tone.js started successfully and is ready.");
+            }).catch(e => {
+                console.warn("Tone.start() failed:", e);
+                window.isToneReady = false; // Explicitly set to false on failure
+            });
         }
         document.body.removeEventListener('click', masterAudioInitListener);
         document.body.removeEventListener('touchstart', masterAudioInitListener);

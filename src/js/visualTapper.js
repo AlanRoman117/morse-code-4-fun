@@ -84,14 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Sound is explicitly off and not in story playback mode
         }
 
-        // Check if Tone.js is available and its context is running (should be started by user gesture via main.js)
-        if (typeof Tone === 'undefined' || !Tone.context || Tone.context.state !== 'running') {
-            // console.warn('playTapSound: Tone.js context not ready or not started by user gesture.'); // Keep for debugging if needed
+        // Check if Tone.js is available and explicitly marked as ready by main.js
+        if (typeof Tone === 'undefined' || !window.isToneReady) {
+            // console.warn('playTapSound: Tone.js not explicitly ready (isToneReady flag is false or Tone undefined).'); // Keep for debugging
             return;
         }
 
-        // Original sound playing logic, now simplified
-        if (Tone && Tone.Synth) { // Check Tone.Synth existence as well
+        // Original sound playing logic (Tone.Synth should exist if Tone is defined and ready)
+        if (Tone && Tone.Synth) {
             const playNoteInternal = () => {
                 if (!tapperTone) {
                     try {
