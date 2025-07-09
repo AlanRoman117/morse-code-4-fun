@@ -56,17 +56,24 @@ function initializeCoreUI() {
     const masterAudioInitListener = () => {
         console.log("masterAudioInitListener triggered.");
         initAudio(); // Initializes the Web Audio API context if needed
-        if (typeof Tone !== 'undefined' && Tone.start) {
-            console.log("Attempting Tone.start()...");
-            Tone.start().then(() => {
+
+        if (typeof Tone !== 'undefined' && Tone.start && Tone.context) {
+            if (Tone.context.state === 'running') {
                 window.isToneReady = true;
-                console.log("Tone.start() promise RESOLVED. isToneReady is true.");
-            }).catch(e => {
-                console.warn("Tone.start() promise REJECTED:", e);
-                window.isToneReady = false; // Explicitly set to false on failure
-            });
+                console.log("Tone.js context already running. isToneReady set to true.");
+            } else {
+                console.log(`Attempting Tone.start(). Current state: ${Tone.context.state}`);
+                Tone.start().then(() => {
+                    window.isToneReady = true;
+                    console.log("Tone.start() promise RESOLVED. isToneReady is true.");
+                }).catch(e => {
+                    console.warn("Tone.start() promise REJECTED:", e);
+                    window.isToneReady = false;
+                });
+            }
         } else {
-            console.warn("Tone or Tone.start not defined in masterAudioInitListener.");
+            console.warn("Tone, Tone.start, or Tone.context not defined in masterAudioInitListener.");
+            window.isToneReady = false; // Ensure it's false if Tone isn't even available
         }
         document.body.removeEventListener('click', masterAudioInitListener);
         document.body.removeEventListener('touchstart', masterAudioInitListener);
