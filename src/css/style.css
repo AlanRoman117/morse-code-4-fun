@@ -354,13 +354,34 @@ body {
         .light-theme #wpm-slider, .light-theme-container #wpm-slider,
         .light-theme #farnsworth-slider, .light-theme-container #farnsworth-slider,
         .light-theme #freq-slider, .light-theme-container #freq-slider {
-            background-color: #5A5C5E; /* User Recommended: Darker track for light theme */
-            /* This only styles the track for some browsers if appearance-none is set.
-               Full slider styling is complex and browser-specific.
-            */
+            background-color: transparent; /* Input itself is transparent, track styled by pseudo-elements */
         }
 
-        /* Light theme slider thumb styles */
+        /* Light theme slider track styles */
+        .light-theme #wpm-slider::-webkit-slider-runnable-track,
+        .light-theme-container #wpm-slider::-webkit-slider-runnable-track,
+        .light-theme #farnsworth-slider::-webkit-slider-runnable-track,
+        .light-theme-container #farnsworth-slider::-webkit-slider-runnable-track,
+        .light-theme #freq-slider::-webkit-slider-runnable-track,
+        .light-theme-container #freq-slider::-webkit-slider-runnable-track {
+            background: #5A5C5E; /* Dark gray track */
+            height: 0.5rem; /* h-2 */
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+
+        .light-theme #wpm-slider::-moz-range-track,
+        .light-theme-container #wpm-slider::-moz-range-track,
+        .light-theme #farnsworth-slider::-moz-range-track,
+        .light-theme-container #farnsworth-slider::-moz-range-track,
+        .light-theme #freq-slider::-moz-range-track,
+        .light-theme-container #freq-slider::-moz-range-track {
+            background: #5A5C5E; /* Dark gray track */
+            height: 0.5rem; /* h-2 */
+            border-radius: 0.5rem; /* rounded-lg */
+            border: none; /* Firefox sometimes adds its own border */
+        }
+
+        /* Light theme slider thumb styles (ensure these are still correct) */
         .light-theme #wpm-slider::-webkit-slider-thumb,
         .light-theme-container #wpm-slider::-webkit-slider-thumb,
         .light-theme #farnsworth-slider::-webkit-slider-thumb,
