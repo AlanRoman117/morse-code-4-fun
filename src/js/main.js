@@ -673,8 +673,18 @@ function populateMorseReference() {
 }
 
 function applySavedTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    const isLight = savedTheme === 'light';
+    let currentTheme = localStorage.getItem('theme');
+    if (!currentTheme) {
+        // No theme saved, check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            currentTheme = 'light';
+        } else {
+            currentTheme = 'dark'; // Default to dark if no system preference or system is dark
+        }
+        localStorage.setItem('theme', currentTheme);
+    }
+
+    const isLight = currentTheme === 'light';
     document.body.classList.toggle('light-theme', isLight);
     document.body.classList.toggle('dark', !isLight);
 
