@@ -1,6 +1,6 @@
 html {
-            /* overflow-y: scroll; */ /* Reverted temporary fix */
-            scrollbar-gutter: stable; /* Preferred solution */
+            overflow-y: scroll; /* Force scrollbar for diagnosing menu shift */
+            /* scrollbar-gutter: stable; */ /* Commented out preferred solution for this test */
         }
 body {
             font-family: 'Arial', sans-serif;
