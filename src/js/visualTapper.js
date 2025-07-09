@@ -350,59 +350,89 @@ document.addEventListener('DOMContentLoaded', () => {
     const suggestionsPanel = document.getElementById('predictive-taps-display'); // Renamed for clarity
     // const tapper = document.getElementById('tapper'); // REMOVED: tapper is already defined above in this scope
 
+    function logLayoutDiagnostics(logPrefix) {
+        const navElement = document.querySelector('nav.fixed.bottom-0'); // Selector for the mobile bottom nav
+        if (navElement) {
+            const navRect = navElement.getBoundingClientRect();
+            console.log(`${logPrefix} Nav - BRect: T:${navRect.top.toFixed(1)}, L:${navRect.left.toFixed(1)}, W:${navRect.width.toFixed(1)}, H:${navRect.height.toFixed(1)}`);
+            console.log(`${logPrefix} Nav - Offset: W:${navElement.offsetWidth}, H:${navElement.offsetHeight}`);
+            const navComputed = window.getComputedStyle(navElement);
+            console.log(`${logPrefix} Nav - Computed: bottom:${navComputed.bottom}, position:${navComputed.position}, left:${navComputed.left}, right:${navComputed.right}, width:${navComputed.width}`);
+        } else {
+            console.log(`${logPrefix} Nav element not found.`);
+        }
+
+        console.log(`${logPrefix} Body - scrollH:${document.body.scrollHeight}, clientH:${document.body.clientHeight}, scrollW:${document.body.scrollWidth}, clientW:${document.body.clientWidth}`);
+        console.log(`${logPrefix} HTML - scrollH:${document.documentElement.scrollHeight}, clientH:${document.documentElement.clientHeight}, scrollW:${document.documentElement.scrollWidth}, clientW:${document.documentElement.clientWidth}`);
+        console.log(`${logPrefix} Window - innerW:${window.innerWidth}, innerH:${window.innerHeight}`);
+
+        const suggestionsPanelElem = document.getElementById('predictive-taps-display'); // Use a different var name to avoid conflict if suggestionsPanel is a param
+        if (suggestionsPanelElem) {
+            if (!suggestionsPanelElem.classList.contains('hidden')) {
+                const panelRect = suggestionsPanelElem.getBoundingClientRect();
+                console.log(`${logPrefix} SuggestPanel - Visible. BRect: T:${panelRect.top.toFixed(1)}, L:${panelRect.left.toFixed(1)}, W:${panelRect.width.toFixed(1)}, H:${panelRect.height.toFixed(1)}`);
+            } else {
+                console.log(`${logPrefix} SuggestPanel - Hidden.`);
+            }
+        }
+    }
+
     function applySuggestionSidePreference(side) {
+        logLayoutDiagnostics(`BEFORE applySuggestionSide (target side: ${side})`);
+
         // 'tapper' const is available from the top of the DOMContentLoaded scope
         if (!suggestionsPanel || !tapper) {
-            // console.warn("Tapper or suggestions panel not found for positioning."); // Keep if debugging needed
+            console.warn("applySuggestionSidePreference: Tapper or suggestionsPanel not found.");
+            logLayoutDiagnostics(`AFTER applySuggestionSide (ERROR - elements not found, target side: ${side})`);
             return;
         }
 
-        // Ensure suggestionsPanel is visible to get correct offsetWidth, otherwise defer or use last known width.
-        // This function will be called by updatePredictiveDisplay after it's made visible.
+        // It's important that suggestionsPanel is visible for offsetWidth to be accurate.
+        // This function is also called from updatePredictiveDisplay after visibility is set.
         if (suggestionsPanel.offsetParent === null && !suggestionsPanel.classList.contains('hidden')) {
-             // It's not hidden by class, but might be display:none via parent.
-             // console.warn("Suggestions panel is not visible for offsetWidth calculation in applySuggestionSidePreference. Deferring or check visibility logic.");
-             // To prevent errors, we can skip positioning if it's not truly visible.
-             // The call from updatePredictiveDisplay will handle it once visible.
-             return;
+             console.warn("applySuggestionSidePreference: suggestionsPanel not truly visible for offsetWidth calculation. Current positioning might be inaccurate until next updatePredictiveDisplay call.");
+             // We might still proceed to set classes/styles, but be aware offsetWidth could be 0.
         }
 
-
-        const tapperContainer = tapper.parentElement; // This is the flex row div
+        const tapperContainer = tapper.parentElement;
         if (!tapperContainer) {
-            // console.warn("Tapper container not found."); // Keep if debugging
+            console.warn("applySuggestionSidePreference: Tapper container not found.");
+            logLayoutDiagnostics(`AFTER applySuggestionSide (ERROR - tapper container not found, target side: ${side})`);
             return;
         }
 
         const tapperRect = tapper.getBoundingClientRect();
-        const containerRect = tapperContainer.getBoundingClientRect(); // This container is the one that centers the tapper
+        const containerRect = tapperContainer.getBoundingClientRect();
 
-        // Calculate tapper's edges relative to its immediate parent container's coordinate system
         const tapperLeftEdgeInContainer = tapperRect.left - containerRect.left;
         const tapperRightEdgeInContainer = tapperRect.right - containerRect.left;
 
-        const desiredGapPx = 8; // 0.5rem
+        const desiredGapPx = 8;
         const suggestionsPanelWidth = suggestionsPanel.offsetWidth;
+        // If suggestionsPanelWidth is 0 (because it was hidden and offsetParent was null), this calculation will be off.
+        // This is why the call from updatePredictiveDisplay (after it's visible) is important.
 
-        // Clear potentially conflicting Tailwind classes and old inline styles
-        suggestionsPanel.classList.remove('left-4', 'right-4', 'order-first', 'order-last', 'mr-2', 'ml-2');
+        suggestionsPanel.classList.remove('left-4', 'right-4'); // Remove old Tailwind position attempt if any
         suggestionsPanel.style.left = '';
-        suggestionsPanel.style.right = '';
+        suggestionsPanel.style.right = ''; // Clear both to ensure one overrides
 
         if (side === 'right') {
             const newLeft = tapperRightEdgeInContainer + desiredGapPx;
             suggestionsPanel.style.left = newLeft + 'px';
-            // console.log(`Set suggestions (right): left=${newLeft}px`); // Keep if debugging
+            console.log(`applySuggestionSidePreference: Setting suggestions to RIGHT, style.left = ${newLeft.toFixed(1)}px`);
         } else { // Default to 'left'
             const newLeft = tapperLeftEdgeInContainer - suggestionsPanelWidth - desiredGapPx;
             suggestionsPanel.style.left = newLeft + 'px';
-            // console.log(`Set suggestions (left): left=${newLeft}px`); // Keep if debugging
+            console.log(`applySuggestionSidePreference: Setting suggestions to LEFT, style.left = ${newLeft.toFixed(1)}px`);
         }
+
+        logLayoutDiagnostics(`AFTER applySuggestionSide (target side: ${side})`);
     }
     window.applySuggestionSidePreference = applySuggestionSidePreference;
 
     if (toggleSuggestionSideBtn && suggestionsPanel) {
         toggleSuggestionSideBtn.addEventListener('click', () => {
+            console.log("--- Toggle Suggestion Side Button Clicked ---"); // Marker for event start
             const currentSide = localStorage.getItem('suggestionSide') || 'left';
             const newSide = (currentSide === 'left') ? 'right' : 'left';
             localStorage.setItem('suggestionSide', newSide);
