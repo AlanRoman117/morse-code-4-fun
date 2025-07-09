@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Check if Tone.js is available and explicitly marked as ready by main.js
         if (typeof Tone === 'undefined' || !window.isToneReady) {
-            // console.warn('playTapSound: Tone.js not explicitly ready (isToneReady flag is false or Tone undefined).'); // Keep for debugging
+            console.warn('playTapSound: Tone.js not explicitly ready (isToneReady flag is false or Tone undefined).'); // Keep for debugging
             return;
         }
 

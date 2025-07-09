@@ -48,6 +48,7 @@ document.addEventListener('deviceready', () => {
 
 function initializeCoreUI() {
     // All your other UI setup code
+    console.log("Initial state in initializeCoreUI: window.isToneReady =", window.isToneReady);
     window.isProUser = loadProStatus();
     populateMorseReference();
     applySavedTheme(); // Apply theme early
@@ -70,6 +71,10 @@ function initializeCoreUI() {
                     console.warn("Tone.start() promise REJECTED:", e);
                     window.isToneReady = false;
                 });
+                // Log state immediately after the call, before promise resolves/rejects
+                if (Tone.context) { // Check context again in case something went wrong with Tone.start() itself
+                    console.log("After Tone.start() call initiated, Tone.context.state is:", Tone.context.state);
+                }
             }
         } else {
             console.warn("Tone, Tone.start, or Tone.context not defined in masterAudioInitListener.");
