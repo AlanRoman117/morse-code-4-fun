@@ -1,6 +1,7 @@
 import os
 import json
 import glob # For scanning directories
+import re # For markdown pre-processing
 
 # --- Constants ---
 # Absolute path to the directory where this script is located
@@ -103,9 +104,17 @@ def main():
             print(f"  Warning: 'content_markdown' key is missing in {json_path}. Using empty content for Morse generation.")
             content_markdown = ""
 
+        # Pre-process markdown for Morse generation: replace newlines with spaces
+        # This helps ensure paragraph breaks in markdown become word separations for Morse.
+        text_for_morse_conversion = content_markdown # Default to original if no processing needed
+        if content_markdown: # Only process if there's content
+            # Replace various newline combinations (and any surrounding whitespace) with a single space
+            text_for_morse_conversion = re.sub(r'\s*[\r\n]+\s*', ' ', content_markdown).strip()
+            # Optional: remove other markdown syntax if necessary, though Morse converter ignores unknown chars
+            # text_for_morse_conversion = re.sub(r'[#*_`]', '', text_for_morse_conversion)
 
         # Generate Morse code
-        morse_code = english_to_morse(content_markdown)
+        morse_code = english_to_morse(text_for_morse_conversion)
         morse_filename = f"{book_key}_morse.txt"
         # Ensure MORSE_CODE_BASE_DIR exists
         if not os.path.exists(MORSE_CODE_BASE_DIR):
