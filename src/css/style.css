@@ -354,7 +354,7 @@ body {
         .light-theme #wpm-slider, .light-theme-container #wpm-slider,
         .light-theme #farnsworth-slider, .light-theme-container #farnsworth-slider,
         .light-theme #freq-slider, .light-theme-container #freq-slider {
-            background-color: #e5e7eb; /* gray-200 for track - User Recommended */
+            background-color: #d1d5db; /* gray-300 for track - Reverted to this for better contrast with panel bg */
             /* This only styles the track for some browsers if appearance-none is set.
                Full slider styling is complex and browser-specific.
             */
