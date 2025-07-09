@@ -20,5 +20,16 @@ window.bookCipherBooks = {
         'imagePath': 'assets/images/covers/passage_1_placeholder.png',
         'filePath': 'assets/book_cipher_texts/passage_1_morse.txt',
         'englishSourcePath': 'assets/book_cipher_texts/english_sources/passage_1.json'
+    },
+    'cosmic_Labyrinth_1': {
+        'title': 'The Cosmic Labyrinth (Pro)',
+        'author': 'Dr. Astra Nova',
+        'description': 'A mind-bending journey through a newly discovered cosmic anomaly. Only for Pro users!',
+        'isPro': true,
+        'genre': 'Sci-Fi',
+        'lengthCategory': 'Long',
+        'imagePath': 'assets/images/covers/cosmic_labyrinth_pro.png',
+        'filePath': 'assets/book_cipher_texts/cosmic_Labyrinth_1_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/cosmic_Labyrinth_1.json'
     }
 };
