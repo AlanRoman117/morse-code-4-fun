@@ -1236,109 +1236,137 @@ if (typeof attachTapperToArea === 'function') {
         }
     }
 
-    function displayUnlockedBookText(bookId) {
-        const bookData = bookCipherBooks[bookId]; // Assumes bookCipherBooks is accessible
+    async function displayUnlockedBookText(bookId) {
+        const bookData = bookCipherBooks[bookId];
         if (!bookData) {
             console.error("displayUnlockedBookText: Invalid bookId or book data not found", bookId);
             alert("Could not load book text. Data is missing.");
             return;
         }
 
-        // Use english_markdown directly if available
-        if (bookData.english_markdown) {
-            const markdownText = bookData.english_markdown;
-            let htmlContent = "";
+        const modal = document.getElementById('unlocked-text-modal');
+        const modalTitle = document.getElementById('unlocked-text-modal-title');
+        const modalContentElement = document.getElementById('unlocked-text-modal-content');
+        const closeModalBtn = document.getElementById('close-unlocked-text-modal-btn');
+
+        if (!modal || !modalTitle || !modalContentElement || !closeModalBtn) {
+            console.error("Modal elements not found for displaying unlocked text.");
+            alert("Error: Could not display the unlocked text. UI elements missing.");
+            return;
+        }
+
+        let markdownText = null;
+        let htmlContent = "";
+        let errorOccurred = false;
+
+        // Priority 1: Fetch from englishSourcePath (JSON)
+        if (bookData.englishSourcePath) {
+            console.log(`displayUnlockedBookText: Attempting to fetch from englishSourcePath: ${bookData.englishSourcePath} for bookId ${bookId}`);
+            try {
+                // Assuming englishSourcePath is relative to src/ like other assets
+                // No, bookData.js paths are usually relative to where index.html is, or root.
+                // Python script generates paths like 'assets/book_cipher_texts/english_sources/passage_1.json'
+                // which should be correct if index.html is in 'src/' or root.
+                // Let's assume paths in bookData.js are directly usable by fetch from the app's context.
+                const response = await fetch(bookData.englishSourcePath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.englishSourcePath}`);
+                }
+                const jsonData = await response.json();
+                if (jsonData && jsonData.content_markdown !== undefined) { // Check for undefined explicitly
+                    markdownText = jsonData.content_markdown;
+                    console.log(`displayUnlockedBookText: Successfully fetched and parsed markdown from ${bookData.englishSourcePath}`);
+                } else {
+                    console.warn(`displayUnlockedBookText: 'content_markdown' key missing or undefined in JSON from ${bookData.englishSourcePath}.`);
+                    // Do not set errorOccurred yet, allow fallback.
+                }
+            } catch (error) {
+                console.error(`Error fetching or parsing JSON from ${bookData.englishSourcePath}:`, error);
+                // Do not set errorOccurred yet, allow fallback.
+            }
+        }
+
+        // Priority 2: Use inline english_markdown (if json fetch failed or path not present)
+        // Note: Our python script generates bookData.js where english_markdown is 'null' if englishSourcePath is used.
+        // So, this block will likely not be hit for books processed by the latest script version.
+        // It's here for robustness or if bookData.js was manually edited.
+        if (markdownText === null && bookData.english_markdown) { // Check if markdownText is still null
+            console.log(`displayUnlockedBookText: Using inline 'english_markdown' for bookId ${bookId}`);
+            markdownText = bookData.english_markdown;
+        }
+
+        // If markdownText was successfully obtained (from JSON or inline)
+        if (markdownText !== null) {
             if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
                 htmlContent = marked.parse(markdownText);
             } else {
                 console.error("marked.parse function not found. Displaying raw Markdown.");
-                // Fallback: Display raw markdown with <pre> for basic formatting
                 htmlContent = `<pre>${markdownText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
             }
+            modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
+            modalContentElement.innerHTML = htmlContent;
+            modal.classList.remove('hidden');
 
-
-            const modal = document.getElementById('unlocked-text-modal');
-            const modalTitle = document.getElementById('unlocked-text-modal-title');
-            const modalContentElement = document.getElementById('unlocked-text-modal-content'); // Renamed for clarity
-            const closeModalBtn = document.getElementById('close-unlocked-text-modal-btn');
-
-            if (modal && modalTitle && modalContentElement && closeModalBtn) {
-                modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
-                modalContentElement.innerHTML = htmlContent; // Set innerHTML with parsed Markdown
-                modal.classList.remove('hidden');
-
-                // Ensure close button listener is attached only once
+            // AdMob logic after successful content display
             if (window.Capacitor?.Plugins?.AdMob && !window.isProUser) {
-        const { AdMob } = window.Capacitor.Plugins;
-        AdMob.prepareInterstitial({
-            adId: "ca-app-pub-6940502431077467/3842216044", // Test Interstitial ID
-            isTesting: true,
-        }).then(() => console.log('[AdMob] Interstitial ad prepared.')
-        ).catch(e => console.error('[AdMob] Error preparing interstitial ad:', e));
-    }
-            } else {
-                console.error("Modal elements not found for displaying unlocked text.");
-                alert("Error: Could not display the unlocked text. UI elements missing.");
+                const { AdMob } = window.Capacitor.Plugins;
+                AdMob.prepareInterstitial({
+                    adId: "ca-app-pub-6940502431077467/3842216044", // Test Interstitial ID
+                    isTesting: true, // Set to false for production
+                }).then(() => console.log('[AdMob] Interstitial ad prepared for unlocked text.')
+                ).catch(e => console.error('[AdMob] Error preparing interstitial ad:', e));
             }
-        } else if (bookData.filePath) { // Fallback to old method if english_markdown is not present
-            console.warn(`displayUnlockedBookText: 'english_markdown' not found for bookId ${bookId}. Falling back to filePath.`);
-            fetch(bookData.filePath)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
-                    }
-                    return response.text();
-                })
-                .then(morseContent => {
-                    morseContent = morseContent.trim();
-                    if (morseContent.length === 0) {
-                        alert("This book appears to be empty.");
-                        return;
-                    }
 
+        // Priority 3: Fallback to translating Morse from filePath
+        } else if (bookData.filePath) {
+            console.warn(`displayUnlockedBookText: No Markdown source found (JSON or inline). Falling back to translating Morse from filePath: ${bookData.filePath} for bookId ${bookId}`);
+            try {
+                const response = await fetch(bookData.filePath); // Now async
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}, file: ${bookData.filePath}`);
+                }
+                const morseContent = (await response.text()).trim();
+
+                if (morseContent.length === 0) {
+                    alert("This book's Morse content appears to be empty.");
+                    errorOccurred = true; // Treat as an error for displaying content
+                } else {
                     let fullEnglishText = "";
                     if (typeof reversedMorseCode !== 'undefined') {
                         fullEnglishText = morseContent.split('/')
-                            .map(morseWord => {
-                                return morseWord.trim().split(' ')
-                                    .map(morseChar => reversedMorseCode[morseChar] || '')
-                                    .join('');
-                            }).join(' ');
+                            .map(morseWord => morseWord.trim().split(' ')
+                                .map(morseChar => reversedMorseCode[morseChar] || '')
+                                .join('')
+                            ).join(' ');
                     } else {
                         console.error("reversedMorseCode is not defined. Cannot translate Morse to English.");
                         fullEnglishText = "Error: Morse translation library not available.";
                     }
-
-
-                    const modal = document.getElementById('unlocked-text-modal');
-                    const modalTitle = document.getElementById('unlocked-text-modal-title');
-                    const modalContent = document.getElementById('unlocked-text-modal-content');
-                    const closeModalBtn = document.getElementById('close-unlocked-text-modal-btn');
-
-                    if (modal && modalTitle && modalContent && closeModalBtn) {
-                        modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
-                        // Display as plain text, as it's a fallback from Morse
-                        modalContent.textContent = fullEnglishText.length > 0 ? fullEnglishText : "No text could be deciphered (book might be empty or in an unrecognized format).";
-                        modal.classList.remove('hidden');
-
-                        if (!closeModalBtn.dataset.listenerAttached) {
-                            closeModalBtn.addEventListener('click', () => {
-                                modal.classList.add('hidden');
-                            });
-                            closeModalBtn.dataset.listenerAttached = 'true';
-                        }
-                    } else {
-                        console.error("Modal elements not found for displaying unlocked text (fallback path).");
-                        alert("Error: Could not display the unlocked text. UI elements missing (fallback path).");
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching or processing book content for displayUnlockedBookText (fallback path):', error);
-                    alert(`Error loading book text (fallback path): ${error.message}`);
-                });
+                    modalTitle.textContent = `Unlocked Text: ${bookData.title}`;
+                    modalContentElement.textContent = fullEnglishText.length > 0 ? fullEnglishText : "No text could be deciphered.";
+                    modal.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching or processing Morse content (fallback path):', error);
+                alert(`Error loading book text (fallback path): ${error.message}`);
+                errorOccurred = true;
+            }
         } else {
-            console.error("displayUnlockedBookText: No 'english_markdown' or 'filePath' found for bookId", bookId);
-            alert("Could not load book text. Data is incomplete.");
+            // All methods failed or no valid paths
+            console.error("displayUnlockedBookText: No 'englishSourcePath', 'english_markdown', or 'filePath' found for bookId", bookId);
+            alert("Could not load book text. Data is incomplete or source is missing.");
+            errorOccurred = true;
+        }
+
+        // Manage close button listener (do this once)
+        if (!errorOccurred && !closeModalBtn.dataset.listenerAttached) {
+            closeModalBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+            closeModalBtn.dataset.listenerAttached = 'true';
+        } else if (errorOccurred) {
+            // Ensure modal is hidden if an error prevented content display
+            modal.classList.add('hidden');
         }
     }
 });
