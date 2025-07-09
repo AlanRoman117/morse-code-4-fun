@@ -217,22 +217,40 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (event) => {
         if (window.isPlayingStoryPlayback) { event.preventDefault(); return; } // Ignore keydown if story playback
 
+        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+        const tapperElement = document.getElementById('tapper');
+
         if (event.key === ' ' || event.keyCode === 32) {
             const activeElement = document.activeElement;
-            if (activeElement) {
-                const tagName = activeElement.tagName.toLowerCase();
-                const isContentEditable = activeElement.isContentEditable;
-                if (tagName === 'input' || tagName === 'textarea' || isContentEditable) {
-                    return;
+            const isTextInputFocused = activeElement && (activeElement.tagName.toLowerCase() === 'input' || activeElement.tagName.toLowerCase() === 'textarea' || activeElement.isContentEditable);
+
+            if (isDesktop && !isTextInputFocused && tapperElement) {
+                event.preventDefault();
+                // Only trigger mousedown if tapper is not already active from this spacebar press
+                // This prevents re-triggering if space is held down (keydown fires repeatedly)
+                if (!tapperElement.classList.contains('spacebar-activated')) {
+                    tapperElement.classList.add('spacebar-activated'); // Mark as activated by spacebar
+                    const mouseDownEvent = new MouseEvent('mousedown', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    tapperElement.dispatchEvent(mouseDownEvent);
                 }
-            }
-            event.preventDefault();
-            if (isPlayingBack) return; // Keep original isPlayingBack check for non-story playback scenarios
-            clearTimeout(silenceTimer);
-            decodeMorse(true);
-            if (spaceButton) {
-                spaceButton.classList.add('active');
-                setTimeout(() => { spaceButton.classList.remove('active'); }, 100);
+            } else if (!isDesktop || isTextInputFocused) {
+                // Original behavior for mobile or when text input is focused
+                if (isTextInputFocused) {
+                    return; // Allow default space insertion in text fields
+                }
+                // For mobile, or desktop when space doesn't activate tapper (e.g. tapperElement not found)
+                event.preventDefault();
+                if (isPlayingBack) return;
+                clearTimeout(silenceTimer);
+                decodeMorse(true);
+                if (spaceButton) {
+                    spaceButton.classList.add('active');
+                    setTimeout(() => { spaceButton.classList.remove('active'); }, 100);
+                }
             }
         }
         else if (event.key === 'Backspace' || event.keyCode === 8) {
@@ -251,6 +269,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteLastCharButton.classList.add('active');
                 setTimeout(() => { deleteLastCharButton.classList.remove('active'); }, 100);
             }
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        if (window.isPlayingStoryPlayback) { return; } // Ignore keyup if story playback
+
+        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+        const tapperElement = document.getElementById('tapper');
+
+        if (event.key === ' ' || event.keyCode === 32) {
+            const activeElement = document.activeElement;
+            const isTextInputFocused = activeElement && (activeElement.tagName.toLowerCase() === 'input' || activeElement.tagName.toLowerCase() === 'textarea' || activeElement.isContentEditable);
+
+            if (isDesktop && !isTextInputFocused && tapperElement) {
+                event.preventDefault();
+                if (tapperElement.classList.contains('spacebar-activated')) {
+                    const mouseUpEvent = new MouseEvent('mouseup', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    tapperElement.dispatchEvent(mouseUpEvent);
+                    tapperElement.classList.remove('spacebar-activated'); // Clean up class
+                }
+            }
+            // No 'else' needed here as keyup for space in text fields is default browser behavior
+            // and the non-desktop/non-tapper scenario for spacebar doesn't have a keyup action in the original code.
         }
     });
 
