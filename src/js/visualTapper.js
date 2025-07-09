@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
             checkStateAndPlay();
-        }, 100); // 100ms delay
+        }, 250); // Changed delay to 250ms
     }
     window.playTapSound = playTapSound; // Expose to global
 
