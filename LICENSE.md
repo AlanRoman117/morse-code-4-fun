@@ -32,4 +32,4 @@ By installing, copying, downloading, or otherwise using the Software, you agree 
     TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL THE LICENSOR BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF THE LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. IN ANY CASE, THE LICENSOR'S ENTIRE LIABILITY UNDER ANY PROVISION OF THIS EULA SHALL BE LIMITED TO THE AMOUNT ACTUALLY PAID BY YOU FOR THE SOFTWARE.
 
 7.  GOVERNING LAW.
-    This EULA and the relationship between You and the Licensor shall be governed by the laws of the State of [Your State], United States of America, without regard to its conflict of law provisions.
+    This EULA and the relationship between You and the Licensor shall be governed by the laws of the State of Florida, United States of America, without regard to its conflict of law provisions.
