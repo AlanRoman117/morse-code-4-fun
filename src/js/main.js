@@ -1,8 +1,72 @@
 // The Final, Definitive main.js
 
+// window.isToneReady = false; // REMOVED
+
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    initializeCoreUI();
+    // Elements for modal and main app content
+    const welcomeModal = document.getElementById('welcome-audio-modal');
+    const startAppBtn = document.getElementById('start-app-btn');
+    const mainNav = document.getElementById('main-nav');
+    const mainTitle = document.querySelector('.main-title'); // Assuming only one main-title
+    const tabContentWrapper = document.getElementById('tab-content-wrapper');
+
+    if (welcomeModal && startAppBtn && mainNav && mainTitle && tabContentWrapper) {
+        // Ensure main app is hidden and modal is shown initially
+        // (though classes in HTML should handle this, this is a JS failsafe/confirmation)
+        mainNav.classList.add('hidden');
+        mainTitle.classList.add('hidden');
+        tabContentWrapper.classList.add('hidden');
+        welcomeModal.classList.remove('hidden'); // Ensure modal is visible
+
+        startAppBtn.addEventListener('click', () => {
+            // console.log("Start App button clicked."); // Keep if minor interaction log is desired, or remove for cleaner console. Let's remove for now.
+            initAudio();
+
+            if (typeof Tone !== 'undefined' && Tone.start && Tone.context) {
+                if (Tone.context.state !== 'running') {
+                    // console.log("Welcome Modal: Attempting Tone.start()."); // Can be removed, success/fail is more important
+                    Tone.start().then(() => {
+                        console.log("Audio Initialized: Tone.js started successfully via modal.");
+                        if (typeof window.setToneContextConfirmedRunning === 'function') {
+                            window.setToneContextConfirmedRunning(true);
+                        }
+                    }).catch(e => {
+                        console.warn("Audio Init Warning: Tone.start() failed from modal:", e);
+                        if (typeof window.setToneContextConfirmedRunning === 'function') {
+                            window.setToneContextConfirmedRunning(false);
+                        }
+                    });
+                } else {
+                    console.log("Audio Initialized: Tone.js context was already running.");
+                    if (typeof window.setToneContextConfirmedRunning === 'function') {
+                        window.setToneContextConfirmedRunning(true);
+                    }
+                }
+            } else {
+                console.warn("Audio Init Warning: Tone.js components not available during modal dismissal.");
+                if (typeof window.setToneContextConfirmedRunning === 'function') {
+                    window.setToneContextConfirmedRunning(false);
+                }
+            }
+
+            // Hide modal and show main app content
+            welcomeModal.style.display = 'none'; // More forceful hide
+            mainNav.classList.remove('hidden');
+            mainTitle.classList.remove('hidden');
+            tabContentWrapper.classList.remove('hidden');
+
+            // Now initialize the rest of the UI that was deferred
+            initializeCoreUI();
+            // showTab() is called within initializeCoreUI or its chain now.
+            // applySavedTheme(); // This is also called in initializeCoreUI or showTab
+        });
+    } else {
+        // If modal elements aren't found, proceed with normal initialization
+        // This might happen if modal HTML is removed or IDs change.
+        console.warn("Welcome modal elements not found. Proceeding with direct app initialization.");
+        initializeCoreUI();
+    }
 });
 
 document.addEventListener('deviceready', () => {
@@ -46,16 +110,16 @@ document.addEventListener('deviceready', () => {
 
 function initializeCoreUI() {
     // All your other UI setup code
+    // console.log("Initial state in initializeCoreUI: window.isToneReady =", window.isToneReady); // Removed
     window.isProUser = loadProStatus();
     populateMorseReference();
     applySavedTheme(); // Apply theme early
     updateDurations();
 
     const masterAudioInitListener = () => {
+        // console.log("masterAudioInitListener: User gesture detected. Initializing non-Tone audio if needed."); // Simplified/removed
         initAudio();
-        if (typeof Tone !== 'undefined' && Tone.start) {
-            Tone.start().catch(e => console.warn("Tone.start() failed:", e));
-        }
+
         document.body.removeEventListener('click', masterAudioInitListener);
         document.body.removeEventListener('touchstart', masterAudioInitListener);
     };
