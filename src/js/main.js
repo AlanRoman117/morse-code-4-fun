@@ -64,17 +64,26 @@ function initializeCoreUI() {
                 console.log("Tone.js context already running. isToneReady set to true.");
             } else {
                 console.log(`Attempting Tone.start(). Current state: ${Tone.context.state}`);
-                Tone.start().then(() => {
-                    window.isToneReady = true;
-                    console.log("Tone.start() promise RESOLVED. isToneReady is true.");
-                }).catch(e => {
-                    console.warn("Tone.start() promise REJECTED:", e);
+                Tone.start().catch(e => { // Keep catch for immediate errors from Tone.start() if its promise does reject
+                    console.warn("Tone.start() call resulted in a promise REJECTION or immediate error:", e);
                     window.isToneReady = false;
                 });
+
                 // Log state immediately after the call, before promise resolves/rejects
-                if (Tone.context) { // Check context again in case something went wrong with Tone.start() itself
+                if (Tone.context) {
                     console.log("After Tone.start() call initiated, Tone.context.state is:", Tone.context.state);
                 }
+
+                // Use setTimeout to check state after a short delay
+                setTimeout(() => {
+                    if (Tone.context && Tone.context.state === 'running') {
+                        window.isToneReady = true;
+                        console.log("SUCCESS: Tone.js context is 'running' after 100ms timeout. isToneReady set to true.");
+                    } else {
+                        window.isToneReady = false; // Ensure it's false if not running
+                        console.log(`FAILURE: Tone.js context NOT 'running' after 100ms timeout. State: ${Tone.context ? Tone.context.state : 'undefined'}. isToneReady set to false.`);
+                    }
+                }, 100); // 100ms delay
             }
         } else {
             console.warn("Tone, Tone.start, or Tone.context not defined in masterAudioInitListener.");
