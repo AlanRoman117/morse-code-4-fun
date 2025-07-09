@@ -16,7 +16,21 @@
     </style>
 </head>
 <body class="pt-5 pb-24 md:pb-5">
-    <nav class="flex justify-around items-center fixed bottom-0 left-0 right-0 z-50 bg-gray-800 py-5 shadow-md md:relative md:top-auto md:left-auto md:right-auto md:bg-transparent md:shadow-none md:mb-4 md:p-0 md:space-x-2">
+
+    <!-- Welcome Modal -->
+    <div id="welcome-audio-modal" class="fixed inset-0 bg-gray-900 bg-opacity-85 flex items-center justify-center z-[100] p-4">
+        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">Welcome to Morse Code 4 Fun!</h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-6 md:mb-8 text-sm md:text-base">
+                To ensure the best experience with audio feedback, please tap the button below. This will initialize the audio for the app.
+            </p>
+            <button id="start-app-btn" class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out text-base md:text-lg focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-700">
+                Start Tapping!
+            </button>
+        </div>
+    </div>
+
+    <nav id="main-nav" class="flex justify-around items-center fixed bottom-0 left-0 right-0 z-50 bg-gray-800 py-5 shadow-md md:relative md:top-auto md:left-auto md:right-auto md:bg-transparent md:shadow-none md:mb-4 md:p-0 md:space-x-2 hidden"> <!-- Added ID and initially hidden -->
         <button id="introduction-nav-btn" data-tab="introduction-tab" class="flex flex-col items-center justify-center p-3 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 active-tab-button w-1/6 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
             <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
@@ -55,8 +69,8 @@
             <span class="sr-only md:not-sr-only md:ml-1">Settings</span>
         </button>
     </nav>
-    <h1 class="text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-center main-title">Morse Code 4 Fun</h1>
-    <div id="tab-content-wrapper">
+    <h1 class="text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-center main-title hidden">Morse Code 4 Fun</h1> <!-- Initially hidden -->
+    <div id="tab-content-wrapper" class="hidden"> <!-- Initially hidden -->
         <div id="introduction-tab" class="tab-content"> <!-- Default to visible, JS will handle -->
             <div class="app-container text-center">
                 <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-blue-400">Welcome to Morse Code 4 Fun!</h2>
@@ -422,24 +436,29 @@
 
     <div id="hiddenTapperStorage" style="display: none;"></div>
     <div id="sharedVisualTapperWrapper" style="display: none;">
-        <div class="tapper-section-container text-center my-2 md:my-4 relative"> <!-- Added position: relative -->
-            <!-- Predictive Taps Display (Tooltip Style) -->
-            <div id="predictive-taps-display" class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 bg-gray-800 text-white p-2 rounded-md shadow-lg max-h-36 overflow-y-auto z-10 border border-gray-600 hidden transition-opacity duration-500 ease-in-out">
-                <!-- Pills will be dynamically inserted here -->
+        <div class="tapper-section-container relative flex flex-col items-center my-2 md:my-4">
+            <!-- Controls: Space, Delete (Toggle button moved into suggestions panel) -->
+            <div class="flex justify-center items-center gap-3 mb-2">
+                <button id="spaceButton" title="End Letter / Word Space" class="text-sm bg-blue-900 hover:bg-blue-800 active:bg-blue-950 text-white font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Word<br>Space</button>
+                <button id="deleteLastCharButton" title="Delete Last Character" class="text-sm bg-red-500 hover:bg-red-600 active:bg-red-700 text-black font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Delete</button>
             </div>
-            <!-- Flex container for tapper and buttons -->
-            <div class="flex justify-center items-center gap-2 md:gap-4 mb-2 md:mb-3">
-                <div id="tapper" class="tapper shadow-lg">Tap!</div>
-                <!-- New wrapper for vertical buttons -->
-                <div class="flex flex-col items-center gap-2">
-                    <button id="spaceButton" title="End Letter / Word Space" class="text-sm bg-blue-900 hover:bg-blue-800 active:bg-blue-950 text-white font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Word<br>Space</button>
-                    <button id="deleteLastCharButton" title="Delete Last Character" class="text-sm bg-red-500 hover:bg-red-600 active:bg-red-700 text-black font-semibold py-1 px-2 md:py-2 md:px-3 rounded-full h-12 w-12 md:h-14 md:w-14 flex items-center justify-center transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Delete</button>
+
+            <!-- Predictive Taps Display (Suggestions) - Absolutely Positioned Sidebar -->
+            <!-- JS will add left-4 or right-4 classes. Centered vertically with tapper. -->
+            <div id="predictive-taps-display" class="absolute top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-1 rounded-md shadow-lg max-h-40 border border-gray-600 hidden transition-opacity duration-500 ease-in-out w-32 md:w-40 flex flex-col">
+                <button id="toggle-suggestion-side-btn" title="Toggle Suggestion Side" class="w-full text-center py-1 mb-1 bg-gray-700 hover:bg-gray-600 rounded text-white font-semibold text-sm flex-shrink-0">⇄ Side</button>
+                <div id="suggestion-pills-container" class="flex flex-wrap justify-center gap-1 items-center overflow-y-auto flex-grow p-1">
+                    <!-- Pills will be dynamically inserted here -->
                 </div>
             </div>
+
+            <!-- Tapper (should be centered by items-center on parent) -->
+            <div id="tapper" class="tapper shadow-lg">Tap!</div>
+
             <!-- Output area remains below -->
-            <div class="output-area mt-1 md:mt-2"> <!-- Adjusted mt-2 to mt-1 md:mt-2 -->
-                <h3 class="text-base md:text-lg font-semibold mb-1">Your Morse:</h3>
-                <p id="tapperMorseOutput" class="text-base md:text-xl font-mono min-h-[20px] md:min-h-[25px] break-all bg-gray-700 p-1 md:p-2 rounded"></p>
+            <div class="output-area mt-2 w-full max-w-md mx-auto">
+                <h3 class="text-base md:text-lg font-semibold mb-1 text-center">Your Morse:</h3>
+                <p id="tapperMorseOutput" class="text-base md:text-xl font-mono min-h-[20px] md:min-h-[25px] break-all bg-gray-700 p-1 md:p-2 rounded text-center"></p>
             </div>
         </div>
     </div>
@@ -450,8 +469,8 @@
     </div>
     <script type="module" src="js/main.js"></script>
     <script src="js/data/bookData.js"></script>
-    <script src="js/learnPracticeGame.js" defer></script>
-    <script src="js/visualTapper.js" defer></script>
+    <script src="js/visualTapper.js" defer></script> <!-- Moved up -->
+    <script src="js/learnPracticeGame.js" defer></script> <!-- Moved down -->
     <script src="js/settings.js" defer></script> 
     <script src="js/bookCipher.js" defer></script> 
     <script src="js/kochMethod.js" defer></script>

@@ -15,6 +15,10 @@ let lastTapTime = 0; // For double-tap zoom prevention
 // Constants
 const DOUBLE_TAP_THRESHOLD_MS = 300; // Threshold for detecting a double tap
 
+// let toneStartAttempted = false; // REMOVED
+let visualTapperIsToneReady = false; // Flag set by main.js after modal dismissal and Tone.start() attempt
+// let primingTapAttemptedThisLoad = false; // REMOVED - No longer needed with modal priming
+
 // Function to update unit time and related variables
 function updateVisualTapperUnitTime(newUnitTime) {
   UNIT_TIME_MS = parseInt(newUnitTime);
@@ -42,6 +46,12 @@ function setTapperActive(isActive) {
     }
 }
 window.setTapperActive = setTapperActive; // Expose to global
+
+// Setter function for main.js to call after attempting Tone.start() via modal
+window.setToneContextConfirmedRunning = function(isReady) {
+    visualTapperIsToneReady = isReady;
+    // console.log('visualTapper.js: visualTapperIsToneReady set to:', visualTapperIsToneReady); // Keep if essential, or remove for cleaner console
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Visual Tapper JavaScript ---
@@ -84,35 +94,42 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Sound is explicitly off and not in story playback mode
         }
 
-        // Original sound playing logic
-        if (typeof Tone !== 'undefined' && Tone && Tone.Synth) {
-            const playNoteInternal = () => {
-                if (!tapperTone) {
-                    try {
-                        tapperTone = new Tone.Synth({
-                            oscillator: { type: 'sine' },
-                            envelope: { attack: 0.005, decay: 0.01, sustain: 0.9, release: 0.05 }
-                        }).toDestination();
-                    } catch (e) {
-                        console.error("Failed to create Tone.Synth for tapper:", e);
-                        return;
-                    }
+        const playNoteInternal = () => {
+            if (!tapperTone) {
+                try {
+                    tapperTone = new Tone.Synth({
+                        oscillator: { type: 'sine' },
+                        envelope: { attack: 0.005, decay: 0.01, sustain: 0.9, release: 0.05 }
+                    }).toDestination();
+                } catch (e) {
+                    console.error("Failed to create Tone.Synth for tapper:", e);
+                    return;
                 }
-                if (tapperTone && typeof tapperTone.triggerAttack === 'function') {
-                    tapperTone.triggerRelease(); // Ensure previous note is released
-                    tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now());
-                }
-            };
-            if (Tone.context.state !== 'running') {
-                Tone.start().then(() => {
-                    playNoteInternal();
-                }).catch(e => {
-                    console.warn("Tone.js audio context couldn't start via playTapSound's Tone.start(): ", e);
-                });
-            } else {
-                playNoteInternal();
             }
+            if (tapperTone && typeof tapperTone.triggerAttack === 'function') {
+                tapperTone.triggerRelease();
+                tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now());
+            }
+        };
+
+        // playNoteInternal definition is above this
+
+        if (typeof Tone === 'undefined' || !Tone.Synth) {
+            // console.warn("playTapSound: Tone.js or Tone.Synth not available."); // Keep this important warning
+            return;
         }
+
+        if (!visualTapperIsToneReady) {
+            // console.warn("playTapSound: Tone.js not confirmed ready by modal/startup. Tap sound skipped."); // Keep this important warning
+            return;
+        }
+
+        if (Tone.context && Tone.context.state !== 'running') {
+            // This case should be rare if modal logic works, but it's a useful warning if it occurs.
+            console.warn(`playTapSound: Audio ready flag is true, but Tone.context.state is '${Tone.context.state}'. Sound may fail.`);
+        }
+
+        playNoteInternal();
     }
     window.playTapSound = playTapSound; // Expose to global
 
@@ -297,30 +314,152 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const savedUnitTime = localStorage.getItem('visualTapperUnitTime');
     if (savedUnitTime) {
-        // console.log("Found saved unit time in localStorage:", savedUnitTime); // Log removed
         updateVisualTapperUnitTime(parseInt(savedUnitTime)); 
     } else {
-        // console.log("No saved unit time in localStorage, ensuring default configuration is applied via updateVisualTapperUnitTime."); // Log removed
         updateVisualTapperUnitTime(UNIT_TIME_MS);
     }
 
-    const predictiveDisplayElement = document.getElementById('predictive-taps-display');
-    if (predictiveDisplayElement) {
+    // --- Suggestion Side Toggle Logic ---
+    const toggleSuggestionSideBtn = document.getElementById('toggle-suggestion-side-btn');
+    const suggestionsPanel = document.getElementById('predictive-taps-display'); // Renamed for clarity
+    // const tapper = document.getElementById('tapper'); // REMOVED: tapper is already defined above in this scope
+
+    /* // REMOVED Diagnostic Logging Function
+    function logLayoutDiagnostics(logPrefix) {
+        const navElement = document.querySelector('nav.fixed.bottom-0');
+        if (navElement) {
+            const navRect = navElement.getBoundingClientRect();
+            console.log(`${logPrefix} Nav - BRect: T:${navRect.top.toFixed(1)}, L:${navRect.left.toFixed(1)}, W:${navRect.width.toFixed(1)}, H:${navRect.height.toFixed(1)}`);
+            console.log(`${logPrefix} Nav - Offset: W:${navElement.offsetWidth}, H:${navElement.offsetHeight}`);
+            const navComputed = window.getComputedStyle(navElement);
+            console.log(`${logPrefix} Nav - Computed: bottom:${navComputed.bottom}, position:${navComputed.position}, left:${navComputed.left}, right:${navComputed.right}, width:${navComputed.width}`);
+        } else {
+            console.log(`${logPrefix} Nav element not found.`);
+        }
+
+        console.log(`${logPrefix} Body - scrollH:${document.body.scrollHeight}, clientH:${document.body.clientHeight}, scrollW:${document.body.scrollWidth}, clientW:${document.body.clientWidth}`);
+        console.log(`${logPrefix} HTML - scrollH:${document.documentElement.scrollHeight}, clientH:${document.documentElement.clientHeight}, scrollW:${document.documentElement.scrollWidth}, clientW:${document.documentElement.clientWidth}`);
+        console.log(`${logPrefix} Window - innerW:${window.innerWidth}, innerH:${window.innerHeight}`);
+
+        const suggestionsPanelElem = document.getElementById('predictive-taps-display');
+        if (suggestionsPanelElem) {
+            if (!suggestionsPanelElem.classList.contains('hidden')) {
+                const panelRect = suggestionsPanelElem.getBoundingClientRect();
+                console.log(`${logPrefix} SuggestPanel - Visible. BRect: T:${panelRect.top.toFixed(1)}, L:${panelRect.left.toFixed(1)}, W:${panelRect.width.toFixed(1)}, H:${panelRect.height.toFixed(1)}`);
+            } else {
+                console.log(`${logPrefix} SuggestPanel - Hidden.`);
+            }
+        }
+    }
+    */
+
+    function applySuggestionSidePreference(side) {
+        // logLayoutDiagnostics(`BEFORE applySuggestionSide (target side: ${side})`); // REMOVED
+
+        if (!suggestionsPanel || !tapper) {
+            console.warn("applySuggestionSidePreference: Tapper or suggestionsPanel not found.");
+            // logLayoutDiagnostics(`AFTER applySuggestionSide (ERROR - elements not found, target side: ${side})`); // REMOVED
+            return;
+        }
+
+        if (suggestionsPanel.offsetParent === null && !suggestionsPanel.classList.contains('hidden')) {
+             console.warn("applySuggestionSidePreference: suggestionsPanel not truly visible for offsetWidth calculation. Current positioning might be inaccurate until next updatePredictiveDisplay call.");
+        }
+
+        const tapperContainer = tapper.parentElement;
+        if (!tapperContainer) {
+            console.warn("applySuggestionSidePreference: Tapper container not found.");
+            // logLayoutDiagnostics(`AFTER applySuggestionSide (ERROR - tapper container not found, target side: ${side})`); // REMOVED
+            return;
+        }
+
+        const tapperRect = tapper.getBoundingClientRect();
+        const containerRect = tapperContainer.getBoundingClientRect();
+
+        const tapperLeftEdgeInContainer = tapperRect.left - containerRect.left;
+        const tapperRightEdgeInContainer = tapperRect.right - containerRect.left;
+
+        const desiredGapPx = 8;
+        const suggestionsPanelWidth = suggestionsPanel.offsetWidth;
+
+        suggestionsPanel.classList.remove('left-4', 'right-4');
+        suggestionsPanel.style.left = '';
+        suggestionsPanel.style.right = '';
+
+        if (side === 'right') {
+            const newLeft = tapperRightEdgeInContainer + desiredGapPx;
+            suggestionsPanel.style.left = newLeft + 'px';
+            // console.log(`applySuggestionSidePreference: Setting suggestions to RIGHT, style.left = ${newLeft.toFixed(1)}px`); // REMOVED
+        } else {
+            const newLeft = tapperLeftEdgeInContainer - suggestionsPanelWidth - desiredGapPx;
+            suggestionsPanel.style.left = newLeft + 'px';
+            // console.log(`applySuggestionSidePreference: Setting suggestions to LEFT, style.left = ${newLeft.toFixed(1)}px`); // REMOVED
+        }
+
+        // logLayoutDiagnostics(`AFTER applySuggestionSide (target side: ${side})`); // REMOVED
+    }
+    window.applySuggestionSidePreference = applySuggestionSidePreference;
+
+    if (toggleSuggestionSideBtn && suggestionsPanel) {
+        toggleSuggestionSideBtn.addEventListener('click', () => {
+            // console.log("--- Toggle Suggestion Side Button Clicked ---"); // REMOVED
+            const currentSide = localStorage.getItem('suggestionSide') || 'left';
+            const newSide = (currentSide === 'left') ? 'right' : 'left';
+            localStorage.setItem('suggestionSide', newSide);
+            applySuggestionSidePreference(newSide);
+        });
+    }
+
+    const savedSuggestionSide = localStorage.getItem('suggestionSide');
+    applySuggestionSidePreference(savedSuggestionSide || 'left');
+    // --- End Suggestion Side Toggle Logic ---
+
+
+    // --- Debounced Resize Handler ---
+    function debounce(func, wait, immediate) {
+        let timeout;
+        return function() {
+            const context = this, args = arguments;
+            const later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            const callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    }
+
+    const handleResize = debounce(() => {
+        if (suggestionsPanel && !suggestionsPanel.classList.contains('hidden')) {
+            applySuggestionSidePreference(localStorage.getItem('suggestionSide') || 'left');
+        }
+    }, 250);
+
+    window.addEventListener('resize', handleResize);
+    // --- End Debounced Resize Handler ---
+
+    if (suggestionsPanel) {
         const interactionHandler = () => {
-            if (predictiveDisplayTimeout && !predictiveDisplayElement.classList.contains('hidden') && !predictiveDisplayElement.classList.contains('opacity-0')) {
+            // Use suggestionsPanel here, as predictiveDisplayElement is not defined in this immediate scope
+            // and suggestionsPanel refers to the same DOM element.
+            if (predictiveDisplayTimeout && !suggestionsPanel.classList.contains('hidden') && !suggestionsPanel.classList.contains('opacity-0')) {
                 // console.log('User interaction with predictive display detected. Resetting hide timer.'); // Log removed
                 resetPredictiveDisplayHideTimer(); 
             }
         };
-        predictiveDisplayElement.addEventListener('touchstart', interactionHandler, { passive: true });
-        predictiveDisplayElement.addEventListener('click', interactionHandler);
-        predictiveDisplayElement.addEventListener('wheel', interactionHandler, { passive: true });
+        // Attach listeners to suggestionsPanel
+        suggestionsPanel.addEventListener('touchstart', interactionHandler, { passive: true });
+        suggestionsPanel.addEventListener('click', interactionHandler);
+        suggestionsPanel.addEventListener('wheel', interactionHandler, { passive: true });
     } else {
-        console.warn("Predictive taps display element not found for attaching interaction listeners.");
+        console.warn("Predictive taps display element (suggestionsPanel) not found for attaching interaction listeners.");
     }
 });
 
 function resetPredictiveDisplayHideTimer() {
+    // This function uses 'displayElement', which is fine as it's locally scoped by getElementById.
     const displayElement = document.getElementById('predictive-taps-display');
     if (!displayElement || displayElement.classList.contains('hidden') || displayElement.classList.contains('opacity-0')) {
         // console.log('resetPredictiveDisplayHideTimer called, but display not in a state to reset timer.'); // Log removed
@@ -357,36 +496,38 @@ function updatePredictiveDisplay(morseString) {
         return;
     }
     // console.log('updatePredictiveDisplay CALLED - Time:', Date.now(), '| Morse:', morseString, '| Current Timeout ID before logic:', predictiveDisplayTimeout); // Log removed
-    const displayElement = document.getElementById('predictive-taps-display');
-    if (!displayElement) return;
+    const overallDisplayPanel = document.getElementById('predictive-taps-display'); // Parent panel for visibility
+    const pillsContainer = document.getElementById('suggestion-pills-container'); // Child for pills content
+
+    if (!overallDisplayPanel || !pillsContainer) {
+        console.error("Predictive display panel or pills container not found.");
+        return;
+    }
 
     if (morseString && morseString.length > 0) {
         if (predictiveDisplayTimeout) {
             clearTimeout(predictiveDisplayTimeout);
             predictiveDisplayTimeout = null;
-            // console.log('Cleared existing timeout due to new morseString:', morseString); // Log removed
         }
         let exactMatchHtml = "";
         let partialMatchesHtml = [];
         if (typeof morseCode === 'undefined') { 
             console.error("morseCode dictionary is not available to updatePredictiveDisplay.");
-            displayElement.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
-            displayElement.classList.remove('hidden', 'opacity-0');
-            void displayElement.offsetWidth;
-            displayElement.classList.add('opacity-100');
+            pillsContainer.innerHTML = "<span class='text-red-500'>Error: Morse dictionary unavailable.</span>";
+            overallDisplayPanel.classList.remove('hidden', 'opacity-0');
+            void overallDisplayPanel.offsetWidth; // Trigger reflow for transition
+            overallDisplayPanel.classList.add('opacity-100');
             predictiveDisplayTimeout = setTimeout(() => {
-                // console.log('6s timeout for error message expired. Hiding.'); // Log removed
-                displayElement.classList.remove('opacity-100');
-                displayElement.classList.add('opacity-0');
+                overallDisplayPanel.classList.remove('opacity-100');
+                overallDisplayPanel.classList.add('opacity-0');
                 predictiveDisplayTimeout = null; 
-                setTimeout(() => { displayElement.classList.add('hidden'); }, 500);
+                setTimeout(() => { overallDisplayPanel.classList.add('hidden'); }, 500);
             }, 6000);
             return;
         }
         for (const char in morseCode) {
             const currentMorseValue = morseCode[char];
             if (currentMorseValue === morseString) {
-                // console.log('Exact match found for:', char, morseString, 'Applying highlight class.');  // Log removed
                 exactMatchHtml = `<span class="char-badge exact-match-highlight text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${currentMorseValue})</span>`;
             } else if (currentMorseValue.startsWith(morseString)) {
                 partialMatchesHtml.push(`<span class="char-badge bg-gray-600 text-gray-200 text-xs font-mono rounded-md px-2 py-1 mr-1 mb-1 inline-block">${char} (${currentMorseValue})</span>`);
@@ -394,47 +535,48 @@ function updatePredictiveDisplay(morseString) {
         }
         const finalHtml = exactMatchHtml + partialMatchesHtml.join('');
         if (finalHtml.length > 0) {
-            displayElement.innerHTML = finalHtml;
-            displayElement.classList.remove('hidden', 'opacity-0');
-            void displayElement.offsetWidth;
-            displayElement.classList.add('opacity-100');
-            // console.log('Displaying predictions. Setting 6s timeout.'); // Log removed
+            pillsContainer.innerHTML = finalHtml;
+            overallDisplayPanel.classList.remove('hidden', 'opacity-0');
+            void overallDisplayPanel.offsetWidth; // Trigger reflow
+            overallDisplayPanel.classList.add('opacity-100');
+            // Ensure position is correctly set now that it's visible and has dimensions
+            applySuggestionSidePreference(localStorage.getItem('suggestionSide') || 'left');
             predictiveDisplayTimeout = setTimeout(() => {
-                // console.log('6s timeout for predictions expired. Hiding.'); // Log removed
-                displayElement.classList.remove('opacity-100');
-                displayElement.classList.add('opacity-0');
+                overallDisplayPanel.classList.remove('opacity-100');
+                overallDisplayPanel.classList.add('opacity-0');
                 predictiveDisplayTimeout = null; 
-                setTimeout(() => { displayElement.classList.add('hidden'); }, 500);
+                setTimeout(() => { overallDisplayPanel.classList.add('hidden'); }, 500);
             }, 6000);
         } else { 
-            displayElement.innerHTML = "<span class='text-gray-500'>No match</span>";
-            displayElement.classList.remove('hidden', 'opacity-0');
-            void displayElement.offsetWidth;
-            displayElement.classList.add('opacity-100');
-            // console.log('Displaying "No match". Setting 6s timeout.'); // Log removed
+            pillsContainer.innerHTML = "<span class='text-gray-500'>No match</span>";
+            overallDisplayPanel.classList.remove('hidden', 'opacity-0');
+            void overallDisplayPanel.offsetWidth; // Trigger reflow
+            overallDisplayPanel.classList.add('opacity-100');
+            // Ensure position is correctly set for "No match" case too
+            applySuggestionSidePreference(localStorage.getItem('suggestionSide') || 'left');
             predictiveDisplayTimeout = setTimeout(() => {
-                // console.log('6s timeout for "No match" expired. Hiding.'); // Log removed
-                displayElement.classList.remove('opacity-100');
-                displayElement.classList.add('opacity-0');
+                overallDisplayPanel.classList.remove('opacity-100');
+                overallDisplayPanel.classList.add('opacity-0');
                 predictiveDisplayTimeout = null; 
-                setTimeout(() => { displayElement.classList.add('hidden'); }, 500);
+                setTimeout(() => { overallDisplayPanel.classList.add('hidden'); }, 500);
             }, 6000);
         }
     } 
-    else { 
+    else { // morseString is empty or null
         if (predictiveDisplayTimeout) {
-            // console.log('Empty morseString received, but a timeout (ID:', predictiveDisplayTimeout, ') is active. Letting it run.'); // Log removed
+            // Active timeout, let it run to hide the panel.
         } else {
-            // console.log('Empty morseString and NO active timeout. Hiding now.'); // Log removed
-            displayElement.classList.remove('opacity-100');
-            displayElement.classList.add('opacity-0');
+            // No active timeout, and morseString is empty, so hide panel immediately.
+            overallDisplayPanel.classList.remove('opacity-100');
+            overallDisplayPanel.classList.add('opacity-0');
             setTimeout(() => {
-                displayElement.classList.add('hidden');
-                displayElement.innerHTML = "";
+                overallDisplayPanel.classList.add('hidden');
+                pillsContainer.innerHTML = ""; // Clear pills when hiding due to empty input
             }, 500);
         }
     }
 }
+window.resetVisualTapperState = resetVisualTapperState; // Expose to global scope
 
 function resetVisualTapperState() {
     currentMorse = "";
