@@ -20,35 +20,32 @@ document.addEventListener('DOMContentLoaded', () => {
         welcomeModal.classList.remove('hidden'); // Ensure modal is visible
 
         startAppBtn.addEventListener('click', () => {
-            console.log("Start App button clicked.");
-            // Attempt to initialize general Web Audio API context
+            // console.log("Start App button clicked."); // Keep if minor interaction log is desired, or remove for cleaner console. Let's remove for now.
             initAudio();
 
-            // Attempt to start Tone.js
             if (typeof Tone !== 'undefined' && Tone.start && Tone.context) {
                 if (Tone.context.state !== 'running') {
-                    console.log("Welcome Modal: Attempting Tone.start().");
+                    // console.log("Welcome Modal: Attempting Tone.start()."); // Can be removed, success/fail is more important
                     Tone.start().then(() => {
-                        console.log("Welcome Modal: Tone.start() successful via modal button.");
+                        console.log("Audio Initialized: Tone.js started successfully via modal.");
                         if (typeof window.setToneContextConfirmedRunning === 'function') {
                             window.setToneContextConfirmedRunning(true);
                         }
                     }).catch(e => {
-                        console.warn("Welcome Modal: Tone.start() failed:", e);
+                        console.warn("Audio Init Warning: Tone.start() failed from modal:", e);
                         if (typeof window.setToneContextConfirmedRunning === 'function') {
                             window.setToneContextConfirmedRunning(false);
                         }
                     });
                 } else {
-                    console.log("Welcome Modal: Tone.context already running.");
+                    console.log("Audio Initialized: Tone.js context was already running.");
                     if (typeof window.setToneContextConfirmedRunning === 'function') {
                         window.setToneContextConfirmedRunning(true);
                     }
                 }
             } else {
-                console.warn("Welcome Modal: Tone.js components not available.");
+                console.warn("Audio Init Warning: Tone.js components not available during modal dismissal.");
                 if (typeof window.setToneContextConfirmedRunning === 'function') {
-                    // Ensure visualTapper knows Tone is not ready if it was expecting this call
                     window.setToneContextConfirmedRunning(false);
                 }
             }
@@ -113,16 +110,15 @@ document.addEventListener('deviceready', () => {
 
 function initializeCoreUI() {
     // All your other UI setup code
-    console.log("Initial state in initializeCoreUI: window.isToneReady =", window.isToneReady);
+    // console.log("Initial state in initializeCoreUI: window.isToneReady =", window.isToneReady); // Removed
     window.isProUser = loadProStatus();
     populateMorseReference();
     applySavedTheme(); // Apply theme early
     updateDurations();
 
     const masterAudioInitListener = () => {
-        console.log("masterAudioInitListener: User gesture detected. Initializing non-Tone audio if needed.");
-        initAudio(); // For the general Web Audio API context (used by playMorseSequence, etc.)
-        // All Tone.js startup logic for tap sounds is now handled within visualTapper.js
+        // console.log("masterAudioInitListener: User gesture detected. Initializing non-Tone audio if needed."); // Simplified/removed
+        initAudio();
 
         document.body.removeEventListener('click', masterAudioInitListener);
         document.body.removeEventListener('touchstart', masterAudioInitListener);

@@ -50,7 +50,7 @@ window.setTapperActive = setTapperActive; // Expose to global
 // Setter function for main.js to call after attempting Tone.start() via modal
 window.setToneContextConfirmedRunning = function(isReady) {
     visualTapperIsToneReady = isReady;
-    console.log('visualTapper.js: visualTapperIsToneReady set to:', visualTapperIsToneReady);
+    // console.log('visualTapper.js: visualTapperIsToneReady set to:', visualTapperIsToneReady); // Keep if essential, or remove for cleaner console
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -114,22 +114,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // playNoteInternal definition is above this
 
-        if (typeof Tone === 'undefined' || !Tone.Synth) { // Check for Tone and Tone.Synth
-            console.warn("playTapSound: Tone.js or Tone.Synth not available.");
+        if (typeof Tone === 'undefined' || !Tone.Synth) {
+            // console.warn("playTapSound: Tone.js or Tone.Synth not available."); // Keep this important warning
             return;
         }
 
         if (!visualTapperIsToneReady) {
-            console.warn("playTapSound: Tone.js not confirmed ready by modal/startup. Tap sound skipped.");
+            // console.warn("playTapSound: Tone.js not confirmed ready by modal/startup. Tap sound skipped."); // Keep this important warning
             return;
         }
 
-        // If visualTapperIsToneReady is true, Tone.context should be 'running'.
-        // A redundant check for safety, but main reliance is on the flag.
         if (Tone.context && Tone.context.state !== 'running') {
-            console.warn(`playTapSound: visualTapperIsToneReady is true, but Tone.context.state is '${Tone.context.state}'. Sound may fail.`);
-            // Optionally, try a last-ditch Tone.start() here, but it might complicate things.
-            // For now, proceed, assuming the flag is the source of truth from modal interaction.
+            // This case should be rare if modal logic works, but it's a useful warning if it occurs.
+            console.warn(`playTapSound: Audio ready flag is true, but Tone.context.state is '${Tone.context.state}'. Sound may fail.`);
         }
 
         playNoteInternal();
@@ -327,8 +324,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const suggestionsPanel = document.getElementById('predictive-taps-display'); // Renamed for clarity
     // const tapper = document.getElementById('tapper'); // REMOVED: tapper is already defined above in this scope
 
+    /* // REMOVED Diagnostic Logging Function
     function logLayoutDiagnostics(logPrefix) {
-        const navElement = document.querySelector('nav.fixed.bottom-0'); // Selector for the mobile bottom nav
+        const navElement = document.querySelector('nav.fixed.bottom-0');
         if (navElement) {
             const navRect = navElement.getBoundingClientRect();
             console.log(`${logPrefix} Nav - BRect: T:${navRect.top.toFixed(1)}, L:${navRect.left.toFixed(1)}, W:${navRect.width.toFixed(1)}, H:${navRect.height.toFixed(1)}`);
@@ -343,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`${logPrefix} HTML - scrollH:${document.documentElement.scrollHeight}, clientH:${document.documentElement.clientHeight}, scrollW:${document.documentElement.scrollWidth}, clientW:${document.documentElement.clientWidth}`);
         console.log(`${logPrefix} Window - innerW:${window.innerWidth}, innerH:${window.innerHeight}`);
 
-        const suggestionsPanelElem = document.getElementById('predictive-taps-display'); // Use a different var name to avoid conflict if suggestionsPanel is a param
+        const suggestionsPanelElem = document.getElementById('predictive-taps-display');
         if (suggestionsPanelElem) {
             if (!suggestionsPanelElem.classList.contains('hidden')) {
                 const panelRect = suggestionsPanelElem.getBoundingClientRect();
@@ -353,28 +351,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+    */
 
     function applySuggestionSidePreference(side) {
-        logLayoutDiagnostics(`BEFORE applySuggestionSide (target side: ${side})`);
+        // logLayoutDiagnostics(`BEFORE applySuggestionSide (target side: ${side})`); // REMOVED
 
-        // 'tapper' const is available from the top of the DOMContentLoaded scope
         if (!suggestionsPanel || !tapper) {
             console.warn("applySuggestionSidePreference: Tapper or suggestionsPanel not found.");
-            logLayoutDiagnostics(`AFTER applySuggestionSide (ERROR - elements not found, target side: ${side})`);
+            // logLayoutDiagnostics(`AFTER applySuggestionSide (ERROR - elements not found, target side: ${side})`); // REMOVED
             return;
         }
 
-        // It's important that suggestionsPanel is visible for offsetWidth to be accurate.
-        // This function is also called from updatePredictiveDisplay after visibility is set.
         if (suggestionsPanel.offsetParent === null && !suggestionsPanel.classList.contains('hidden')) {
              console.warn("applySuggestionSidePreference: suggestionsPanel not truly visible for offsetWidth calculation. Current positioning might be inaccurate until next updatePredictiveDisplay call.");
-             // We might still proceed to set classes/styles, but be aware offsetWidth could be 0.
         }
 
         const tapperContainer = tapper.parentElement;
         if (!tapperContainer) {
             console.warn("applySuggestionSidePreference: Tapper container not found.");
-            logLayoutDiagnostics(`AFTER applySuggestionSide (ERROR - tapper container not found, target side: ${side})`);
+            // logLayoutDiagnostics(`AFTER applySuggestionSide (ERROR - tapper container not found, target side: ${side})`); // REMOVED
             return;
         }
 
@@ -386,42 +381,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const desiredGapPx = 8;
         const suggestionsPanelWidth = suggestionsPanel.offsetWidth;
-        // If suggestionsPanelWidth is 0 (because it was hidden and offsetParent was null), this calculation will be off.
-        // This is why the call from updatePredictiveDisplay (after it's visible) is important.
 
-        suggestionsPanel.classList.remove('left-4', 'right-4'); // Remove old Tailwind position attempt if any
+        suggestionsPanel.classList.remove('left-4', 'right-4');
         suggestionsPanel.style.left = '';
-        suggestionsPanel.style.right = ''; // Clear both to ensure one overrides
+        suggestionsPanel.style.right = '';
 
         if (side === 'right') {
             const newLeft = tapperRightEdgeInContainer + desiredGapPx;
             suggestionsPanel.style.left = newLeft + 'px';
-            console.log(`applySuggestionSidePreference: Setting suggestions to RIGHT, style.left = ${newLeft.toFixed(1)}px`);
-        } else { // Default to 'left'
+            // console.log(`applySuggestionSidePreference: Setting suggestions to RIGHT, style.left = ${newLeft.toFixed(1)}px`); // REMOVED
+        } else {
             const newLeft = tapperLeftEdgeInContainer - suggestionsPanelWidth - desiredGapPx;
             suggestionsPanel.style.left = newLeft + 'px';
-            console.log(`applySuggestionSidePreference: Setting suggestions to LEFT, style.left = ${newLeft.toFixed(1)}px`);
+            // console.log(`applySuggestionSidePreference: Setting suggestions to LEFT, style.left = ${newLeft.toFixed(1)}px`); // REMOVED
         }
 
-        logLayoutDiagnostics(`AFTER applySuggestionSide (target side: ${side})`);
+        // logLayoutDiagnostics(`AFTER applySuggestionSide (target side: ${side})`); // REMOVED
     }
     window.applySuggestionSidePreference = applySuggestionSidePreference;
 
     if (toggleSuggestionSideBtn && suggestionsPanel) {
         toggleSuggestionSideBtn.addEventListener('click', () => {
-            console.log("--- Toggle Suggestion Side Button Clicked ---"); // Marker for event start
+            // console.log("--- Toggle Suggestion Side Button Clicked ---"); // REMOVED
             const currentSide = localStorage.getItem('suggestionSide') || 'left';
             const newSide = (currentSide === 'left') ? 'right' : 'left';
             localStorage.setItem('suggestionSide', newSide);
-            applySuggestionSidePreference(newSide); // Apply immediately
+            applySuggestionSidePreference(newSide);
         });
     }
 
-    // Initial application on load - might be imperfect if elements not fully rendered/visible.
-    // The call from updatePredictiveDisplay is more reliable for precise positioning.
     const savedSuggestionSide = localStorage.getItem('suggestionSide');
-    // Apply initially, will be corrected by updatePredictiveDisplay if panel is shown then.
-    // Or by resize handler if panel is already visible and window resizes.
     applySuggestionSidePreference(savedSuggestionSide || 'left');
     // --- End Suggestion Side Toggle Logic ---
 
@@ -444,10 +433,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleResize = debounce(() => {
         if (suggestionsPanel && !suggestionsPanel.classList.contains('hidden')) {
-            // console.log("Debounced resize event: Recalculating suggestion panel position."); // For debugging
             applySuggestionSidePreference(localStorage.getItem('suggestionSide') || 'left');
         }
-    }, 250); // Debounce by 250ms
+    }, 250);
 
     window.addEventListener('resize', handleResize);
     // --- End Debounced Resize Handler ---
