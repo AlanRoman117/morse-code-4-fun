@@ -16,8 +16,8 @@ let lastTapTime = 0; // For double-tap zoom prevention
 const DOUBLE_TAP_THRESHOLD_MS = 300; // Threshold for detecting a double tap
 
 // let toneStartAttempted = false; // REMOVED
-let isToneContextConfirmedRunning = false; // Renamed from isToneLive
-let primingTapAttemptedThisLoad = false; // True after the first tap that attempts to prime Tone.js
+let visualTapperIsToneReady = false; // Flag set by main.js after modal dismissal and Tone.start() attempt
+// let primingTapAttemptedThisLoad = false; // REMOVED - No longer needed with modal priming
 
 // Function to update unit time and related variables
 function updateVisualTapperUnitTime(newUnitTime) {
@@ -46,6 +46,12 @@ function setTapperActive(isActive) {
     }
 }
 window.setTapperActive = setTapperActive; // Expose to global
+
+// Setter function for main.js to call after attempting Tone.start() via modal
+window.setToneContextConfirmedRunning = function(isReady) {
+    visualTapperIsToneReady = isReady;
+    console.log('visualTapper.js: visualTapperIsToneReady set to:', visualTapperIsToneReady);
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Visual Tapper JavaScript ---
@@ -106,81 +112,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        if (typeof Tone === 'undefined' || !Tone.context || !Tone.start) {
-            console.warn("playTapSound: Tone.js components not available.");
+        // playNoteInternal definition is above this
+
+        if (typeof Tone === 'undefined' || !Tone.Synth) { // Check for Tone and Tone.Synth
+            console.warn("playTapSound: Tone.js or Tone.Synth not available.");
             return;
         }
 
-        if (isToneContextConfirmedRunning) {
-            playNoteInternal();
+        if (!visualTapperIsToneReady) {
+            console.warn("playTapSound: Tone.js not confirmed ready by modal/startup. Tap sound skipped.");
             return;
         }
 
-        // If Tone context is not confirmed running
-        if (Tone.context.state !== 'running') {
-            if (!primingTapAttemptedThisLoad) {
-                primingTapAttemptedThisLoad = true;
-                console.log(`playTapSound: Context not running. This is the PRIMING TAP. Calling Tone.start(). State: ${Tone.context.state}. No sound expected on this tap's timeout.`);
-                Tone.start().catch(e => {
-                    console.warn("playTapSound: Tone.start() (priming tap) call failed/rejected:", e);
-                });
-                // For the priming tap, we don't schedule a setTimeout to play sound immediately.
-                // The next tap will handle the sound if context becomes running.
-                // However, we might want a delayed check to update isToneContextConfirmedRunning if it succeeds.
-                setTimeout(() => {
-                    if (Tone.context && Tone.context.state === 'running' && !isToneContextConfirmedRunning) {
-                        console.log("playTapSound: Priming tap's Tone.start() seems to have worked (context is 'running' after delay). Setting flag.");
-                        isToneContextConfirmedRunning = true;
-                    } else if (Tone.context && Tone.context.state !== 'running') {
-                        console.log(`playTapSound: Priming tap's Tone.start() did not result in 'running' state after delay. State: ${Tone.context.state}`);
-                    }
-                }, 250); // Check after 250ms, but don't play sound from here.
-                return; // Exit playTapSound for this priming tap. Sound will be on next tap.
-            } else {
-                // Priming tap already made, context still not running. This is a subsequent tap.
-                console.log(`playTapSound: Context not running, priming tap made. Attempting Tone.start() again. State: ${Tone.context.state}`);
-                Tone.start().catch(e => {
-                    console.warn("playTapSound: Tone.start() (subsequent tap) call failed/rejected:", e);
-                });
-                // Fall through to the setTimeout check below for this tap.
-            }
-        } else { // Tone.context.state IS 'running', but isToneContextConfirmedRunning was false
-            console.log("playTapSound: Context IS 'running', but flag was false. Setting flag and playing.");
-            isToneContextConfirmedRunning = true;
-            playNoteInternal();
-            return; // Sound played, no need for setTimeout
+        // If visualTapperIsToneReady is true, Tone.context should be 'running'.
+        // A redundant check for safety, but main reliance is on the flag.
+        if (Tone.context && Tone.context.state !== 'running') {
+            console.warn(`playTapSound: visualTapperIsToneReady is true, but Tone.context.state is '${Tone.context.state}'. Sound may fail.`);
+            // Optionally, try a last-ditch Tone.start() here, but it might complicate things.
+            // For now, proceed, assuming the flag is the source of truth from modal interaction.
         }
 
-        // If it's a subsequent tap (primingTapAttemptedThisLoad is true) and context wasn't running,
-        // or if it was the priming tap and we want to re-check after a delay (though we returned above for priming).
-        // The logic below is now primarily for taps *after* the priming tap if context wasn't immediately running.
-        // OR if context was running but flag was false (handled above).
-        // Let's refine: the setTimeout is for any tap that isn't immediately playing due to isToneContextConfirmedRunning = true.
-
-        // This setTimeout is now mainly for the taps *after* the priming tap, if the context wasn't running yet.
-        // Or if the priming tap itself wants to eventually play sound (which current logic prevents by returning)
-        // The plan was: priming tap is silent. Second tap schedules setTimeout to play.
-        // So if primingTapAttemptedThisLoad is true, and we are here, it means it's at least the second tap.
-
-        // If we reached here, isToneContextConfirmedRunning is false.
-        // If it was the priming tap, we returned. So this is for subsequent taps.
-        if (primingTapAttemptedThisLoad) { // Only schedule sound-playing timeout if priming has been done
-            setTimeout(() => {
-                const checkStateAndPlaySound = () => {
-                    if (Tone.context.state === 'running') {
-                        if (!isToneContextConfirmedRunning) {
-                            console.log("playTapSound: SUCCESS via setTimeout (post-priming) - Tone.context is 'running'. Setting flag.");
-                            isToneContextConfirmedRunning = true;
-                        }
-                        playNoteInternal();
-                    } else {
-                        console.log(`playTapSound: FAILURE via setTimeout (post-priming) - Tone.context NOT 'running'. State: ${Tone.context.state}. Flag remains false.`);
-                        isToneContextConfirmedRunning = false;
-                    }
-                };
-                checkStateAndPlaySound();
-            }, 250);
-        }
+        playNoteInternal();
     }
     window.playTapSound = playTapSound; // Expose to global
 

@@ -16,7 +16,21 @@
     </style>
 </head>
 <body class="pt-5 pb-24 md:pb-5">
-    <nav class="flex justify-around items-center fixed bottom-0 left-0 right-0 z-50 bg-gray-800 py-5 shadow-md md:relative md:top-auto md:left-auto md:right-auto md:bg-transparent md:shadow-none md:mb-4 md:p-0 md:space-x-2">
+
+    <!-- Welcome Modal -->
+    <div id="welcome-audio-modal" class="fixed inset-0 bg-gray-900 bg-opacity-85 flex items-center justify-center z-[100] p-4">
+        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">Welcome to Morse Code 4 Fun!</h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-6 md:mb-8 text-sm md:text-base">
+                To ensure the best experience with audio feedback, please tap the button below. This will initialize the audio for the app.
+            </p>
+            <button id="start-app-btn" class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out text-base md:text-lg focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-700">
+                Start Tapping!
+            </button>
+        </div>
+    </div>
+
+    <nav id="main-nav" class="flex justify-around items-center fixed bottom-0 left-0 right-0 z-50 bg-gray-800 py-5 shadow-md md:relative md:top-auto md:left-auto md:right-auto md:bg-transparent md:shadow-none md:mb-4 md:p-0 md:space-x-2 hidden"> <!-- Added ID and initially hidden -->
         <button id="introduction-nav-btn" data-tab="introduction-tab" class="flex flex-col items-center justify-center p-3 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 active-tab-button w-1/6 md:w-auto md:px-4 md:py-2 md:text-sm md:flex-row md:space-x-2">
             <svg class="w-5 h-5 md:w-6 md:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
@@ -55,8 +69,8 @@
             <span class="sr-only md:not-sr-only md:ml-1">Settings</span>
         </button>
     </nav>
-    <h1 class="text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-center main-title">Morse Code 4 Fun</h1>
-    <div id="tab-content-wrapper">
+    <h1 class="text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-center main-title hidden">Morse Code 4 Fun</h1> <!-- Initially hidden -->
+    <div id="tab-content-wrapper" class="hidden"> <!-- Initially hidden -->
         <div id="introduction-tab" class="tab-content"> <!-- Default to visible, JS will handle -->
             <div class="app-container text-center">
                 <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-blue-400">Welcome to Morse Code 4 Fun!</h2>

@@ -1,10 +1,75 @@
 // The Final, Definitive main.js
 
-// window.isToneReady = false; // REMOVED - No longer used in main.js
+// window.isToneReady = false; // REMOVED
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    initializeCoreUI();
+    // Elements for modal and main app content
+    const welcomeModal = document.getElementById('welcome-audio-modal');
+    const startAppBtn = document.getElementById('start-app-btn');
+    const mainNav = document.getElementById('main-nav');
+    const mainTitle = document.querySelector('.main-title'); // Assuming only one main-title
+    const tabContentWrapper = document.getElementById('tab-content-wrapper');
+
+    if (welcomeModal && startAppBtn && mainNav && mainTitle && tabContentWrapper) {
+        // Ensure main app is hidden and modal is shown initially
+        // (though classes in HTML should handle this, this is a JS failsafe/confirmation)
+        mainNav.classList.add('hidden');
+        mainTitle.classList.add('hidden');
+        tabContentWrapper.classList.add('hidden');
+        welcomeModal.classList.remove('hidden'); // Ensure modal is visible
+
+        startAppBtn.addEventListener('click', () => {
+            console.log("Start App button clicked.");
+            // Attempt to initialize general Web Audio API context
+            initAudio();
+
+            // Attempt to start Tone.js
+            if (typeof Tone !== 'undefined' && Tone.start && Tone.context) {
+                if (Tone.context.state !== 'running') {
+                    console.log("Welcome Modal: Attempting Tone.start().");
+                    Tone.start().then(() => {
+                        console.log("Welcome Modal: Tone.start() successful via modal button.");
+                        if (typeof window.setToneContextConfirmedRunning === 'function') {
+                            window.setToneContextConfirmedRunning(true);
+                        }
+                    }).catch(e => {
+                        console.warn("Welcome Modal: Tone.start() failed:", e);
+                        if (typeof window.setToneContextConfirmedRunning === 'function') {
+                            window.setToneContextConfirmedRunning(false);
+                        }
+                    });
+                } else {
+                    console.log("Welcome Modal: Tone.context already running.");
+                    if (typeof window.setToneContextConfirmedRunning === 'function') {
+                        window.setToneContextConfirmedRunning(true);
+                    }
+                }
+            } else {
+                console.warn("Welcome Modal: Tone.js components not available.");
+                if (typeof window.setToneContextConfirmedRunning === 'function') {
+                    // Ensure visualTapper knows Tone is not ready if it was expecting this call
+                    window.setToneContextConfirmedRunning(false);
+                }
+            }
+
+            // Hide modal and show main app content
+            welcomeModal.style.display = 'none'; // More forceful hide
+            mainNav.classList.remove('hidden');
+            mainTitle.classList.remove('hidden');
+            tabContentWrapper.classList.remove('hidden');
+
+            // Now initialize the rest of the UI that was deferred
+            initializeCoreUI();
+            // showTab() is called within initializeCoreUI or its chain now.
+            // applySavedTheme(); // This is also called in initializeCoreUI or showTab
+        });
+    } else {
+        // If modal elements aren't found, proceed with normal initialization
+        // This might happen if modal HTML is removed or IDs change.
+        console.warn("Welcome modal elements not found. Proceeding with direct app initialization.");
+        initializeCoreUI();
+    }
 });
 
 document.addEventListener('deviceready', () => {
