@@ -354,13 +354,63 @@ body {
         .light-theme #wpm-slider, .light-theme-container #wpm-slider,
         .light-theme #farnsworth-slider, .light-theme-container #farnsworth-slider,
         .light-theme #freq-slider, .light-theme-container #freq-slider {
-            background-color: #d1d5db; /* gray-300 for track */
-            /* This only styles the track for some browsers if appearance-none is set.
-               Full slider styling is complex and browser-specific.
-               Tailwind typically handles this with pseudo-elements like ::-webkit-slider-thumb etc.
-               which are harder to override cleanly outside of Tailwind's dark: variant.
-               For now, this will change the track color.
-            */
+            background-color: transparent; /* Input itself is transparent, track styled by pseudo-elements */
+        }
+
+        /* Light theme slider track styles */
+        .light-theme #wpm-slider::-webkit-slider-runnable-track,
+        .light-theme-container #wpm-slider::-webkit-slider-runnable-track,
+        .light-theme #farnsworth-slider::-webkit-slider-runnable-track,
+        .light-theme-container #farnsworth-slider::-webkit-slider-runnable-track,
+        .light-theme #freq-slider::-webkit-slider-runnable-track,
+        .light-theme-container #freq-slider::-webkit-slider-runnable-track {
+            background: #5A5C5E; /* Dark gray track */
+            height: 0.5rem; /* h-2 */
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+
+        .light-theme #wpm-slider::-moz-range-track,
+        .light-theme-container #wpm-slider::-moz-range-track,
+        .light-theme #farnsworth-slider::-moz-range-track,
+        .light-theme-container #farnsworth-slider::-moz-range-track,
+        .light-theme #freq-slider::-moz-range-track,
+        .light-theme-container #freq-slider::-moz-range-track {
+            background: #5A5C5E; /* Dark gray track */
+            height: 0.5rem; /* h-2 */
+            border-radius: 0.5rem; /* rounded-lg */
+            border: none; /* Firefox sometimes adds its own border */
+        }
+
+        /* Light theme slider thumb styles (ensure these are still correct) */
+        .light-theme #wpm-slider::-webkit-slider-thumb,
+        .light-theme-container #wpm-slider::-webkit-slider-thumb,
+        .light-theme #farnsworth-slider::-webkit-slider-thumb,
+        .light-theme-container #farnsworth-slider::-webkit-slider-thumb,
+        .light-theme #freq-slider::-webkit-slider-thumb,
+        .light-theme-container #freq-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Necessary for Webkit/Blink */
+            appearance: none;
+            width: 1.25rem; /* h-5 w-5 */
+            height: 1.25rem; /* h-5 w-5 */
+            background-color: #FFFFFF; /* White thumb for contrast with dark track */
+            border-radius: 9999px; /* rounded-full */
+            cursor: pointer;
+            border: 1px solid #d1d5db; /* Optional: gray-300 border for white thumb */
+            margin-top: -0.375rem; /* (track_height(0.5rem) - thumb_height(1.25rem)) / 2 = -0.375rem */
+        }
+
+        .light-theme #wpm-slider::-moz-range-thumb,
+        .light-theme-container #wpm-slider::-moz-range-thumb,
+        .light-theme #farnsworth-slider::-moz-range-thumb,
+        .light-theme-container #farnsworth-slider::-moz-range-thumb,
+        .light-theme #freq-slider::-moz-range-thumb,
+        .light-theme-container #freq-slider::-moz-range-thumb {
+            width: 1.25rem; /* h-5 w-5 */
+            height: 1.25rem; /* h-5 w-5 */
+            background-color: #FFFFFF; /* White thumb for contrast with dark track */
+            border-radius: 9999px; /* rounded-full */
+            cursor: pointer;
+            border: 1px solid #d1d5db; /* Optional: gray-300 border for white thumb */
         }
 
         .light-theme #book-selection, .light-theme-container #book-selection,
