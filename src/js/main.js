@@ -1,6 +1,6 @@
 // The Final, Definitive main.js
 
-window.isToneReady = false; // Flag to indicate if Tone.js has been successfully started
+// window.isToneReady = false; // REMOVED - No longer used in main.js
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -55,40 +55,13 @@ function initializeCoreUI() {
     updateDurations();
 
     const masterAudioInitListener = () => {
-        console.log("masterAudioInitListener triggered.");
-        initAudio(); // Initializes the Web Audio API context if needed
+        console.log("masterAudioInitListener triggered (simplified).");
+        initAudio(); // Initializes the Web Audio API context 'audioContext' if needed.
+                     // This is for playTone/playMorseSequence, not directly for Tone.js tap sounds anymore.
 
-        if (typeof Tone !== 'undefined' && Tone.start && Tone.context) {
-            if (Tone.context.state === 'running') {
-                window.isToneReady = true;
-                console.log("Tone.js context already running. isToneReady set to true.");
-            } else {
-                console.log(`Attempting Tone.start(). Current state: ${Tone.context.state}`);
-                Tone.start().catch(e => { // Keep catch for immediate errors from Tone.start() if its promise does reject
-                    console.warn("Tone.start() call resulted in a promise REJECTION or immediate error:", e);
-                    window.isToneReady = false;
-                });
+        // No longer responsible for Tone.start() or isToneReady flag.
+        // That logic is now in visualTapper.js -> playTapSound.
 
-                // Log state immediately after the call, before promise resolves/rejects
-                if (Tone.context) {
-                    console.log("After Tone.start() call initiated, Tone.context.state is:", Tone.context.state);
-                }
-
-                // Use setTimeout to check state after a short delay
-                setTimeout(() => {
-                    if (Tone.context && Tone.context.state === 'running') {
-                        window.isToneReady = true;
-                        console.log("SUCCESS: Tone.js context is 'running' after 100ms timeout. isToneReady set to true.");
-                    } else {
-                        window.isToneReady = false; // Ensure it's false if not running
-                        console.log(`FAILURE: Tone.js context NOT 'running' after 100ms timeout. State: ${Tone.context ? Tone.context.state : 'undefined'}. isToneReady set to false.`);
-                    }
-                }, 100); // 100ms delay
-            }
-        } else {
-            console.warn("Tone, Tone.start, or Tone.context not defined in masterAudioInitListener.");
-            window.isToneReady = false; // Ensure it's false if Tone isn't even available
-        }
         document.body.removeEventListener('click', masterAudioInitListener);
         document.body.removeEventListener('touchstart', masterAudioInitListener);
     };

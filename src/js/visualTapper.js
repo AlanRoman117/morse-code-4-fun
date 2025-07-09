@@ -15,6 +15,8 @@ let lastTapTime = 0; // For double-tap zoom prevention
 // Constants
 const DOUBLE_TAP_THRESHOLD_MS = 300; // Threshold for detecting a double tap
 
+let toneStartAttempted = false; // Flag to ensure Tone.start() is only attempted once by playTapSound
+
 // Function to update unit time and related variables
 function updateVisualTapperUnitTime(newUnitTime) {
   UNIT_TIME_MS = parseInt(newUnitTime);
@@ -84,32 +86,46 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Sound is explicitly off and not in story playback mode
         }
 
-        // Check if Tone.js is available and explicitly marked as ready by main.js
-        if (typeof Tone === 'undefined' || !window.isToneReady) {
-            console.warn('playTapSound: Tone.js not explicitly ready (isToneReady flag is false or Tone undefined).'); // Keep for debugging
-            return;
-        }
+        // Define playNoteInternal here so it's accessible in all branches
+        const playNoteInternal = () => {
+            if (!tapperTone) {
+                try {
+                    tapperTone = new Tone.Synth({
+                        oscillator: { type: 'sine' },
+                        envelope: { attack: 0.005, decay: 0.01, sustain: 0.9, release: 0.05 }
+                    }).toDestination();
+                } catch (e) {
+                    console.error("Failed to create Tone.Synth for tapper:", e);
+                    return;
+                }
+            }
+            if (tapperTone && typeof tapperTone.triggerAttack === 'function') {
+                tapperTone.triggerRelease(); // Ensure previous note is released
+                tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now());
+            }
+        };
 
-        // Original sound playing logic (Tone.Synth should exist if Tone is defined and ready)
-        if (Tone && Tone.Synth) {
-            const playNoteInternal = () => {
-                if (!tapperTone) {
-                    try {
-                        tapperTone = new Tone.Synth({
-                            oscillator: { type: 'sine' },
-                            envelope: { attack: 0.005, decay: 0.01, sustain: 0.9, release: 0.05 }
-                        }).toDestination();
-                    } catch (e) {
-                        console.error("Failed to create Tone.Synth for tapper:", e);
-                        return;
-                    }
+        if (typeof Tone !== 'undefined' && Tone.context && Tone.start) { // Ensure Tone, context, and start are defined
+            if (Tone.context.state !== 'running') {
+                if (!toneStartAttempted) {
+                    toneStartAttempted = true; // Set flag immediately
+                    console.log("playTapSound: Tone.context not running. Attempting Tone.start() for the first time.");
+                    Tone.start().then(() => {
+                        console.log("playTapSound: Tone.start() successful. Context now running.");
+                        playNoteInternal(); // Play sound after successful start
+                    }).catch(e => {
+                        console.warn("playTapSound: Tone.start() failed:", e);
+                        // Consider if toneStartAttempted should be reset to false here to allow another try.
+                        // For now, it prevents repeated failed attempts on every tap.
+                    });
+                } else {
+                    console.warn("playTapSound: Tone.start() previously attempted but context still not running.");
                 }
-                if (tapperTone && typeof tapperTone.triggerAttack === 'function') {
-                    tapperTone.triggerRelease(); // Ensure previous note is released
-                    tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now());
-                }
-            };
-            playNoteInternal(); // Directly call, assuming Tone.js context is running
+            } else { // Tone.context.state is 'running'
+                playNoteInternal();
+            }
+        } else {
+            console.warn("playTapSound: Tone, Tone.context, or Tone.start is undefined.");
         }
     }
     window.playTapSound = playTapSound; // Expose to global
