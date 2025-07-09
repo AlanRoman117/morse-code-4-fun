@@ -308,7 +308,7 @@ body {
         /* Settings tab specific (if any more needed beyond general) */
         .light-theme #master-sound-toggle + .w-11.h-6, /* Target the specific track div for background */
         .light-theme-container #master-sound-toggle + .w-11.h-6 { 
-            background-color: #d1d5db; /* gray-300 for off state track */
+            background-color: #d1d5db !important; /* gray-300 for off state track, ensure override */
         }
         .light-theme #master-sound-toggle:checked + .w-11.h-6, /* Target the specific track div for background */
         .light-theme-container #master-sound-toggle:checked + .w-11.h-6 {
