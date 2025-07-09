@@ -173,7 +173,9 @@ def main():
     for key, book_obj in all_book_data_for_js.items():
         js_book_entry_parts = [f"        '{js_key}': {format_js_value(js_val)}"  # Ensure keys are quoted
                                for js_key, js_val in book_obj.items()]
-        js_object_parts.append(f"    '{key}': {{\n{',\n'.join(js_book_entry_parts)}\n    }}")
+        # Corrected approach for joining with newlines to avoid f-string backslash issue:
+        inner_js_object_string = ",\n".join(js_book_entry_parts)
+        js_object_parts.append(f"    '{key}': {{\n{inner_js_object_string}\n    }}")
 
     book_data_js_content = "window.bookCipherBooks = {\n"
     book_data_js_content += ",\n".join(js_object_parts)
