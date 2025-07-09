@@ -354,7 +354,7 @@ body {
         .light-theme #wpm-slider, .light-theme-container #wpm-slider,
         .light-theme #farnsworth-slider, .light-theme-container #farnsworth-slider,
         .light-theme #freq-slider, .light-theme-container #freq-slider {
-            background-color: #d1d5db; /* gray-300 for track - Reverted to this for better contrast with panel bg */
+            background-color: #5A5C5E; /* User Recommended: Darker track for light theme */
             /* This only styles the track for some browsers if appearance-none is set.
                Full slider styling is complex and browser-specific.
             */
@@ -371,10 +371,10 @@ body {
             appearance: none;
             width: 1.25rem; /* h-5 w-5 */
             height: 1.25rem; /* h-5 w-5 */
-            background-color: #5A5C5E; /* User Recommended Foreground */
+            background-color: #FFFFFF; /* White thumb for contrast with dark track */
             border-radius: 9999px; /* rounded-full */
             cursor: pointer;
-            /* border: 1px solid #4b5563; /* Optional: gray-600 border for thumb */
+            border: 1px solid #d1d5db; /* Optional: gray-300 border for white thumb */
         }
 
         .light-theme #wpm-slider::-moz-range-thumb,
@@ -385,11 +385,10 @@ body {
         .light-theme-container #freq-slider::-moz-range-thumb {
             width: 1.25rem; /* h-5 w-5 */
             height: 1.25rem; /* h-5 w-5 */
-            background-color: #5A5C5E; /* User Recommended Foreground */
+            background-color: #FFFFFF; /* White thumb for contrast with dark track */
             border-radius: 9999px; /* rounded-full */
             cursor: pointer;
-            border: none; /* Remove default border for Firefox if any */
-            /* border: 1px solid #4b5563; /* Optional: gray-600 border for thumb */
+            border: 1px solid #d1d5db; /* Optional: gray-300 border for white thumb */
         }
 
         .light-theme #book-selection, .light-theme-container #book-selection,
