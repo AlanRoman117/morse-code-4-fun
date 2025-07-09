@@ -55,23 +55,9 @@ function initializeCoreUI() {
     updateDurations();
 
     const masterAudioInitListener = () => {
-        console.log("masterAudioInitListener: First user gesture detected.");
-        initAudio(); // For the general Web Audio API context
-
-        if (typeof Tone !== 'undefined' && Tone.start && Tone.context) {
-            if (Tone.context.state !== 'running') {
-                console.log("masterAudioInitListener: Tone.context not running. Attempting global Tone.start().");
-                Tone.start().then(() => {
-                    console.log("masterAudioInitListener: Global Tone.start() promise resolved (context should be running).");
-                }).catch(e => {
-                    console.warn("masterAudioInitListener: Global Tone.start() failed/rejected:", e);
-                });
-            } else {
-                console.log("masterAudioInitListener: Tone.context was already running.");
-            }
-        } else {
-            console.warn("masterAudioInitListener: Tone.js components not available for global start attempt.");
-        }
+        console.log("masterAudioInitListener: User gesture detected. Initializing non-Tone audio if needed.");
+        initAudio(); // For the general Web Audio API context (used by playMorseSequence, etc.)
+        // All Tone.js startup logic for tap sounds is now handled within visualTapper.js
 
         document.body.removeEventListener('click', masterAudioInitListener);
         document.body.removeEventListener('touchstart', masterAudioInitListener);

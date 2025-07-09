@@ -17,7 +17,7 @@ const DOUBLE_TAP_THRESHOLD_MS = 300; // Threshold for detecting a double tap
 
 // let toneStartAttempted = false; // REMOVED
 let isToneLive = false; // Flag to indicate if Tone.js context has been confirmed as 'running'
-// let initialToneStartCallMadeThisLoad = false; // REMOVED - Tone.start() will be called if context not running
+let firstToneStartAttemptMadeThisLoad = false; // True after Tone.start() is called for the first time in a page session
 
 // Function to update unit time and related variables
 function updateVisualTapperUnitTime(newUnitTime) {
@@ -111,38 +111,51 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (isToneLive /* && Tone.context.state === 'running' is implied */) {
+        if (isToneLive) { // If isToneLive is true, assume Tone.context.state is 'running'
             playNoteInternal();
             return;
         }
 
-        // If isToneLive is false, proceed to try and start/verify Tone.js
+        // If isToneLive is false, we need to attempt to start/verify Tone.js
         if (Tone.context.state !== 'running') {
-            console.log(`playTapSound: Context not running. Attempting Tone.start(). State: ${Tone.context.state}`);
-            Tone.start().catch(e => {
-                console.warn("playTapSound: Tone.start() call failed/rejected:", e);
-                isToneLive = false; // Ensure isToneLive remains false if start() call itself errors
-            });
+            if (!firstToneStartCallMadeThisLoad) {
+                firstToneStartCallMadeThisLoad = true;
+                console.log(`playTapSound: Context not running. Making FIRST two Tone.start() calls this load. State: ${Tone.context.state}`);
+                Tone.start().catch(e => {
+                    console.warn("playTapSound: Tone.start() (1st attempt of double) failed/rejected:", e);
+                    // isToneLive remains false, setTimeout will check
+                });
+                Tone.start().catch(e => { // Second immediate call
+                    console.warn("playTapSound: Tone.start() (2nd attempt of double) failed/rejected:", e);
+                    // isToneLive remains false, setTimeout will check
+                });
+            } else {
+                // Context not running, but first double-attempt was already made this load.
+                // Subsequent taps will also try to start it, in case it got suspended again.
+                console.log(`playTapSound: Context not running, first attempts made. Calling Tone.start() again. State: ${Tone.context.state}`);
+                Tone.start().catch(e => {
+                    console.warn("playTapSound: Tone.start() (subsequent single attempt) failed/rejected:", e);
+                    // isToneLive remains false, setTimeout will check
+                });
+            }
         }
 
-        // Always schedule a check after a delay.
-        // This allows Tone.start() time to take effect if called, or confirms existing running state.
+        // Always schedule a check after a delay if isToneLive is false.
         setTimeout(() => {
-            // Inner function for clarity, though logic could be inline
             const checkStateAndPlay = () => {
                 if (Tone.context.state === 'running') {
-                    if (!isToneLive) { // Log success only once when isToneLive transitions
+                    if (!isToneLive) {
                         console.log("playTapSound: SUCCESS via setTimeout - Tone.context is 'running'. Setting isToneLive=true.");
                         isToneLive = true;
                     }
                     playNoteInternal();
                 } else {
                     console.log(`playTapSound: FAILURE via setTimeout - Tone.context NOT 'running'. State: ${Tone.context.state}. isToneLive remains false.`);
-                    isToneLive = false; // Important to reset/confirm false if check fails
+                    isToneLive = false;
                 }
             };
             checkStateAndPlay();
-        }, 250); // Changed delay to 250ms
+        }, 250);
     }
     window.playTapSound = playTapSound; // Expose to global
 
