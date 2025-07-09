@@ -17,7 +17,7 @@ const DOUBLE_TAP_THRESHOLD_MS = 300; // Threshold for detecting a double tap
 
 // let toneStartAttempted = false; // REMOVED
 let isToneLive = false; // Flag to indicate if Tone.js context has been confirmed as 'running'
-let initialToneStartCallMadeThisLoad = false; // Ensures Tone.start() is called only once per page load if needed
+// let initialToneStartCallMadeThisLoad = false; // REMOVED - Tone.start() will be called if context not running
 
 // Function to update unit time and related variables
 function updateVisualTapperUnitTime(newUnitTime) {
@@ -111,38 +111,38 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (isToneLive) { // If isToneLive is true, we assume Tone.context.state is 'running'
+        if (isToneLive /* && Tone.context.state === 'running' is implied */) {
             playNoteInternal();
             return;
         }
 
-        // If isToneLive is false, we need to attempt to start or verify Tone.js
-        if (Tone.context.state !== 'running' && !initialToneStartCallMadeThisLoad) {
-            initialToneStartCallMadeThisLoad = true;
-            console.log(`playTapSound: Context not running. Calling Tone.start() for the first time this session. State: ${Tone.context.state}`);
+        // If isToneLive is false, proceed to try and start/verify Tone.js
+        if (Tone.context.state !== 'running') {
+            console.log(`playTapSound: Context not running. Attempting Tone.start(). State: ${Tone.context.state}`);
             Tone.start().catch(e => {
-                console.warn("playTapSound: Tone.start() initial call failed/rejected:", e);
-                isToneLive = false; // Ensure it's false if the call itself errors
+                console.warn("playTapSound: Tone.start() call failed/rejected:", e);
+                isToneLive = false; // Ensure isToneLive remains false if start() call itself errors
             });
         }
 
-        // Always schedule a check after a delay if isToneLive is false.
-        // This handles both the first attempt and subsequent taps if it didn't start immediately.
+        // Always schedule a check after a delay.
+        // This allows Tone.start() time to take effect if called, or confirms existing running state.
         setTimeout(() => {
+            // Inner function for clarity, though logic could be inline
             const checkStateAndPlay = () => {
                 if (Tone.context.state === 'running') {
-                    if (!isToneLive) { // Log only on first successful detection by timeout
+                    if (!isToneLive) { // Log success only once when isToneLive transitions
                         console.log("playTapSound: SUCCESS via setTimeout - Tone.context is 'running'. Setting isToneLive=true.");
                         isToneLive = true;
                     }
                     playNoteInternal();
                 } else {
                     console.log(`playTapSound: FAILURE via setTimeout - Tone.context NOT 'running'. State: ${Tone.context.state}. isToneLive remains false.`);
-                    isToneLive = false; // Ensure it's false if check fails
+                    isToneLive = false; // Important to reset/confirm false if check fails
                 }
             };
             checkStateAndPlay();
-        }, 100);
+        }, 100); // 100ms delay
     }
     window.playTapSound = playTapSound; // Expose to global
 
