@@ -15,7 +15,8 @@ let lastTapTime = 0; // For double-tap zoom prevention
 // Constants
 const DOUBLE_TAP_THRESHOLD_MS = 300; // Threshold for detecting a double tap
 
-let toneStartAttempted = false; // Flag to ensure Tone.start() is only attempted once by playTapSound
+// let toneStartAttempted = false; // REMOVED - Replaced by isToneLive logic
+let isToneLive = false; // Flag to indicate if Tone.js context has been confirmed as 'running'
 
 // Function to update unit time and related variables
 function updateVisualTapperUnitTime(newUnitTime) {
@@ -86,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Sound is explicitly off and not in story playback mode
         }
 
-        // Define playNoteInternal here so it's accessible in all branches
         const playNoteInternal = () => {
             if (!tapperTone) {
                 try {
@@ -100,32 +100,49 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (tapperTone && typeof tapperTone.triggerAttack === 'function') {
-                tapperTone.triggerRelease(); // Ensure previous note is released
+                tapperTone.triggerRelease();
                 tapperTone.triggerAttack(TAP_SOUND_FREQ, Tone.now());
             }
         };
 
-        if (typeof Tone !== 'undefined' && Tone.context && Tone.start) { // Ensure Tone, context, and start are defined
-            if (Tone.context.state !== 'running') {
-                if (!toneStartAttempted) {
-                    toneStartAttempted = true; // Set flag immediately
-                    console.log("playTapSound: Tone.context not running. Attempting Tone.start() for the first time.");
-                    Tone.start().then(() => {
-                        console.log("playTapSound: Tone.start() successful. Context now running.");
-                        playNoteInternal(); // Play sound after successful start
-                    }).catch(e => {
-                        console.warn("playTapSound: Tone.start() failed:", e);
-                        // Consider if toneStartAttempted should be reset to false here to allow another try.
-                        // For now, it prevents repeated failed attempts on every tap.
-                    });
+        if (typeof Tone === 'undefined' || !Tone.context || !Tone.start) {
+            console.warn("playTapSound: Tone.js components not available.");
+            return;
+        }
+
+        if (isToneLive && Tone.context.state === 'running') {
+            playNoteInternal();
+        } else if (Tone.context.state !== 'running') {
+            // This path will be taken on the first tap that's also the first user gesture,
+            // or if Tone.js was somehow suspended after being live.
+            console.log(`playTapSound: Tone.context not running (state: ${Tone.context.state}). Attempting Tone.start().`);
+
+            Tone.start().catch(e => {
+                console.warn("playTapSound: Tone.start() call itself resulted in a promise rejection or immediate error:", e);
+                isToneLive = false; // Ensure flag is false if Tone.start() errors out
+            });
+
+            // Check state after a delay, regardless of Tone.start() promise behavior for playing this tap's sound
+            setTimeout(() => {
+                if (Tone.context && Tone.context.state === 'running') {
+                    console.log("playTapSound: SUCCESS - Tone.context is 'running' after 100ms timeout. Setting isToneLive=true and playing note.");
+                    isToneLive = true;
+                    playNoteInternal(); // Play the sound for the current tap
                 } else {
-                    console.warn("playTapSound: Tone.start() previously attempted but context still not running.");
+                    console.log(`playTapSound: FAILURE - Tone.context NOT 'running' after 100ms timeout. State: ${Tone.context ? Tone.context.state : 'undefined'}. isToneLive remains/set to false.`);
+                    isToneLive = false;
                 }
-            } else { // Tone.context.state is 'running'
-                playNoteInternal();
-            }
+            }, 100); // 100ms delay
+
+        } else if (Tone.context.state === 'running' && !isToneLive) {
+            // Context is running, but our flag wasn't set. This can happen if another part of app started it,
+            // or if the page was reloaded and Tone.js auto-resumed successfully before any tap.
+            console.log("playTapSound: Context is 'running', but isToneLive was false. Updating flag and playing.");
+            isToneLive = true;
+            playNoteInternal();
         } else {
-            console.warn("playTapSound: Tone, Tone.context, or Tone.start is undefined.");
+            // Fallback/unexpected state
+            console.warn(`playTapSound: Unexpected state. isToneLive: ${isToneLive}, Tone.context.state: ${Tone.context.state}`);
         }
     }
     window.playTapSound = playTapSound; // Expose to global
