@@ -3,20 +3,20 @@ window.bookCipherBooks = {
     'passage_1': {
         title: 'Sherlock Holmes Snippet',
         filePath: 'assets/book_cipher_texts/passage1_morse.txt',
+        englishSourcePath: 'assets/book_cipher_texts/english_sources/passage_1.json',
         author: "Sir Arthur Conan Doyle",
         description: "A short snippet featuring the world's most famous detective.",
         isPro: false,
-        english_markdown: "### The Adventures of Sherlock Holmes\n\n**To Sherlock Holmes she is always _the_ woman.**\n\nI have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex. It was not that he felt any emotion akin to love for Irene Adler. All emotions, and that one particularly, were abhorrent to his cold, precise but admirably balanced mind.\n\n---\n\n*A Scandal in Bohemia*",
         genre: "Classic Detective",
         lengthCategory: "Short" // ~65 words
     },
     'mystery_intro': {
         title: 'Stormy Night Mystery',
         filePath: 'assets/book_cipher_texts/mystery_intro_morse.txt',
+        englishSourcePath: 'assets/book_cipher_texts/english_sources/mystery_intro.json',
         author: "Placeholder Author",
         description: "The beginning of a thrilling mystery.",
         isPro: false,
-        english_markdown: "### Chapter 1: The Gathering Storm\n\nThe wind howled like a banshee, rattling the ancient windowpanes of Blackwood Manor. Rain lashed down in relentless sheets, obscuring the winding path that led to the imposing oak door. Inside, a fire crackled in the grand hearth, casting flickering shadows on the faces of the assembled guests.\n\nEach had received a mysterious invitation. None knew why they were truly there.\n\n**Tonight, a secret will be revealed.**\n\n*Someone in this room is not who they claim to be...*",
         genre: "Mystery",
         lengthCategory: "Short" // ~70 words
     },
