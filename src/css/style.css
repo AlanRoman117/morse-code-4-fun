@@ -354,13 +354,42 @@ body {
         .light-theme #wpm-slider, .light-theme-container #wpm-slider,
         .light-theme #farnsworth-slider, .light-theme-container #farnsworth-slider,
         .light-theme #freq-slider, .light-theme-container #freq-slider {
-            background-color: #d1d5db; /* gray-300 for track */
+            background-color: #d1d5db; /* gray-300 for track - Reverted to this for better contrast with panel bg */
             /* This only styles the track for some browsers if appearance-none is set.
                Full slider styling is complex and browser-specific.
-               Tailwind typically handles this with pseudo-elements like ::-webkit-slider-thumb etc.
-               which are harder to override cleanly outside of Tailwind's dark: variant.
-               For now, this will change the track color.
             */
+        }
+
+        /* Light theme slider thumb styles */
+        .light-theme #wpm-slider::-webkit-slider-thumb,
+        .light-theme-container #wpm-slider::-webkit-slider-thumb,
+        .light-theme #farnsworth-slider::-webkit-slider-thumb,
+        .light-theme-container #farnsworth-slider::-webkit-slider-thumb,
+        .light-theme #freq-slider::-webkit-slider-thumb,
+        .light-theme-container #freq-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Necessary for Webkit/Blink */
+            appearance: none;
+            width: 1.25rem; /* h-5 w-5 */
+            height: 1.25rem; /* h-5 w-5 */
+            background-color: #5A5C5E; /* User Recommended Foreground */
+            border-radius: 9999px; /* rounded-full */
+            cursor: pointer;
+            /* border: 1px solid #4b5563; /* Optional: gray-600 border for thumb */
+        }
+
+        .light-theme #wpm-slider::-moz-range-thumb,
+        .light-theme-container #wpm-slider::-moz-range-thumb,
+        .light-theme #farnsworth-slider::-moz-range-thumb,
+        .light-theme-container #farnsworth-slider::-moz-range-thumb,
+        .light-theme #freq-slider::-moz-range-thumb,
+        .light-theme-container #freq-slider::-moz-range-thumb {
+            width: 1.25rem; /* h-5 w-5 */
+            height: 1.25rem; /* h-5 w-5 */
+            background-color: #5A5C5E; /* User Recommended Foreground */
+            border-radius: 9999px; /* rounded-full */
+            cursor: pointer;
+            border: none; /* Remove default border for Firefox if any */
+            /* border: 1px solid #4b5563; /* Optional: gray-600 border for thumb */
         }
 
         .light-theme #book-selection, .light-theme-container #book-selection,
