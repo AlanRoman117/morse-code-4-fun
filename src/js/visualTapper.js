@@ -17,7 +17,7 @@ const DOUBLE_TAP_THRESHOLD_MS = 300; // Threshold for detecting a double tap
 
 // let toneStartAttempted = false; // REMOVED
 let isToneLive = false; // Flag to indicate if Tone.js context has been confirmed as 'running'
-let firstToneStartAttemptMadeThisLoad = false; // True after Tone.start() is called for the first time in a page session
+let firstToneStartCallMadeThisLoad = false; // Ensures Tone.start() is called appropriately on first attempt
 
 // Function to update unit time and related variables
 function updateVisualTapperUnitTime(newUnitTime) {
