@@ -1,0 +1,5 @@
+# Sherlock's Lost Manuscript
+
+## The Professor's Legacy
+
+Watson and Holmes discovered that the stolen manuscript contained a revolutionary theory of deduction, coveted by a shadowy organization seeking to control knowledge. They pursued the thieves across London, uncovering a conspiracy that threatened the foundations of reason.
