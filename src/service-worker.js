@@ -108,6 +108,6 @@ self.addEventListener('fetch', event => {
         // Optionally, you could return a custom offline page here if the fetch fails
         // and it's a navigation request. For now, just logging the error.
       })
-    )
-  );
-});
+    ) // Closes event.respondWith()
+  } // Closes the arrow function body for 'fetch' event listener
+); // Closes self.addEventListener for 'fetch'
