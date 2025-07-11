@@ -1,0 +1,5 @@
+# The Little Star
+
+## The Lost Constellation
+
+The little star, now shining brightly, noticed a gap in the night sky. A constellation had vanished! Determined to restore balance, she embarked on a journey through the cosmos, encountering whimsical creatures and overcoming celestial challenges.
