@@ -1,7 +1,7 @@
-// MORSE_APP_SW_VERSION_JULES_003_CACHE_BOOK_FILES
+// MORSE_APP_SW_VERSION_JULES_004_SELF_BOOKDATA
 importScripts('js/data/bookData.js'); // Import book data to access file paths
 
-const CACHE_NAME = 'morseapp-shell-v2'; // Incremented cache version
+const CACHE_NAME = 'morseapp-shell-v3'; // Incremented cache version
 let urlsToCache = [
   './', // Represents the root of the service worker's scope (e.g., www/)
   'index.html',
@@ -53,7 +53,7 @@ urlsToCache = [...new Set(urlsToCache)]; // Remove duplicates, if any
 
 // Install event: open cache and add app shell files
 self.addEventListener('install', event => {
-  console.log('[Service Worker] Install event triggered. Version: MORSE_APP_SW_VERSION_JULES_003_CACHE_BOOK_FILES');
+  console.log('[Service Worker] Install event triggered. Version: MORSE_APP_SW_VERSION_JULES_004_SELF_BOOKDATA');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -73,7 +73,7 @@ self.addEventListener('install', event => {
 
 // Activate event: clean up old caches if any
 self.addEventListener('activate', event => {
-  console.log('[Service Worker] Activate event triggered. Version: MORSE_APP_SW_VERSION_JULES_003_CACHE_BOOK_FILES');
+  console.log('[Service Worker] Activate event triggered. Version: MORSE_APP_SW_VERSION_JULES_004_SELF_BOOKDATA');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
