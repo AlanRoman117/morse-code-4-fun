@@ -1,35 +1,244 @@
 window.bookCipherBooks = {
-    'mystery_intro': {
-        'title': 'Stormy Night Mystery',
-        'author': 'Placeholder Author',
+    'the-lost-key-002': {
+        'title': 'The Lost Key - The Blackwood Legacy',
+        'author': 'Alan Roman',
+        'description': 'The Blackwood Legacy.',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-lost-key-002_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-lost-key-002.json'
+    },
+    'sherlocks-lost-manuscript-003': {
+        'title': 'Sherlock\'s Lost Manuscript - The Deduction Game',
+        'author': 'Alan Roman',
+        'description': 'The Deduction Game',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/sherlocks-lost-manuscript-003_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/sherlocks-lost-manuscript-003.json'
+    },
+    'the-bermuda-echo-002': {
+        'title': 'The Bermuda Echo - The Thorne Equation',
+        'author': 'Alan Roman',
+        'description': 'The Thorne Equation.',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-bermuda-echo-002_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-bermuda-echo-002.json'
+    },
+    'the-case-of-the-vanishing-violinist-003': {
+        'title': 'The Case of the Vanishing Violinist - The Maestro\'s Secret',
+        'author': 'Alan Roman',
+        'description': 'The Maestro\'s Secret.',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-case-of-the-vanishing-violinist-003_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-case-of-the-vanishing-violinist-003.json'
+    },
+    'a-cats-adventure-002': {
+        'title': 'A Cat\'s Adventure. - The Dot Conspiracy',
+        'author': 'Alan Roman',
+        'description': 'The Dot Conspiracy',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/a-cats-adventure-002_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/a-cats-adventure-002.json'
+    },
+    'a-cats-adventure-003': {
+        'title': 'A Cat\'s Adventure. - The Laser Maze',
+        'author': 'Alan Roman',
+        'description': 'The Laser Maze',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/a-cats-adventure-003_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/a-cats-adventure-003.json'
+    },
+    'the-case-of-the-vanishing-violinist-002': {
+        'title': 'The Case of the Vanishing Violinist - The Second Performance',
+        'author': 'Alan Roman',
+        'description': 'The Second Performance.',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-case-of-the-vanishing-violinist-002_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-case-of-the-vanishing-violinist-002.json'
+    },
+    'the-little-star-001': {
+        'title': 'The Little Star - A Tale of Self-Discovery',
+        'author': 'Alan Roman',
+        'description': 'A Tale of Self-Discovery',
+        'isPro': false,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-little-star-001_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-little-star-001.json'
+    },
+    'the-bermuda-echo-003': {
+        'title': 'The Bermuda Echo - The Echo Chamber',
+        'author': 'Alan Roman',
+        'description': 'The Echo Chamber.',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-bermuda-echo-003_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-bermuda-echo-003.json'
+    },
+    'sherlocks-lost-manuscript-002': {
+        'title': 'Sherlock\'s Lost Manuscript - The Professor\'s Legacy',
+        'author': 'Alan Roman',
+        'description': 'The Professor\'s Legacy.',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/sherlocks-lost-manuscript-002_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/sherlocks-lost-manuscript-002.json'
+    },
+    'the-lost-key-003': {
+        'title': 'The Lost Key - The Shadow of Blackwood',
+        'author': 'Alan Roman',
+        'description': 'The Shadow of Blackwood.',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-lost-key-003_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-lost-key-003.json'
+    },
+    'the-lighthouse-keepers-secrets-001': {
+        'title': 'The Lighthouse Keeper\'s Secret - The Vanishing Keeper',
+        'author': 'Alan Roman',
+        'description': 'The Vanishing Keeper',
+        'isPro': false,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-lighthouse-keepers-secrets-001_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-lighthouse-keepers-secrets-001.json'
+    },
+    'the-lighthouse-keepers-secrets-002': {
+        'title': 'The Lighthouse Keeper\'s Secret - The Island\'s Lore',
+        'author': 'Alan Roman',
+        'description': 'The Island\'s Lore',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-lighthouse-keepers-secrets-002_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-lighthouse-keepers-secrets-002.json'
+    },
+    'the-lighthouse-keepers-secrets-003': {
+        'title': 'The Lighthouse Keeper\'s Secret - The Treasure\'s Guardian.',
+        'author': 'Alan Roman',
+        'description': 'The Treasure\'s Guardian.',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-lighthouse-keepers-secrets-003_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-lighthouse-keepers-secrets-003.json'
+    },
+    'sherlocks-lost-manuscript-001': {
+        'title': 'Sherlock\'s Lost Manuscript - A Detective\'s Dilemma',
+        'author': 'Alan Roman',
+        'description': 'A Detective\'s Dilemma',
+        'isPro': false,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/sherlocks-lost-manuscript-001_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/sherlocks-lost-manuscript-001.json'
+    },
+    'the-case-of-the-vanishing-violinist-001': {
+        'title': 'The Case of the Vanishing Violinist - A Disappearing Act',
+        'author': 'Alan Roman',
+        'description': 'A Disappearing Act.',
+        'isPro': false,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-case-of-the-vanishing-violinist-001_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-case-of-the-vanishing-violinist-001.json'
+    },
+    'enemy-transmission-001': {
+        'title': 'Enemy Transmission 001',
+        'author': 'Alan Roman',
         'description': 'The beginning of a thrilling mystery.',
         'isPro': false,
         'genre': 'Mystery',
         'lengthCategory': 'Short',
         'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
-        'filePath': 'assets/book_cipher_texts/mystery_intro_morse.txt',
-        'englishSourcePath': 'assets/book_cipher_texts/english_sources/mystery_intro.json'
+        'filePath': 'assets/book_cipher_texts/enemy-transmission-001_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/enemy-transmission-001.json'
     },
-    'passage_1': {
-        'title': 'Sherlock Holmes Snippet',
-        'author': 'Sir Arthur Conan Doyle',
-        'description': 'A short snippet featuring the world\'s most famous detective.',
-        'isPro': false,
-        'genre': 'Classic Detective',
-        'lengthCategory': 'Short',
-        'imagePath': 'assets/images/covers/passage_1_placeholder.png',
-        'filePath': 'assets/book_cipher_texts/passage_1_morse.txt',
-        'englishSourcePath': 'assets/book_cipher_texts/english_sources/passage_1.json'
-    },
-    'cosmic_Labyrinth_1': {
-        'title': 'The Cosmic Labyrinth (Pro)',
-        'author': 'Dr. Astra Nova',
-        'description': 'A mind-bending journey through a newly discovered cosmic anomaly. Only for Pro users!',
+    'the-little-star-002': {
+        'title': 'The Little Star - The Lost Constellation.',
+        'author': 'Alan Roman',
+        'description': 'The Lost Constellation.',
         'isPro': true,
-        'genre': 'Sci-Fi',
-        'lengthCategory': 'Long',
-        'imagePath': 'assets/images/covers/cosmic_labyrinth_pro.png',
-        'filePath': 'assets/book_cipher_texts/cosmic_Labyrinth_1_morse.txt',
-        'englishSourcePath': 'assets/book_cipher_texts/english_sources/cosmic_Labyrinth_1.json'
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-little-star-002_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-little-star-002.json'
+    },
+    'the-little-star-003': {
+        'title': 'The Little Star - The Star Weaver',
+        'author': 'Alan Roman',
+        'description': 'The Star Weaver',
+        'isPro': true,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-little-star-003_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-little-star-003.json'
+    },
+    'a-cats-adventure-001': {
+        'title': 'A Cat\'s Adventure. - A Curious Pursuit',
+        'author': 'Alan Roman',
+        'description': 'A Curious Pursuit.',
+        'isPro': false,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/a-cats-adventure-001_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/a-cats-adventure-001.json'
+    },
+    'the-lost-key-001': {
+        'title': 'The Lost Key - A Detective\'s Dilemma',
+        'author': 'Alan Roman',
+        'description': 'A Detective\'s Dilemma.',
+        'isPro': false,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-lost-key-001_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-lost-key-001.json'
+    },
+    'the-bermuda-echo-001': {
+        'title': 'The Bermuda Echo - A Cryptographer\'s Obsession',
+        'author': 'Alan Roman',
+        'description': 'A Cryptographer\'s Obsession.',
+        'isPro': false,
+        'genre': 'Mystery',
+        'lengthCategory': 'Short',
+        'imagePath': 'assets/images/covers/mystery_intro_placeholder.png',
+        'filePath': 'assets/book_cipher_texts/the-bermuda-echo-001_morse.txt',
+        'englishSourcePath': 'assets/book_cipher_texts/english_sources/the-bermuda-echo-001.json'
     }
 };
