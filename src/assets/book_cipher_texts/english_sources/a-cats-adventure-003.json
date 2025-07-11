@@ -1,0 +1,10 @@
+{
+    "title": "A Cat's Adventure. - The Laser Maze",
+    "author": "Alan Roman",
+    "description": "The Laser Maze",
+    "isPro": true,
+    "genre": "Mystery",
+    "lengthCategory": "Short",
+    "imagePath": "assets/images/covers/mystery_intro_placeholder.png",
+     "content_markdown": "# A Cat's Adventure. ## The Laser Maze. A mischievous inventor created a complex laser maze, challenging cats from around the world. Whiskers, with his agility and determination, navigated the treacherous beams, proving that even a simple cat can conquer any obstacle."
+}
