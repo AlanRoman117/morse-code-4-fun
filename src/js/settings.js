@@ -151,4 +151,97 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSettingsUI(newValue);
         });
     }
+
+    // Refresh Audio Button Logic
+    const refreshAudioBtn = document.getElementById('refresh-audio-btn');
+    if (refreshAudioBtn) {
+        refreshAudioBtn.addEventListener('click', async () => {
+            console.log("[Refresh Audio Btn] Clicked by user.");
+            refreshAudioBtn.textContent = "Refreshing...";
+            refreshAudioBtn.disabled = true;
+
+            // 1. Dispose current tapperTone synth
+            if (typeof window.reinitializeTapperSynthAfterResume === 'function') {
+                window.reinitializeTapperSynthAfterResume();
+            } else {
+                console.warn("[Refresh Audio Btn] reinitializeTapperSynthAfterResume function not found.");
+            }
+
+            // 2. Close existing Tone.context
+            if (typeof Tone !== 'undefined' && Tone.context && Tone.context.state !== 'closed') {
+                try {
+                    console.log(`[Refresh Audio Btn] Closing current Tone.context (state: ${Tone.context.state}).`);
+                    await Tone.context.close();
+                    console.log("[Refresh Audio Btn] Current Tone.context closed successfully.");
+                } catch (e) {
+                    console.warn("[Refresh Audio Btn] Error closing current Tone.context:", e);
+                }
+            } else if (typeof Tone !== 'undefined' && Tone.context) {
+                console.log("[Refresh Audio Btn] Tone.context already closed or in an unhandled state:", Tone.context.state);
+            } else {
+                console.log("[Refresh Audio Btn] No Tone.context to close.");
+            }
+
+            // 3. Create and set a new AudioContext for Tone.js
+            let newContextSuccessfullySet = false;
+            if (typeof Tone !== 'undefined') {
+                try {
+                    const freshCtx = new AudioContext();
+                    Tone.setContext(freshCtx);
+                    console.log("[Refresh Audio Btn] New AudioContext created and set for Tone.js. State:", Tone.context.state);
+                    newContextSuccessfullySet = true;
+                } catch (e) {
+                    console.error("[Refresh Audio Btn] Error creating/setting new AudioContext for Tone:", e);
+                }
+            } else {
+                console.error("[Refresh Audio Btn] Tone is not defined. Cannot set new context.");
+            }
+
+            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                window.setToneContextConfirmedRunning(false); // New context isn't running yet
+            }
+
+            // 4. Attempt to start the new Tone.context
+            if (newContextSuccessfullySet && typeof Tone !== 'undefined' && Tone.start && Tone.context) {
+                try {
+                    await Tone.start();
+                    console.log("[Refresh Audio Btn] Tone.start() successful on new context. State: " + Tone.context.state);
+                    if (Tone.context.state === 'running') {
+                        if (typeof window.setToneContextConfirmedRunning === 'function') {
+                            window.setToneContextConfirmedRunning(true);
+                        }
+                        // Re-initialize synth again *after* new context is confirmed running
+                        if (typeof window.reinitializeTapperSynthAfterResume === 'function') {
+                            // This call is important to nullify tapperTone so playTapSound recreates it with the new, running context.
+                            window.reinitializeTapperSynthAfterResume();
+                            console.log("[Refresh Audio Btn] Tapper synth re-queued for initialization.");
+                        }
+                        refreshAudioBtn.textContent = "Audio Refreshed!";
+                    } else {
+                        console.warn("[Refresh Audio Btn] Tone.start() completed but context not running. State: " + Tone.context.state);
+                        refreshAudioBtn.textContent = "Refresh Failed (Ctx)";
+                         if (typeof window.setToneContextConfirmedRunning === 'function') {
+                            window.setToneContextConfirmedRunning(false);
+                        }
+                    }
+                } catch (e) {
+                    console.error("[Refresh Audio Btn] Tone.start() FAILED on new context:", e);
+                    if (typeof window.setToneContextConfirmedRunning === 'function') {
+                        window.setToneContextConfirmedRunning(false);
+                    }
+                    refreshAudioBtn.textContent = "Refresh Failed (Start)";
+                }
+            } else {
+                console.warn("[Refresh Audio Btn] Cannot start Tone.js: Tone, Tone.start, Tone.context, or new context setup failed.");
+                refreshAudioBtn.textContent = "Error";
+            }
+
+            setTimeout(() => {
+                refreshAudioBtn.textContent = "Refresh Audio";
+                refreshAudioBtn.disabled = false;
+            }, 3000); // Reset button text after 3 seconds
+        });
+    } else {
+        console.warn("Refresh audio button (refresh-audio-btn) not found.");
+    }
 });

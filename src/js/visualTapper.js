@@ -4,6 +4,7 @@ let UNIT_TIME_MS = 150;
 let DOT_THRESHOLD_MS = UNIT_TIME_MS * 1.5;
 let LETTER_SPACE_SILENCE_MS = UNIT_TIME_MS * 3;
 let predictiveDisplayTimeout = null; // For managing the hide timer
+let tapperTone = null; // Declare tapperTone in the script's global scope
 
 // State variables for the visual tapper, scoped to be accessible by resetVisualTapperState
 let currentMorse = "";
@@ -33,6 +34,22 @@ function getVisualTapperUnitTime() {
   return UNIT_TIME_MS;
 }
 window.getVisualTapperUnitTime = getVisualTapperUnitTime; // Expose to global
+
+// Function to reinitialize the tapper's synth after an app resume
+window.reinitializeTapperSynthAfterResume = function() {
+    console.log('[VisualTapper] Called reinitializeTapperSynthAfterResume.');
+    if (tapperTone) {
+        try {
+            tapperTone.dispose();
+            console.log('[VisualTapper] Existing tapperTone disposed.');
+        } catch (e) {
+            console.warn('[VisualTapper] Error disposing existing tapperTone:', e);
+        }
+        tapperTone = null; // Set to null so it gets recreated by playTapSound
+    } else {
+        console.log('[VisualTapper] No existing tapperTone to dispose, or it was already null.');
+    }
+};
 
 // Function to set tapper active state for playback
 function setTapperActive(isActive) {
@@ -77,7 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const TAP_SOUND_FREQ = 770;
     let isPlayingBack = false;
-    let tapperTone = null;
+    // tapperTone is already declared in the script's global scope, no need to redeclare here.
+
+    // Note: The window.reinitializeTapperSynthAfterResume function is already defined globally in this script.
+    // It will correctly access the script-scoped tapperTone.
 
     function checkPractice() { 
     }

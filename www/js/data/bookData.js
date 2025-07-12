@@ -1,4 +1,4 @@
-window.bookCipherBooks = {
+self.bookCipherBooks = {
     'the-lost-key-002': {
         'title': 'The Lost Key - The Blackwood Legacy',
         'author': 'Alan Roman',
