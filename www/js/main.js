@@ -4,6 +4,9 @@
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Apply theme as the very first step to ensure modal theming is correct.
+    applySavedTheme(); // MOVED HERE
+
     // Elements for modal and main app content
     const welcomeModal = document.getElementById('welcome-audio-modal');
     const startAppBtn = document.getElementById('start-app-btn');
@@ -11,61 +14,202 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainTitle = document.querySelector('.main-title'); // Assuming only one main-title
     const tabContentWrapper = document.getElementById('tab-content-wrapper');
 
+    // Helper function to show the welcome modal and hide main app content
+    function showWelcomeModal() {
+        if (welcomeModal && mainNav && mainTitle && tabContentWrapper) {
+            console.log('[UI] Showing welcome modal, hiding app content.');
+            mainNav.classList.add('hidden');
+            mainTitle.classList.add('hidden');
+            tabContentWrapper.classList.add('hidden');
+            welcomeModal.classList.remove('hidden');
+            welcomeModal.style.display = 'flex'; // Ensure it's flex for centering
+        } else {
+            console.warn('[UI] Cannot show welcome modal - one or more elements missing.');
+        }
+    }
+
+    // Helper function to hide the welcome modal and show main app content
+    function hideWelcomeModalAndShowApp() {
+        if (welcomeModal && mainNav && mainTitle && tabContentWrapper) {
+            console.log('[UI] Hiding welcome modal, showing app content.');
+            welcomeModal.style.display = 'none'; // More forceful hide
+            mainNav.classList.remove('hidden');
+            mainTitle.classList.remove('hidden');
+            tabContentWrapper.classList.remove('hidden');
+        } else {
+            console.warn('[UI] Cannot hide welcome modal/show app - one or more elements missing.');
+        }
+    }
+
     if (welcomeModal && startAppBtn && mainNav && mainTitle && tabContentWrapper) {
+        // Initial setup: Show welcome modal
+        showWelcomeModal();
         // Ensure main app is hidden and modal is shown initially
         // (though classes in HTML should handle this, this is a JS failsafe/confirmation)
-        mainNav.classList.add('hidden');
-        mainTitle.classList.add('hidden');
-        tabContentWrapper.classList.add('hidden');
-        welcomeModal.classList.remove('hidden'); // Ensure modal is visible
+
+        // Attach a global visibility change listener early
+        document.addEventListener('visibilitychange', async () => { // Made async
+            console.log('[Global Visibility API] Visibility changed. State:', document.visibilityState);
+            if (document.visibilityState === 'visible') {
+                console.log('[Global Visibility API] App became visible.');
+                if (typeof Tone !== 'undefined') {
+                    if (Tone.context) {
+                        const currentState = Tone.context.state;
+                        console.log(`[Global Visibility API] Existing Tone.context state: ${currentState}`);
+
+                        if (typeof window.reinitializeTapperSynthAfterResume === 'function') {
+                            window.reinitializeTapperSynthAfterResume(); // Dispose synth linked to old context
+                        }
+
+                        if (currentState === 'interrupted' || currentState === 'suspended' || currentState === 'closed') {
+                            console.log(`[Global Visibility API] Context is ${currentState}. Attempting full reset.`);
+                            if (currentState !== 'closed') {
+                                try {
+                                    await Tone.context.close();
+                                    console.log('[Global Visibility API] Old Tone.context closed successfully.');
+                                } catch (e) {
+                                    console.warn('[Global Visibility API] Error closing old Tone.context:', e);
+                                }
+                            }
+                            try {
+                                const freshCtx = new AudioContext();
+                                Tone.setContext(freshCtx);
+                                console.log('[Global Visibility API] New AudioContext created and set for Tone.js.');
+                                if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                    window.setToneContextConfirmedRunning(false);
+                                }
+                                showWelcomeModal();
+                            } catch (e) {
+                                console.error('[Global Visibility API] Error creating/setting new AudioContext for Tone:', e);
+                                showWelcomeModal(); // Fallback to modal even if context reset failed
+                            }
+                        } else if (currentState === 'running') {
+                            console.log('[Global Visibility API] Tone.context is already running. Synth reinitialized.');
+                            // Reinitialize synth was called above. setToneContextConfirmedRunning should be true.
+                             if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(true);
+                            }
+                        } else {
+                            console.warn(`[Global Visibility API] Tone.context in unexpected state: ${currentState}. Showing modal.`);
+                            showWelcomeModal();
+                        }
+                    } else {
+                        console.warn('[Global Visibility API] Tone.js loaded, but Tone.context is null. Attempting to set new context and show modal.');
+                        try {
+                            const freshCtx = new AudioContext();
+                            Tone.setContext(freshCtx);
+                             console.log('[Global Visibility API] New AudioContext created and set for Tone.js (old context was null).');
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(false);
+                            }
+                        } catch (e) {
+                             console.error('[Global Visibility API] Error creating/setting new AudioContext for Tone (old context was null):', e);
+                        }
+                        showWelcomeModal();
+                    }
+                } else {
+                    console.warn('[Global Visibility API] Tone.js not available. Cannot manage audio context. Showing modal.');
+                    showWelcomeModal();
+                }
+
+                // Resume main non-Tone audio context
+                if (audioContext && audioContext.state === 'suspended') {
+                    console.log('[Global Visibility API] Main audioContext is suspended, attempting resume...');
+                    audioContext.resume().catch(e => console.warn("[Global Visibility API] Main audioContext resume failed:", e));
+                }
+            } else {
+                console.log('[Global Visibility API] App became hidden.');
+            }
+        });
+
+        // The lines for explicitly hiding mainNav etc. and showing welcomeModal are now handled by showWelcomeModal() called earlier.
+        // We only need the startAppBtn event listener here.
 
         startAppBtn.addEventListener('click', () => {
-            // console.log("Start App button clicked."); // Keep if minor interaction log is desired, or remove for cleaner console. Let's remove for now.
-            initAudio();
+            initAudio(); // Initialize non-Tone audio first
 
             if (typeof Tone !== 'undefined' && Tone.start && Tone.context) {
                 if (Tone.context.state !== 'running') {
-                    // console.log("Welcome Modal: Attempting Tone.start()."); // Can be removed, success/fail is more important
                     Tone.start().then(() => {
-                        console.log("Audio Initialized: Tone.js started successfully via modal.");
-                        if (typeof window.setToneContextConfirmedRunning === 'function') {
-                            window.setToneContextConfirmedRunning(true);
-                        }
+                        console.log("Audio Initialized: Tone.js started successfully via modal. Current context state: " + Tone.context.state + ". Adding short delay.");
+                        setTimeout(() => {
+                            console.log("[startAppBtn] Delay complete. Reinitializing synth and updating UI. Context state now: " + Tone.context.state);
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(true);
+                            }
+                            if (typeof window.reinitializeTapperSynthAfterResume === 'function') {
+                                window.reinitializeTapperSynthAfterResume();
+                            }
+                            hideWelcomeModalAndShowApp();
+                            initializeCoreUI();
+                        }, 150); // 150ms delay
                     }).catch(e => {
                         console.warn("Audio Init Warning: Tone.start() failed from modal:", e);
                         if (typeof window.setToneContextConfirmedRunning === 'function') {
                             window.setToneContextConfirmedRunning(false);
                         }
+                        // Modal remains visible due to failure, no specific action needed here to re-show it.
                     });
-                } else {
-                    console.log("Audio Initialized: Tone.js context was already running.");
-                    if (typeof window.setToneContextConfirmedRunning === 'function') {
-                        window.setToneContextConfirmedRunning(true);
-                    }
+                } else { // Tone.context.state is already 'running'
+                    console.log("Audio Initialized: Tone.js context was already running. Adding short delay.");
+                     setTimeout(() => {
+                        console.log("[startAppBtn] Context already running. Delay complete. Reinitializing synth and updating UI. Context state: " + Tone.context.state);
+                        if (typeof window.setToneContextConfirmedRunning === 'function') {
+                            window.setToneContextConfirmedRunning(true);
+                        }
+                        if (typeof window.reinitializeTapperSynthAfterResume === 'function') {
+                            window.reinitializeTapperSynthAfterResume();
+                        }
+                        hideWelcomeModalAndShowApp();
+                        initializeCoreUI();
+                    }, 150); // 150ms delay
                 }
             } else {
-                console.warn("Audio Init Warning: Tone.js components not available during modal dismissal.");
+                console.warn("Audio Init Warning: Tone.js components not available during modal dismissal. Cannot start audio.");
                 if (typeof window.setToneContextConfirmedRunning === 'function') {
                     window.setToneContextConfirmedRunning(false);
                 }
+                // Keep modal visible or show specific error message if Tone is not available.
             }
-
-            // Hide modal and show main app content
-            welcomeModal.style.display = 'none'; // More forceful hide
+        });
+    } else {
+        // If modal elements aren't found, this means showWelcomeModal() would have warned.
+        // Proceed with direct app initialization without modal logic.
+        console.warn("Welcome modal elements not found. Proceeding with direct app initialization (no modal interaction possible).");
+        // Attempt to initialize audio directly.
+        initAudio();
+        if (typeof Tone !== 'undefined' && Tone.start && Tone.context) {
+             if (Tone.context.state !== 'running') {
+                Tone.start().then(() => {
+                    console.log("Audio Initialized: Tone.js started directly (no modal).");
+                     if (typeof window.setToneContextConfirmedRunning === 'function') {
+                        window.setToneContextConfirmedRunning(true);
+                    }
+                }).catch(e => {
+                    console.warn("Audio Init Warning: Tone.start() failed (no modal):", e);
+                    if (typeof window.setToneContextConfirmedRunning === 'function') {
+                        window.setToneContextConfirmedRunning(false);
+                    }
+                });
+             } else {
+                console.log("Audio Initialized: Tone.js context was already running (no modal).");
+                 if (typeof window.setToneContextConfirmedRunning === 'function') {
+                    window.setToneContextConfirmedRunning(true);
+                }
+             }
+        } else {
+            console.warn("Audio Init Warning: Tone.js components not available (no modal).");
+            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                window.setToneContextConfirmedRunning(false);
+            }
+        }
+        // Ensure main app content is visible if there's no modal
+        if (mainNav && mainTitle && tabContentWrapper) {
             mainNav.classList.remove('hidden');
             mainTitle.classList.remove('hidden');
             tabContentWrapper.classList.remove('hidden');
-
-            // Now initialize the rest of the UI that was deferred
-            initializeCoreUI();
-            // showTab() is called within initializeCoreUI or its chain now.
-            // applySavedTheme(); // This is also called in initializeCoreUI or showTab
-        });
-    } else {
-        // If modal elements aren't found, proceed with normal initialization
-        // This might happen if modal HTML is removed or IDs change.
-        console.warn("Welcome modal elements not found. Proceeding with direct app initialization.");
-        initializeCoreUI();
+        }
+        initializeCoreUI(); // Initialize UI regardless
     }
 });
 
@@ -105,6 +249,119 @@ document.addEventListener('deviceready', () => {
             console.error('CRITICAL ERROR in AdMob chain:', error);
         });
 
+    // Capacitor App plugin listener for app state changes (e.g., resume)
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+        const { App } = window.Capacitor.Plugins;
+
+        App.addListener('appStateChange', async ({ isActive }) => { // Made async
+            console.log('[App Lifecycle] App state changed. IsActive:', isActive);
+            if (isActive) {
+                console.log('[App Lifecycle] App resumed.');
+                if (typeof Tone !== 'undefined') {
+                    if (Tone.context) {
+                        const currentState = Tone.context.state;
+                        console.log(`[App Lifecycle] Existing Tone.context state: ${currentState}`);
+
+                        if (typeof window.reinitializeTapperSynthAfterResume === 'function') {
+                            window.reinitializeTapperSynthAfterResume(); // Dispose synth linked to old context
+                        }
+
+                        if (currentState === 'interrupted' || currentState === 'suspended' || currentState === 'closed') {
+                            console.log(`[App Lifecycle] Context is ${currentState}. Attempting full reset.`);
+                            if (currentState !== 'closed') {
+                                try {
+                                    await Tone.context.close();
+                                    console.log('[App Lifecycle] Old Tone.context closed successfully.');
+                                } catch (e) {
+                                    console.warn('[App Lifecycle] Error closing old Tone.context:', e);
+                                }
+                            }
+                            try {
+                                const freshCtx = new AudioContext();
+                                Tone.setContext(freshCtx);
+                                console.log('[App Lifecycle] New AudioContext created and set for Tone.js.');
+                                if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                    window.setToneContextConfirmedRunning(false);
+                                }
+                                showWelcomeModal();
+                            } catch (e) {
+                                console.error('[App Lifecycle] Error creating/setting new AudioContext for Tone:', e);
+                                showWelcomeModal(); // Fallback to modal
+                            }
+                        } else if (currentState === 'running') {
+                            console.log('[App Lifecycle] Tone.context is already running. Synth reinitialized.');
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(true);
+                            }
+                        } else {
+                            console.warn(`[App Lifecycle] Tone.context in unexpected state: ${currentState}. Showing modal.`);
+                            showWelcomeModal();
+                        }
+                    } else {
+                        console.warn('[App Lifecycle] Tone.js loaded, but Tone.context is null. Attempting to set new context and show modal.');
+                         try {
+                            const freshCtx = new AudioContext();
+                            Tone.setContext(freshCtx);
+                            console.log('[App Lifecycle] New AudioContext created and set for Tone.js (old context was null).');
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(false);
+                            }
+                        } catch (e) {
+                            console.error('[App Lifecycle] Error creating/setting new AudioContext for Tone (old context was null):', e);
+                        }
+                        showWelcomeModal();
+                    }
+                } else {
+                    console.warn('[App Lifecycle] Tone.js not available. Cannot manage audio context. Showing modal.');
+                    showWelcomeModal();
+                }
+
+                // Resume main non-Tone audio context
+                if (audioContext && audioContext.state === 'suspended') {
+                    console.log('[App Lifecycle] Main audioContext is suspended, attempting resume...');
+                    audioContext.resume().then(() => {
+                        console.log('[App Lifecycle] Main audioContext resumed successfully.');
+                    }).catch(e => console.warn("[App Lifecycle] Main audioContext resume failed:", e));
+                }
+            } else {
+                // App has gone to the background
+                console.log('[App Lifecycle] App paused.');
+            }
+        });
+    } else {
+        console.warn('[App Lifecycle] Capacitor App plugin not available. Cannot listen for app resume events.');
+        // Fallback for browsers or non-Capacitor environments using Visibility API
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                console.log('[Visibility API] App became visible.');
+                 if (typeof Tone !== 'undefined' && Tone.context) {
+                    console.log(`[Visibility API] Tone.context state on visibility change: ${Tone.context.state}`);
+                    if (Tone.context.state === 'suspended') {
+                        console.log('[Visibility API] Tone.context is suspended, attempting Tone.start()...');
+                        Tone.start().then(() => {
+                            console.log('[Visibility API] Tone.start() successful on visibility change.');
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(true);
+                            }
+                        }).catch(e => {
+                             console.warn('[Visibility API] Tone.start() failed on visibility change:', e);
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(false);
+                            }
+                        });
+                    }
+                 }
+                 if (audioContext && audioContext.state === 'suspended') {
+                    console.log('[Visibility API] Main audioContext is suspended, attempting resume...');
+                    audioContext.resume().then(() => {
+                        console.log('[Visibility API] Main audioContext resumed successfully.');
+                    }).catch(e => console.warn("[Visibility API] Main audioContext resume failed:", e));
+                }
+            } else {
+                console.log('[Visibility API] App became hidden.');
+            }
+        });
+    }
 }, false);
 
 
@@ -692,6 +949,32 @@ function applySavedTheme() {
         c.classList.toggle('light-theme-container', isLight);
         c.classList.toggle('dark-theme-container', !isLight);
     });
+
+    // Explicitly style #welcome-audio-modal elements based on theme
+    const welcomeModalInstance = document.getElementById('welcome-audio-modal');
+    if (welcomeModalInstance) { // Only proceed if the modal exists
+        const welcomeModalContentDiv = welcomeModalInstance.querySelector('div'); // Targets the first direct div child
+        const welcomeTitle = welcomeModalContentDiv?.querySelector('h2');
+        const welcomeText = welcomeModalContentDiv?.querySelector('p');
+        // Button (#start-app-btn) text color is handled by its own `text-white` and specific CSS override.
+
+        if (welcomeModalContentDiv) {
+            welcomeModalContentDiv.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'dark');
+            if (welcomeTitle) welcomeTitle.classList.remove('text-gray-900', 'dark:text-white');
+            if (welcomeText) welcomeText.classList.remove('text-gray-600', 'dark:text-gray-300');
+
+            if (isLight) {
+                welcomeModalContentDiv.classList.add('bg-white');
+                if (welcomeTitle) welcomeTitle.classList.add('text-gray-900');
+                if (welcomeText) welcomeText.classList.add('text-gray-600');
+            } else { // isDark
+                welcomeModalContentDiv.classList.add('dark', 'bg-gray-800');
+                if (welcomeTitle) welcomeTitle.classList.add('text-white');
+                if (welcomeText) welcomeText.classList.add('text-gray-300');
+            }
+        }
+    }
+
 
     // Explicitly style #pro-upsell-modal elements based on theme
     const proModalContentDiv = document.querySelector('#pro-upsell-modal > div');
