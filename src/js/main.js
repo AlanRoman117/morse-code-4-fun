@@ -140,8 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (typeof window.reinitializeTapperSynthAfterResume === 'function') {
                                 window.reinitializeTapperSynthAfterResume();
                             }
-                            hideWelcomeModalAndShowApp();
-                            initializeCoreUI();
+                            hideWelcomeModalAndShowApp(); 
+                            initializeCoreUI(); 
                         }, 150); // 150ms delay
                     }).catch(e => {
                         console.warn("Audio Init Warning: Tone.start() failed from modal:", e);
@@ -160,8 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (typeof window.reinitializeTapperSynthAfterResume === 'function') {
                             window.reinitializeTapperSynthAfterResume();
                         }
-                        hideWelcomeModalAndShowApp();
-                        initializeCoreUI();
+                        hideWelcomeModalAndShowApp(); 
+                        initializeCoreUI(); 
                     }, 150); // 150ms delay
                 }
             } else {
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Proceed with direct app initialization without modal logic.
         console.warn("Welcome modal elements not found. Proceeding with direct app initialization (no modal interaction possible).");
         // Attempt to initialize audio directly.
-        initAudio();
+        initAudio(); 
         if (typeof Tone !== 'undefined' && Tone.start && Tone.context) {
              if (Tone.context.state !== 'running') {
                 Tone.start().then(() => {
