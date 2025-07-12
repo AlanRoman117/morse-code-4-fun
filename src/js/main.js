@@ -696,6 +696,32 @@ function applySavedTheme() {
         c.classList.toggle('dark-theme-container', !isLight);
     });
 
+    // Explicitly style #welcome-audio-modal elements based on theme
+    const welcomeModalInstance = document.getElementById('welcome-audio-modal');
+    if (welcomeModalInstance) { // Only proceed if the modal exists
+        const welcomeModalContentDiv = welcomeModalInstance.querySelector('div'); // Targets the first direct div child
+        const welcomeTitle = welcomeModalContentDiv?.querySelector('h2');
+        const welcomeText = welcomeModalContentDiv?.querySelector('p');
+        // Button (#start-app-btn) text color is handled by its own `text-white` and specific CSS override.
+
+        if (welcomeModalContentDiv) {
+            welcomeModalContentDiv.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-900', 'dark:text-white', 'dark');
+            if (welcomeTitle) welcomeTitle.classList.remove('text-gray-900', 'dark:text-white');
+            if (welcomeText) welcomeText.classList.remove('text-gray-600', 'dark:text-gray-300');
+
+            if (isLight) {
+                welcomeModalContentDiv.classList.add('bg-white');
+                if (welcomeTitle) welcomeTitle.classList.add('text-gray-900');
+                if (welcomeText) welcomeText.classList.add('text-gray-600');
+            } else { // isDark
+                welcomeModalContentDiv.classList.add('dark', 'bg-gray-800');
+                if (welcomeTitle) welcomeTitle.classList.add('text-white');
+                if (welcomeText) welcomeText.classList.add('text-gray-300');
+            }
+        }
+    }
+
+
     // Explicitly style #pro-upsell-modal elements based on theme
     const proModalContentDiv = document.querySelector('#pro-upsell-modal > div');
     const proModalTitle = document.querySelector('#pro-upsell-modal h2');
