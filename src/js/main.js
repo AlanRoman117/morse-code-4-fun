@@ -4,6 +4,9 @@
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Apply theme as the very first step to ensure modal theming is correct.
+    applySavedTheme(); // MOVED HERE
+
     // Elements for modal and main app content
     const welcomeModal = document.getElementById('welcome-audio-modal');
     const startAppBtn = document.getElementById('start-app-btn');
