@@ -108,6 +108,94 @@ document.addEventListener('deviceready', () => {
             console.error('CRITICAL ERROR in AdMob chain:', error);
         });
 
+    // Capacitor App plugin listener for app state changes (e.g., resume)
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+        const { App } = window.Capacitor.Plugins;
+
+        App.addListener('appStateChange', ({ isActive }) => {
+            console.log('[App Lifecycle] App state changed. IsActive:', isActive);
+            if (isActive) {
+                // App has come to the foreground
+                console.log('[App Lifecycle] App resumed.');
+
+                // Attempt to resume/start Tone.js AudioContext if it's suspended
+                if (typeof Tone !== 'undefined' && Tone.context) {
+                    console.log(`[App Lifecycle] Tone.context state on resume: ${Tone.context.state}`);
+                    if (Tone.context.state === 'suspended') {
+                        console.log('[App Lifecycle] Tone.context is suspended, attempting Tone.start()...');
+                        Tone.start().then(() => {
+                            console.log('[App Lifecycle] Tone.start() successful on resume.');
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(true);
+                            }
+                        }).catch(e => {
+                            console.warn('[App Lifecycle] Tone.start() failed on resume:', e);
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(false);
+                            }
+                        });
+                    } else if (Tone.context.state === 'closed') {
+                        console.warn('[App Lifecycle] Tone.context is closed on resume. May need re-initialization beyond just Tone.start().');
+                        // Potentially, a more robust re-initialization might be needed if 'closed'
+                        // For now, also try Tone.start()
+                         Tone.start().then(() => {
+                            console.log('[App Lifecycle] Tone.start() attempted on closed context.');
+                        }).catch(e => {
+                            console.warn('[App Lifecycle] Tone.start() failed on closed context:', e);
+                        });
+                    } else {
+                        console.log('[App Lifecycle] Tone.context is already running or in an unexpected state.');
+                    }
+                } else {
+                    console.warn('[App Lifecycle] Tone.js or Tone.context not available on resume.');
+                }
+
+                // Also attempt to resume the main non-Tone audio context if it exists and is suspended
+                if (audioContext && audioContext.state === 'suspended') {
+                    console.log('[App Lifecycle] Main audioContext is suspended, attempting resume...');
+                    audioContext.resume().then(() => {
+                        console.log('[App Lifecycle] Main audioContext resumed successfully.');
+                    }).catch(e => console.warn("[App Lifecycle] Main audioContext resume failed:", e));
+                }
+            } else {
+                // App has gone to the background
+                console.log('[App Lifecycle] App paused.');
+            }
+        });
+    } else {
+        console.warn('[App Lifecycle] Capacitor App plugin not available. Cannot listen for app resume events.');
+        // Fallback for browsers or non-Capacitor environments using Visibility API
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                console.log('[Visibility API] App became visible.');
+                 if (typeof Tone !== 'undefined' && Tone.context) {
+                    console.log(`[Visibility API] Tone.context state on visibility change: ${Tone.context.state}`);
+                    if (Tone.context.state === 'suspended') {
+                        console.log('[Visibility API] Tone.context is suspended, attempting Tone.start()...');
+                        Tone.start().then(() => {
+                            console.log('[Visibility API] Tone.start() successful on visibility change.');
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(true);
+                            }
+                        }).catch(e => {
+                             console.warn('[Visibility API] Tone.start() failed on visibility change:', e);
+                            if (typeof window.setToneContextConfirmedRunning === 'function') {
+                                window.setToneContextConfirmedRunning(false);
+                            }
+                        });
+                    }
+                 }
+                 if (audioContext && audioContext.state === 'suspended') {
+                    console.log('[Visibility API] Main audioContext is suspended, attempting resume...');
+                    audioContext.resume().then(() => {
+                        console.log('[Visibility API] Main audioContext resumed successfully.');
+                    }).catch(e => console.warn("[Visibility API] Main audioContext resume failed:", e));
+                }
+            } else {
+                console.log('[Visibility API] App became hidden.');
+            }
+        });
+    }
 }, false);
 
 
